@@ -2,3 +2,11 @@ allowBuilds:
   esbuild: false
   sharp: false
   workerd: false
+  
+packages:
+  - .
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - workerd
