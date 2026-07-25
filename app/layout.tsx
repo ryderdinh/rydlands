@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import CustomCursor from "@/components/CustomCursor";
 import GrainOverlay from "@/components/GrainOverlay";
+import OceanScene from "@/components/OceanScene";
 import "./globals.css";
 
 const display = Space_Grotesk({
@@ -46,6 +47,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
+        <OceanScene />
         <GrainOverlay />
         <CustomCursor />
         {children}

@@ -8,6 +8,11 @@
   --text: #e4edf3;
   --text-dim: #8fa3b3;
   --radius: 14px;
+  --shadow-ambient: 0 2px 4px rgba(0, 0, 0, 0.65), 0 18px 34px -12px rgba(0, 0, 0, 0.75);
+  --shadow-lift: 0 32px 60px -18px rgba(0, 0, 0, 0.7);
+  --glow-cyan: 0 34px 60px -22px rgba(79, 209, 197, 0.5);
+  --glow-gold: 0 34px 60px -22px rgba(255, 209, 102, 0.42);
+  --glow-coral: 0 34px 60px -22px rgba(255, 107, 107, 0.4);
 }
 
 * {
@@ -24,9 +29,29 @@ body {
   color: var(--text);
   font-family: var(--font-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  background-image:
-    radial-gradient(circle at 15% -10%, rgba(79, 209, 197, 0.08), transparent 40%),
-    radial-gradient(circle at 85% 10%, rgba(255, 107, 107, 0.06), transparent 35%);
+}
+
+/* -------- Ocean background (persistent Three.js canvas) -------- */
+.ocean-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ocean-scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* A fixed z-index:0 layer paints above plain static-position siblings in CSS
+   stacking order, so content needs its own stacking context to sit above it. */
+.marquee,
+main,
+.footer {
+  position: relative;
+  z-index: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -124,6 +149,11 @@ body {
   backdrop-filter: blur(10px);
   background: rgba(11, 20, 28, 0.72);
   border-bottom: 1px solid var(--panel-border);
+  box-shadow: 0 20px 40px -24px rgba(0, 0, 0, 0.7);
+}
+
+.logo-dot {
+  box-shadow: 0 0 14px rgba(79, 209, 197, 0.65);
 }
 
 .nav-inner {
@@ -180,10 +210,22 @@ body {
   }
 }
 
-/* -------- Hero -------- */
+/* -------- Hero (full-bleed over the ocean scene) -------- */
 .hero-wrap {
   position: relative;
   overflow: hidden;
+  min-height: 92vh;
+  display: flex;
+  align-items: center;
+}
+
+.hero-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(ellipse 70% 55% at 20% 50%, rgba(3, 8, 13, 0.72), transparent 70%);
+  pointer-events: none;
 }
 
 .hero-watermark {
@@ -203,69 +245,15 @@ body {
   user-select: none;
 }
 
-.shader-bg {
-  display: none;
-}
-
-.liquid-stage {
-  position: relative;
-  width: 100%;
-  height: 420px;
-  border-radius: 24px;
-  overflow: hidden;
-}
-
-.liquid-aura {
-  position: absolute;
-  inset: -25%;
-  z-index: 0;
-  background: radial-gradient(
-    circle at 50% 45%,
-    rgba(79, 209, 197, 0.38),
-    rgba(255, 107, 107, 0.16) 45%,
-    transparent 72%
-  );
-  filter: blur(60px);
-  pointer-events: none;
-  animation: aura-pulse 6s ease-in-out infinite;
-}
-
-@keyframes aura-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.75; }
-  50% { transform: scale(1.14); opacity: 1; }
-}
-
-.liquid-stage .mount {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-
-.liquid-stage .mount canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-@media (max-width: 860px) {
-  .liquid-stage {
-    height: 300px;
-  }
-}
-
 .hero {
   position: relative;
   z-index: 2;
   padding: 96px 0 84px;
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 48px;
-  align-items: center;
+  max-width: 640px;
 }
 
 @media (max-width: 860px) {
   .hero {
-    grid-template-columns: 1fr;
     padding: 56px 0 48px;
     text-align: left;
   }
@@ -326,49 +314,51 @@ body {
   transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
+.btn {
+  box-shadow: var(--shadow-ambient);
+}
+
 .btn:hover {
   transform: translateY(-2px);
 }
 
 .btn-primary {
-  background: var(--liquid-cyan);
+  background: linear-gradient(180deg, #6fe4d8, var(--liquid-cyan));
   color: #06201d;
   border: 1px solid var(--liquid-cyan);
   font-weight: 600;
+  box-shadow: var(--shadow-ambient), 0 16px 30px -12px rgba(79, 209, 197, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-primary:hover {
-  background: #63e0d4;
+  background: linear-gradient(180deg, #8bf0e6, #63e0d4);
+  box-shadow: var(--shadow-ambient), 0 22px 40px -14px rgba(79, 209, 197, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .btn-ghost {
-  background: transparent;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0) 60%), var(--panel);
   color: var(--text);
   border: 1px solid var(--panel-border);
+  transition: transform 0.15s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-ghost:hover {
   border-color: var(--liquid-cyan);
   color: var(--liquid-cyan);
+  box-shadow: var(--shadow-ambient), var(--glow-cyan);
 }
 
-/* -------- Hero bottles (signature element) -------- */
-.rack {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-end;
-  gap: 8px;
-  height: 64px;
-}
-
+/* -------- Project vessels (bottle / orb) -------- */
 .bottle {
   position: relative;
-  width: 16px;
-  height: 60px;
+  width: 36px;
+  height: 104px;
   border: 1.5px solid rgba(228, 237, 243, 0.28);
-  border-radius: 3px 3px 8px 8px;
+  border-radius: 6px 6px 16px 16px;
   overflow: hidden;
   background: rgba(228, 237, 243, 0.03);
+  box-shadow: 0 16px 28px -12px rgba(0, 0, 0, 0.6);
   animation: float 5.5s ease-in-out infinite;
 }
 
@@ -381,9 +371,18 @@ body {
   pointer-events: none;
 }
 
-.bottle:nth-child(2) { animation-delay: 0.6s; }
-.bottle:nth-child(3) { animation-delay: 1.2s; }
-.bottle:nth-child(4) { animation-delay: 1.8s; }
+.bottle::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 12px;
+  left: 4px;
+  width: 4px;
+  z-index: 2;
+  border-radius: 2px;
+  background: linear-gradient(rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.05));
+  pointer-events: none;
+}
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }
@@ -401,6 +400,44 @@ body {
 @keyframes wave {
   0%, 100% { border-top-left-radius: 50% 6px; border-top-right-radius: 50% 8px; }
   50% { border-top-left-radius: 50% 9px; border-top-right-radius: 50% 5px; }
+}
+
+.orb {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.55), transparent 45%),
+    linear-gradient(155deg, var(--orb-c1), var(--orb-c2));
+  box-shadow: 0 18px 30px -12px rgba(0, 0, 0, 0.6), inset 0 -10px 18px -6px rgba(0, 0, 0, 0.35),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  animation: float 5.5s ease-in-out infinite;
+}
+
+.orb-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.55) 48%, transparent 62%);
+  background-size: 260% 260%;
+  animation: orb-sweep 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes orb-sweep {
+  0% { background-position: 130% 130%; }
+  50% { background-position: -30% -30%; }
+  100% { background-position: -30% -30%; }
+}
+
+.orb-pulse {
+  animation: float 5.5s ease-in-out infinite, orb-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes orb-pulse {
+  0%, 100% { box-shadow: 0 18px 30px -12px rgba(0, 0, 0, 0.6), inset 0 -10px 18px -6px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.4), 0 0 0 rgba(255, 107, 107, 0); }
+  50% { box-shadow: 0 18px 30px -12px rgba(0, 0, 0, 0.6), inset 0 -10px 18px -6px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.4), 0 0 22px 4px rgba(255, 107, 107, 0.45); }
 }
 
 /* -------- Section shell -------- */
@@ -424,21 +461,52 @@ body {
   margin: 0;
 }
 
+/* -------- Tilt cards (mouse-tracking 3D) -------- */
+.tilt-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+  position: relative;
+}
+
+.tilt-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.16), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.tilt-card:hover .tilt-glare {
+  opacity: 1;
+}
+
+@media (pointer: coarse) {
+  .tilt-card {
+    transform: none !important;
+  }
+}
+
 /* -------- Skills -------- */
 .skill-groups {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 24px;
+  perspective: 1000px;
 }
 
 .skill-card {
   position: relative;
-  background: var(--panel);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 40%), rgba(18, 29, 40, 0.5);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius);
   padding: 24px 22px 22px;
   overflow: hidden;
-  transition: border-color 0.25s ease, transform 0.25s ease;
+  box-shadow: var(--shadow-ambient), 0 34px 60px -34px rgba(79, 209, 197, 0.28);
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .skill-card::before {
@@ -449,17 +517,20 @@ body {
   width: 100%;
   height: 2px;
   background: linear-gradient(90deg, var(--liquid-cyan), var(--liquid-coral), var(--liquid-gold));
-  transform: scaleX(0);
+  opacity: 0.5;
+  transform: scaleX(0.4);
   transform-origin: left;
-  transition: transform 0.35s ease;
+  transition: transform 0.35s ease, opacity 0.35s ease;
 }
 
 .skill-card:hover {
   border-color: var(--panel-border);
   transform: translateY(-3px);
+  box-shadow: var(--shadow-ambient), var(--shadow-lift), var(--glow-cyan);
 }
 
 .skill-card:hover::before {
+  opacity: 1;
   transform: scaleX(1);
 }
 
@@ -507,16 +578,19 @@ body {
 .project-row {
   position: relative;
   display: grid;
-  grid-template-columns: 64px 1fr 90px;
+  grid-template-columns: 64px 1fr 120px;
   gap: 28px;
   align-items: center;
   padding: 34px 8px;
   border-bottom: 1px solid var(--panel-border);
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, border-radius 0.3s ease;
 }
 
 .project-row:hover {
-  background: linear-gradient(90deg, rgba(79, 209, 197, 0.06), transparent 70%);
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-ambient), var(--glow-cyan);
+  transform: translateY(-4px);
 }
 
 @media (max-width: 700px) {
@@ -524,7 +598,10 @@ body {
     grid-template-columns: 40px 1fr;
   }
   .project-swatch {
-    display: none;
+    grid-column: 2;
+    justify-content: flex-start;
+    height: auto;
+    margin-top: 6px;
   }
 }
 
@@ -590,26 +667,42 @@ body {
 
 .project-swatch {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  height: 64px;
-  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  perspective: 600px;
+}
+
+/* -------- About (submarine porthole) -------- */
+.about-section {
+  position: relative;
   overflow: hidden;
 }
 
-.project-swatch span {
-  flex: 1;
-  transform: scaleX(0.55);
-  transform-origin: right;
-  transition: transform 0.35s ease;
+.about-porthole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 900px;
+  height: 900px;
+  max-width: 140vw;
+  max-height: 140vw;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+  border: 2px solid rgba(228, 237, 243, 0.06);
+  box-shadow:
+    0 0 0 24px rgba(3, 8, 13, 0.35),
+    0 0 0 26px rgba(228, 237, 243, 0.05),
+    0 0 0 70px rgba(3, 8, 13, 0.55),
+    0 0 0 72px rgba(228, 237, 243, 0.04),
+    inset 0 0 120px 40px rgba(3, 8, 13, 0.6);
 }
 
-.project-row:hover .project-swatch span {
-  transform: scaleX(1);
-}
-
-/* -------- About -------- */
 .about {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: 0.8fr 1.2fr;
   gap: 40px;
@@ -623,13 +716,16 @@ body {
 }
 
 .about-card {
-  background: var(--panel);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 40%), rgba(18, 29, 40, 0.55);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius);
   padding: 24px;
   font-family: var(--font-mono), monospace;
   font-size: 13px;
   color: var(--text-dim);
+  box-shadow: var(--shadow-ambient), 0 34px 60px -34px rgba(79, 209, 197, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .about-card div {
@@ -676,11 +772,14 @@ body {
 
 /* -------- Contact -------- */
 .contact-panel {
-  background: linear-gradient(135deg, rgba(79, 209, 197, 0.08), rgba(255, 107, 107, 0.06));
+  background: linear-gradient(135deg, rgba(79, 209, 197, 0.12), rgba(255, 107, 107, 0.1)), rgba(18, 29, 40, 0.5);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
   border: 1px solid var(--panel-border);
   border-radius: 18px;
   padding: 48px;
   text-align: center;
+  box-shadow: var(--shadow-ambient), var(--glow-cyan), var(--glow-coral), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .contact-panel h2 {

@@ -1,9 +1,9 @@
-import LiquidBlob from "@/components/LiquidBlob";
-import BottleRack from "@/components/BottleRack";
 import HeroIntro from "@/components/HeroIntro";
 import ScrollReveal from "@/components/ScrollReveal";
 import Marquee from "@/components/Marquee";
 import MagneticButton from "@/components/MagneticButton";
+import TiltCard from "@/components/TiltCard";
+import ProjectVessel, { type VesselType } from "@/components/ProjectVessel";
 
 const marqueeItems = [
   "Unity Engine",
@@ -33,34 +33,58 @@ const skillGroups = [
   },
 ];
 
-const projects = [
+const projects: {
+  tag: string;
+  title: string;
+  desc: string;
+  stack: string[];
+  vessel: { type: VesselType; layers: { h: number; c: string }[]; pulse?: boolean; shimmer?: boolean };
+}[] = [
   {
     tag: "Puzzle Game · Shader",
     title: "Water Sort Puzzle Color Master",
     desc: "Xây dựng shader chất lỏng nhiều lớp cho chai nước (URP/HLSL): mặt cong meniscus, nghiêng chai theo góc thực (tan), preview WebGL đồng bộ với bản Unity.",
     stack: ["HLSL", "ShaderLab", "URP", "WebGL"],
-    colors: ["#4fd1c5", "#ffd166", "#ff6b6b"],
+    vessel: {
+      type: "bottle",
+      layers: [
+        { h: 34, c: "#4fd1c5" },
+        { h: 33, c: "#ffd166" },
+        { h: 33, c: "#ff6b6b" },
+      ],
+    },
   },
   {
     tag: "Live Event · Animation",
     title: "WinStreakEvent1",
     desc: "Thiết kế shader shine/shimmer cho URP, cùng chuỗi animation scale + đếm số tuần tự dùng UniTask và CancellationTokenSource, đồng bộ âm thanh qua AudioController.",
     stack: ["UniTask", "URP Shader", "AudioController"],
-    colors: ["#ffd166", "#4fd1c5"],
+    vessel: {
+      type: "orb",
+      layers: [{ h: 50, c: "#ffd166" }, { h: 50, c: "#4fd1c5" }],
+      shimmer: true,
+    },
   },
   {
     tag: "Performance · Diagnostics",
     title: "Android ANR Root-Cause",
     desc: "Phân tích log ANR từ Google Play Console, xác định nguyên nhân do GPU fence stall khi WebView ad creative (Pangle/ByteDance) chặn RenderThread của Unity.",
     stack: ["Android", "Profiling", "AppLovin MAX"],
-    colors: ["#ff6b6b", "#ffd166"],
+    vessel: {
+      type: "orb",
+      layers: [{ h: 100, c: "#ff6b6b" }],
+      pulse: true,
+    },
   },
   {
     tag: "Monetization System",
     title: "Bid Floor Interstitial (iOS)",
     desc: "Xây hệ thống quảng cáo interstitial nhiều tầng bid floor bằng Objective-C, mở rộng từ 2 lên 9 đơn vị quảng cáo, cấu hình linh hoạt qua Info.plist.",
     stack: ["Objective-C", "AppLovin MAX", "iOS"],
-    colors: ["#4fd1c5", "#ff6b6b"],
+    vessel: {
+      type: "bottle",
+      layers: [{ h: 50, c: "#ffd166" }, { h: 50, c: "#ff6b6b" }],
+    },
   },
 ];
 
@@ -107,8 +131,6 @@ export default function Home() {
                 </MagneticButton>
               </div>
             </HeroIntro>
-
-            <LiquidBlob />
           </div>
         </section>
 
@@ -119,7 +141,7 @@ export default function Home() {
           </div>
           <ScrollReveal className="skill-groups">
             {skillGroups.map((g, i) => (
-              <div className="skill-card" key={g.title}>
+              <TiltCard as="div" className="skill-card" key={g.title} maxTilt={7} glare>
                 <span className="skill-index">{String(i + 1).padStart(2, "0")}</span>
                 <h3>{g.title}</h3>
                 <div className="tag-row">
@@ -127,7 +149,7 @@ export default function Home() {
                     <span className="tag" key={t}>{t}</span>
                   ))}
                 </div>
-              </div>
+              </TiltCard>
             ))}
           </ScrollReveal>
         </section>
@@ -152,18 +174,15 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="project-swatch">
-                  {p.title === "Water Sort Puzzle Color Master" ? (
-                    <BottleRack />
-                  ) : (
-                    p.colors.map((c) => <span key={c} style={{ background: c }} />)
-                  )}
+                  <ProjectVessel type={p.vessel.type} layers={p.vessel.layers} pulse={p.vessel.pulse} shimmer={p.vessel.shimmer} />
                 </div>
               </div>
             ))}
           </ScrollReveal>
         </section>
 
-        <section id="about" className="container section">
+        <section id="about" className="container section about-section">
+          <div className="about-porthole" aria-hidden="true" />
           <div className="section-head">
             <p className="eyebrow">giới thiệu</p>
             <h2>Về mình</h2>
