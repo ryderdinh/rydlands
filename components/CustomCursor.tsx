@@ -4,21 +4,23 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { prefersReducedMotion } from "@/lib/motion";
 
+// A viewfinder-style reticle (four corner brackets), not a glow blob — reads as
+// an inspector tool crosshair rather than a decorative cursor effect.
 export default function CustomCursor() {
-  const dotRef = useRef<HTMLDivElement>(null);
+  const reticleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
     if (typeof window === "undefined") return;
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
-    const dot = dotRef.current;
-    if (!dot) return;
+    const reticle = reticleRef.current;
+    if (!reticle) return;
 
-    gsap.set(dot, { x: -100, y: -100 });
+    gsap.set(reticle, { x: -100, y: -100 });
 
-    const xTo = gsap.quickTo(dot, "x", { duration: 0.5, ease: "power3" });
-    const yTo = gsap.quickTo(dot, "y", { duration: 0.5, ease: "power3" });
+    const xTo = gsap.quickTo(reticle, "x", { duration: 0.4, ease: "power3" });
+    const yTo = gsap.quickTo(reticle, "y", { duration: 0.4, ease: "power3" });
 
     function move(e: MouseEvent) {
       xTo(e.clientX);
@@ -27,10 +29,12 @@ export default function CustomCursor() {
     window.addEventListener("mousemove", move);
 
     function onEnter() {
-      gsap.to(dot, { scale: 2.6, duration: 0.3, ease: "power2.out" });
+      reticle!.classList.add("is-active");
+      gsap.to(reticle, { scale: 1.6, duration: 0.25, ease: "power2.out" });
     }
     function onLeave() {
-      gsap.to(dot, { scale: 1, duration: 0.3, ease: "power2.out" });
+      reticle!.classList.remove("is-active");
+      gsap.to(reticle, { scale: 1, duration: 0.25, ease: "power2.out" });
     }
 
     const interactive = document.querySelectorAll("a, button");
@@ -48,5 +52,12 @@ export default function CustomCursor() {
     };
   }, []);
 
-  return <div ref={dotRef} className="cursor-blob" aria-hidden="true" />;
+  return (
+    <div ref={reticleRef} className="cursor-reticle" aria-hidden="true">
+      <span className="cursor-tick cursor-tick-tl" />
+      <span className="cursor-tick cursor-tick-tr" />
+      <span className="cursor-tick cursor-tick-bl" />
+      <span className="cursor-tick cursor-tick-br" />
+    </div>
+  );
 }

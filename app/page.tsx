@@ -1,9 +1,12 @@
 import HeroIntro from "@/components/HeroIntro";
+import HeroScope from "@/components/HeroScope";
+import HeroPinned from "@/components/HeroPinned";
 import ScrollReveal from "@/components/ScrollReveal";
+import SplitReveal from "@/components/SplitReveal";
 import Marquee from "@/components/Marquee";
 import MagneticButton from "@/components/MagneticButton";
 import TiltCard from "@/components/TiltCard";
-import ProjectVessel, { type VesselType } from "@/components/ProjectVessel";
+import ProjectGallery, { type Project } from "@/components/ProjectGallery";
 
 const marqueeItems = [
   "Unity Engine",
@@ -18,32 +21,30 @@ const skillGroups = [
   {
     title: "Gameplay & Engine",
     tags: ["C#", "Unity URP", "DOTween / LMotion", "UniTask", "Jobs & Burst", "R3 / VitalRouter"],
+    tick: "var(--teal)",
   },
   {
     title: "Rendering & Shader",
     tags: ["ShaderLab", "HLSL", "URP Custom Shaders", "SpriteMask & Stencil", "Post-processing"],
+    tick: "var(--gold)",
   },
   {
     title: "Tooling & Workflow",
     tags: ["Odin Inspector", "Easy Save 3", "Spine-Unity", "Editor Tooling", "Obi Rope"],
+    tick: "var(--coral)",
   },
   {
     title: "Native & Monetization",
     tags: ["AppLovin MAX", "Android / iOS Native Bridge", "ANR & Performance Profiling", "Objective-C"],
+    tick: "var(--teal)",
   },
 ];
 
-const projects: {
-  tag: string;
-  title: string;
-  desc: string;
-  stack: string[];
-  vessel: { type: VesselType; layers: { h: number; c: string }[]; pulse?: boolean; shimmer?: boolean };
-}[] = [
+const projects: Project[] = [
   {
     tag: "Puzzle Game · Shader",
     title: "Water Sort Puzzle Color Master",
-    desc: "Xây dựng shader chất lỏng nhiều lớp cho chai nước (URP/HLSL): mặt cong meniscus, nghiêng chai theo góc thực (tan), preview WebGL đồng bộ với bản Unity.",
+    desc: "Shader chất lỏng nhiều lớp cho chai nước (URP/HLSL): mặt cong meniscus, nghiêng chai theo góc thực (tan), preview WebGL đồng bộ với bản Unity.",
     stack: ["HLSL", "ShaderLab", "URP", "WebGL"],
     vessel: {
       type: "bottle",
@@ -57,7 +58,7 @@ const projects: {
   {
     tag: "Live Event · Animation",
     title: "WinStreakEvent1",
-    desc: "Thiết kế shader shine/shimmer cho URP, cùng chuỗi animation scale + đếm số tuần tự dùng UniTask và CancellationTokenSource, đồng bộ âm thanh qua AudioController.",
+    desc: "Shader shine/shimmer cho URP, cùng chuỗi animation scale + đếm số tuần tự dùng UniTask và CancellationTokenSource, đồng bộ âm thanh qua AudioController.",
     stack: ["UniTask", "URP Shader", "AudioController"],
     vessel: {
       type: "orb",
@@ -79,7 +80,7 @@ const projects: {
   {
     tag: "Monetization System",
     title: "Bid Floor Interstitial (iOS)",
-    desc: "Xây hệ thống quảng cáo interstitial nhiều tầng bid floor bằng Objective-C, mở rộng từ 2 lên 9 đơn vị quảng cáo, cấu hình linh hoạt qua Info.plist.",
+    desc: "Hệ thống quảng cáo interstitial nhiều tầng bid floor bằng Objective-C, mở rộng từ 2 lên 9 đơn vị quảng cáo, cấu hình linh hoạt qua Info.plist.",
     stack: ["Objective-C", "AppLovin MAX", "iOS"],
     vessel: {
       type: "bottle",
@@ -98,8 +99,8 @@ export default function Home() {
             RYDER
           </a>
           <ul className="nav-links">
-            <li><a href="#projects">Dự án</a></li>
             <li><a href="#skills">Kỹ năng</a></li>
+            <li><a href="#projects">Dự án</a></li>
             <li><a href="#about">Giới thiệu</a></li>
             <li><a href="#contact">Liên hệ</a></li>
           </ul>
@@ -109,40 +110,44 @@ export default function Home() {
       <Marquee items={marqueeItems} />
 
       <main id="top">
-        <section className="hero-wrap">
-          <span className="hero-watermark" aria-hidden="true">RYDER</span>
-          <div className="container hero">
+        <HeroPinned
+          copy={
             <HeroIntro>
-              <p className="eyebrow">unity game developer · mobile</p>
-              <h1>
-                Biến gameplay thành <span className="accent">chuyển động mượt</span> và mãn nhãn.
-              </h1>
-              <p>
-                Mình là Ryder — lập trình game Unity tập trung vào mobile: từ gameplay logic,
-                shader URP/HLSL, cho đến tối ưu hiệu năng và tích hợp quảng cáo ở tầng native.
-                Đang tìm cơ hội freelance hoặc full-time cho các dự án cần độ chỉn chu về kỹ thuật.
-              </p>
-              <div className="cta-row">
-                <MagneticButton href="#projects" className="btn btn-primary">
-                  Xem dự án
-                </MagneticButton>
-                <MagneticButton href="#contact" className="btn btn-ghost">
-                  Liên hệ hợp tác
-                </MagneticButton>
+              <div className="hero-copy">
+                <p className="eyebrow">unity game developer · mobile</p>
+                <h1>
+                  Gameplay chắc tay, shader tự viết, và không né phần khó của mobile game.
+                </h1>
+                <p>
+                  Mình là Ryder — Unity developer tập trung vào mobile: gameplay logic bằng C#,
+                  shader URP/HLSL cho hiệu ứng đặc thù (chất lỏng nhiều lớp, shimmer sự kiện), và
+                  phần ít người nhận làm — tích hợp quảng cáo native (AppLovin MAX) trên Android/iOS,
+                  debug hiệu năng tới tận RenderThread. Đang nhận dự án freelance ngắn hạn, và mở cho
+                  cơ hội full-time.
+                </p>
+                <div className="cta-row">
+                  <MagneticButton href="#projects" className="btn btn-primary">
+                    Xem case study
+                  </MagneticButton>
+                  <MagneticButton href="#contact" className="btn btn-ghost">
+                    Liên hệ hợp tác
+                  </MagneticButton>
+                </div>
               </div>
             </HeroIntro>
-          </div>
-        </section>
+          }
+          scope={<HeroScope />}
+        />
 
         <section id="skills" className="container section">
           <div className="section-head">
             <p className="eyebrow">bộ công cụ</p>
-            <h2>Kỹ năng & công cụ làm việc</h2>
+            <SplitReveal as="h2">Công cụ đang dùng hằng ngày</SplitReveal>
           </div>
           <ScrollReveal className="skill-groups">
-            {skillGroups.map((g, i) => (
-              <TiltCard as="div" className="skill-card" key={g.title} maxTilt={7} glare>
-                <span className="skill-index">{String(i + 1).padStart(2, "0")}</span>
+            {skillGroups.map((g) => (
+              <TiltCard as="div" className="skill-card" key={g.title} maxTilt={6} glare>
+                <span className="skill-tick" style={{ "--skill-c": g.tick } as React.CSSProperties} />
                 <h3>{g.title}</h3>
                 <div className="tag-row">
                   {g.tags.map((t) => (
@@ -154,38 +159,12 @@ export default function Home() {
           </ScrollReveal>
         </section>
 
-        <section id="projects" className="container section">
-          <div className="section-head">
-            <p className="eyebrow">đã triển khai</p>
-            <h2>Dự án nổi bật</h2>
-          </div>
-          <ScrollReveal className="projects" stagger={0.06}>
-            {projects.map((p, i) => (
-              <div className="project-row" key={p.title}>
-                <span className="project-index">{String(i + 1).padStart(2, "0")}</span>
-                <div className="project-main">
-                  <span className="project-tag">{p.tag}</span>
-                  <h3>{p.title}</h3>
-                  <p>{p.desc}</p>
-                  <div className="project-stack">
-                    {p.stack.map((s) => (
-                      <span className="chip" key={s}>{s}</span>
-                    ))}
-                  </div>
-                </div>
-                <div className="project-swatch">
-                  <ProjectVessel type={p.vessel.type} layers={p.vessel.layers} pulse={p.vessel.pulse} shimmer={p.vessel.shimmer} />
-                </div>
-              </div>
-            ))}
-          </ScrollReveal>
-        </section>
+        <ProjectGallery projects={projects} />
 
         <section id="about" className="container section about-section">
-          <div className="about-porthole" aria-hidden="true" />
           <div className="section-head">
             <p className="eyebrow">giới thiệu</p>
-            <h2>Về mình</h2>
+            <SplitReveal as="h2">Về mình</SplitReveal>
           </div>
           <ScrollReveal className="about" stagger={0.15}>
             <div className="about-card">
@@ -196,19 +175,17 @@ export default function Home() {
             </div>
             <div>
               <p className="pull">
-                Mình làm việc chủ yếu trên Unity URP — từ gameplay logic bằng C#,
-                đến shader ShaderLab/HLSL cho các hiệu ứng đặc thù như chất lỏng
-                nhiều lớp hay shimmer sự kiện trong game.
+                Ở Unity URP, mình đi từ gameplay logic bằng C# đến tự viết shader
+                ShaderLab/HLSL cho hiệu ứng riêng — chất lỏng nhiều lớp, shimmer sự kiện.
               </p>
               <p>
-                Ngoài gameplay, mình cũng trực tiếp xử lý phần <strong>tích hợp quảng cáo
-                native</strong> (AppLovin MAX mediation) trên cả Android và iOS, cũng như
-                debug các vấn đề hiệu năng khó như ANR do xung đột giữa WebView ad creative
-                và RenderThread của Unity.
+                Ngoài phần gameplay, mình trực tiếp làm luôn <strong>tích hợp quảng cáo
+                native</strong> (AppLovin MAX mediation) trên cả Android và iOS, và từng debug
+                một ca ANR khó do WebView ad creative chặn RenderThread của Unity.
               </p>
               <p>
-                Cách làm việc của mình: code gọn, comment tiếng Anh rõ ràng, ưu tiên giải
-                pháp production-ready thay vì demo minh hoạ dài dòng.
+                Cách làm việc: code gọn, comment tiếng Anh rõ ràng, ưu tiên giải pháp
+                production-ready hơn là demo minh hoạ dài dòng.
               </p>
             </div>
           </ScrollReveal>

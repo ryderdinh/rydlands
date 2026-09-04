@@ -1,5 +1,5 @@
-// Ashima/McEwan classic 3D simplex noise - dùng để làm mặt khối "sôi" hữu cơ như chất lỏng
-// và làm vệt caustics xuyên nước. Dùng chung cho OceanScene (blob + caustics).
+// Ashima/McEwan classic 3D simplex noise — drives the organic "material preview"
+// surface displacement in HeroScope (see components/HeroScope.tsx).
 export const simplexNoise = `
   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
   vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -67,6 +67,9 @@ export const simplexNoise = `
   }
 `;
 
+// Displaces an icosahedron with simplex noise and shades it with a fresnel-driven
+// mix across the three "vial" colors used throughout the case studies below —
+// the hero literally previews the material technique the projects describe.
 export const blobVertexShader = `
   uniform float uTime;
   varying vec3 vNormal;
@@ -127,51 +130,13 @@ export const blobFragmentShader = `
     vec3 base = mix(uColorA, uColorB, mixT);
     base = mix(base, uColorC, fresnel * 0.7);
 
-    vec3 glow = base + fresnel * vec3(0.55, 0.85, 0.8);
+    vec3 glow = base + fresnel * vec3(0.35, 0.5, 0.5);
 
     float spec = pow(max(dot(reflect(-uLightDir, normal), viewDir), 0.0), 24.0);
-    glow += spec * vec3(1.0, 0.98, 0.9) * 0.6;
+    glow += spec * vec3(1.0, 0.98, 0.9) * 0.4;
 
-    float alpha = 0.55 + fresnel * 0.4;
+    float alpha = 0.85 + fresnel * 0.15;
 
     gl_FragColor = vec4(glow, alpha);
-  }
-`;
-
-export const causticsVertexShader = `
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-export const causticsFragmentShader = `
-  precision highp float;
-  varying vec2 vUv;
-  uniform float uTime;
-  uniform float uOpacity;
-  uniform vec3 uColor;
-  uniform float uOctaves;
-
-  ${simplexNoise}
-
-  void main() {
-    vec2 uv = vUv * 3.0;
-    float t = uTime * 0.06;
-
-    float n1 = snoise(vec3(uv * 1.4 + vec2(t, -t * 0.6), t));
-    float n2 = uOctaves > 1.5
-      ? snoise(vec3(uv * 2.1 - vec2(-t * 0.5, t * 0.8), t * 1.3))
-      : n1;
-
-    float streaks = abs(sin((n1 + n2) * 3.14159));
-    streaks = pow(streaks, 5.0);
-
-    float edgeFade = smoothstep(0.0, 0.25, vUv.x) * smoothstep(1.0, 0.75, vUv.x)
-      * smoothstep(0.0, 0.2, vUv.y) * smoothstep(1.0, 0.8, vUv.y);
-
-    float alpha = streaks * uOpacity * edgeFade;
-    gl_FragColor = vec4(uColor, alpha);
   }
 `;

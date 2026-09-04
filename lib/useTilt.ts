@@ -13,8 +13,12 @@ export function useTilt<T extends HTMLElement>(maxTilt = 8) {
     if (prefersReducedMotion()) return;
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
-    const rotX = gsap.quickTo(el, "rotateX", { duration: 0.5, ease: "power3" });
-    const rotY = gsap.quickTo(el, "rotateY", { duration: 0.5, ease: "power3" });
+    // quickTo's reset path looks up the property by its literal string, unresolved
+    // through GSAP's alias table — "rotateX"/"rotateY" are aliases for the real
+    // internal names "rotationX"/"rotationY", so quickTo must use the real names
+    // directly or every reset warns "not eligible for reset".
+    const rotX = gsap.quickTo(el, "rotationX", { duration: 0.5, ease: "power3" });
+    const rotY = gsap.quickTo(el, "rotationY", { duration: 0.5, ease: "power3" });
 
     function onMove(e: MouseEvent) {
       const r = el!.getBoundingClientRect();

@@ -37,7 +37,7 @@ export default function ProjectVessel({ type, layers, pulse, shimmer }: ProjectV
       gsap.fromTo(
         layerEls,
         { scaleY: 0, transformOrigin: "bottom" },
-        { scaleY: 1, duration: 1.1, ease: "elastic.out(1, 0.6)", stagger: 0.08, delay: 0.3 }
+        { scaleY: 1, duration: 0.8, ease: "power2.out", stagger: 0.08, delay: 0.2 }
       );
     }, el);
 

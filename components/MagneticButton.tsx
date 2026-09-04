@@ -26,7 +26,7 @@ export default function MagneticButton({
   }
 
   function handleLeave() {
-    gsap.to(ref.current, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1, 0.4)" });
+    gsap.to(ref.current, { x: 0, y: 0, duration: 0.5, ease: "power3.out" });
   }
 
   return (

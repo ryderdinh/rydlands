@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { Unbounded, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import CustomCursor from "@/components/CustomCursor";
 import GrainOverlay from "@/components/GrainOverlay";
-import OceanScene from "@/components/OceanScene";
+import SmoothScroll from "@/components/SmoothScroll";
+import ScrollHud from "@/components/ScrollHud";
 import "./globals.css";
 
-const display = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
+const display = Unbounded({
+  subsets: ["latin", "vietnamese"],
+  weight: ["600", "700", "800"],
   variable: "--font-display",
 });
 
-const body = Inter({
+const body = IBM_Plex_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-body",
@@ -47,10 +48,10 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
-        <OceanScene />
         <GrainOverlay />
         <CustomCursor />
-        {children}
+        <ScrollHud />
+        <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
   );
