@@ -18,8 +18,13 @@ typography:
     fontFamily: "var(--font-wordmark), sans-serif"
     fontSize: "clamp(72px, 14vw, 210px)"
     fontWeight: 700
-    lineHeight: 0.82
-    letterSpacing: "-0.01em"
+    lineHeight: 0.8
+    letterSpacing: "-0.03em"
+  eyebrow:
+    fontFamily: "var(--font-mono), monospace"
+    fontSize: "11.5px"
+    fontWeight: 500
+    letterSpacing: "0.14em"
   display:
     fontFamily: "var(--font-display), sans-serif"
     fontSize: "clamp(28px, 3.6vw, 44px)"
@@ -126,7 +131,8 @@ A near-black instrumentation ground carries three saturated signal colors used n
 **Character:** Unbounded gives every heading a geometric, slightly display-weight presence without reading as condensed; JetBrains Mono carries every instrumentation label (nav links, tags, HUD text, chips) so the "inspector panel" reads consistently across the whole page; Oswald's condensed grotesk is deliberately confined to the one poster-scale wordmark that needs a narrower, taller character than Unbounded can give it.
 
 ### Hierarchy
-- **Wordmark** (700, `clamp(72px, 14vw, 210px)`, line-height 0.82): the single decorative hero "RYDER" lockup, `aria-hidden`; the real `<h1>` is the sentence beneath it. Deliberately past the normal display ceiling — this is the site's one committed signature, not a precedent for other headings.
+- **Eyebrow** (500, 11.5px, JetBrains Mono, letter-spacing `0.14em`, uppercase, teal): one tracked line directly above the hero wordmark (`.hero-eyebrow`) — the two-tier "lead-in + poster lockup" the hero needed instead of the wordmark standing alone with no hierarchy above it. Confined to this one position; it is not a general section-eyebrow component.
+- **Wordmark** (700, `clamp(72px, 14vw, 210px)`, line-height 0.8, letter-spacing `-0.03em`): the single decorative hero "RYDER" lockup, `aria-hidden`; the real `<h1>` is the sentence beneath it. Deliberately past the normal display ceiling — this is the site's one committed signature, not a precedent for other headings. Tracked tight enough that the letterforms read as one poster-scale block, not loose display type.
 - **Display** (600, `clamp(28px, 3.6vw, 44px)`, tight tracking `-0.01em`): section headings (`h2`).
 - **Hero Headline** (600, `clamp(22px, 2.6vw, 32px)`, line-height 1.32, max-width 20ch): the hero's real `<h1>` sentence.
 - **Body** (400, 16.5px hero / 15–15.5px section body, line-height 1.65–1.75): paragraph copy, max-width 50–58ch.
@@ -180,7 +186,8 @@ Borders are hairline (1px, `--line` or `--line-strong`) throughout — never a h
 - **Interactive tilt:** project/skill cards use a shared `TiltCard` primitive (mouse-tracking 3D rotation via `useTilt`, disabled on coarse pointers) with an optional diagonal glare sweep on hover — the system's one recurring "tactile" card behavior.
 
 ### Navigation
-- Sticky top bar (60px), translucent dark background with a 6px legibility blur, 1px bottom hairline. Logo is a small teal square dot + Unbounded wordmark text. Links are mono, uppercase-scale 12.5px, `--ink-dim` at rest, teal on hover/focus/active. The active link's highlight is a single shared Motion (`layoutId="nav-pill"`) element that glides between link positions on scroll-driven section change (via `IntersectionObserver`), rather than snapping or fading — the page's one Motion-owned interaction. Mobile (<640px) hides the link list entirely; no hamburger menu exists in the build.
+- Sticky top bar (60px), translucent dark background with a 6px legibility blur, 1px bottom hairline. Logo is a small teal square dot + Unbounded wordmark text. Links are mono, uppercase (`text-transform`), 12.5px with `0.07em` tracking, `--ink-dim` at rest, teal on hover/focus/active. The active link's highlight is a single shared Motion (`layoutId="nav-pill"`) element that glides between link positions on scroll-driven section change (via `IntersectionObserver`), rather than snapping or fading — the page's one Motion-owned interaction. Mobile (<640px) hides the link list entirely; no hamburger menu exists in the build.
+- **Chrome-less first frame.** The nav starts invisible (`autoAlpha: 0`) and fades in over the first ~160px of scroll (`SiteNav`'s own GSAP ScrollTrigger on `document.documentElement`), so the very first thing a visitor sees is the render stage alone — no bar, no links — like a title card, matching the reference's nav-less opening frame. It reappears the instant the visitor starts scrolling, not gated behind the full hero span. Desktop/no-reduced-motion only; touch and `prefers-reduced-motion` keep the nav visible from load, since there's no scroll-linked precision to hide it against.
 
 ### Render Stage (signature component)
 The hero's full-bleed Three.js canvas: a single `IcosahedronGeometry` with a custom noise-displaced, fresnel-mixed `ShaderMaterial` (teal→gold color stops over a near-black base), a soft additive dust-point field for depth, and a GSAP `quickTo`-driven parallax that tilts the mesh toward the cursor. Camera dollies and fog density are scroll-scrubbed (GSAP ScrollTrigger) against the same span `HeroPinned` uses to pin the section, so the render literally moves the viewer through the scene as they scroll. A `stage-hud` overlay (mono micro-labels, teal/gold) and a floating telemetry chip (live fps + elapsed time, teal pulsing status dot) read the scene like an engine debug view. On WebGL failure it falls back to a static radial-gradient glow rather than an empty box; on `prefers-reduced-motion` it renders one static frame with no telemetry.

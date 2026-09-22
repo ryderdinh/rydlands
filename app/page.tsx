@@ -101,6 +101,7 @@ export default function Home() {
         <HeroPinned
           copy={
             <HeroIntro>
+              <span className="hero-eyebrow">Unity developer · gameplay, shaders, native performance</span>
               <div className="hero-wordmark" aria-hidden="true">RYDER</div>
               <div className="hero-copy">
                 <SplitReveal as="h1">
