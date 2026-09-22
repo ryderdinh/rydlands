@@ -100,26 +100,27 @@ export default function Home() {
       <main id="top">
         <HeroPinned
           copy={
-            <HeroIntro>
-              <span className="hero-eyebrow">Unity developer · gameplay, shaders, native performance</span>
-              <div className="hero-wordmark" aria-hidden="true">RYDER</div>
+            <HeroIntro className="hero-copy-inner">
+              <div className="hero-masthead">
+                <span className="hero-eyebrow">Unity developer · gameplay, shaders, native performance</span>
+                <div className="hero-wordmark" aria-hidden="true">RYDER</div>
+              </div>
               <div className="hero-copy">
                 <SplitReveal as="h1">
                   Gameplay that ships. Shaders I write myself.
                 </SplitReveal>
                 <p>
-                  Unity developer focused on mobile: C# gameplay systems, hand-written
-                  URP/HLSL shaders for signature effects — multi-layer liquid materials,
-                  event shimmer — and the parts most portfolios skip: native
-                  ad-mediation integration on Android/iOS, and root-causing hard
-                  performance bugs. Open to freelance engagements and full-time roles.
+                  Unity developer for mobile games — hand-written URP/HLSL shaders,
+                  C# gameplay systems, and the native/performance work most
+                  portfolios skip.
                 </p>
                 <div className="cta-row">
                   <MagneticButton href="#projects" className="btn btn-primary">
                     View case studies
                   </MagneticButton>
-                  <MagneticButton href="#contact" className="btn btn-ghost">
+                  <MagneticButton href="#contact" className="btn btn-link">
                     Get in touch
+                    <span className="btn-link-arrow" aria-hidden="true">→</span>
                   </MagneticButton>
                 </div>
               </div>

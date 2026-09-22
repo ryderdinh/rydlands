@@ -243,7 +243,7 @@ main,
     height: 100vh;
     overflow: hidden;
     display: flex;
-    align-items: center;
+    align-items: stretch;
   }
 }
 
@@ -262,6 +262,9 @@ main,
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .hero {
     padding: 0;
+    height: 100%;
+    display: flex;
+    align-items: stretch;
   }
 }
 
@@ -275,8 +278,35 @@ main,
   min-width: 0;
 }
 
+/* Spread masthead and copy to opposite ends of the viewport instead of
+   centering one compact stacked block — the wordmark anchors the top, the
+   pitch anchors the bottom, and the shader gets to breathe in the open
+   middle. Desktop/pinned only; mobile keeps the simple stacked flow.
+   (.hero-copy-inner is HeroIntro's own root div — .hero-copy-wrap is
+   HeroPinned's ref target for the scroll-exit transform and stays a plain
+   single-child box so that transform isn't fighting this flex layout.) */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .hero-copy-wrap {
+    height: 100%;
+  }
+
+  .hero-copy-inner {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* Bottom padding is generous on purpose: .hero-pin is a full 100vh box,
+       but the nav + marquee ahead of it in flow push its top ~100px below
+       the actual viewport top at rest (before GSAP's pin engages), so
+       naive space-between math would park the CTA row past the fold on
+       first load. This keeps it inside the frame that's actually visible
+       at scroll 0. */
+    padding: 110px 0 140px;
+  }
+}
+
 .hero-copy {
-  max-width: 560px;
+  max-width: 480px;
 }
 
 /* Decorative full-bleed lockup, aria-hidden — the real <h1> is the sentence
@@ -289,7 +319,7 @@ main,
   font-size: clamp(72px, 14vw, 210px);
   line-height: 0.8;
   letter-spacing: -0.03em;
-  margin: 0 0 30px;
+  margin: 0 0 8px;
   color: var(--ink);
   user-select: none;
 }
@@ -310,26 +340,27 @@ main,
 
 .hero h1 {
   font-family: var(--font-display), sans-serif;
-  font-size: clamp(22px, 2.6vw, 32px);
-  line-height: 1.32;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  margin: 0 0 18px;
+  font-size: clamp(19px, 1.9vw, 24px);
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  margin: 0 0 14px;
   color: var(--ink);
-  max-width: 20ch;
+  max-width: 19ch;
 }
 
 .hero p {
-  font-size: 16.5px;
-  line-height: 1.68;
+  font-size: 15px;
+  line-height: 1.72;
   color: var(--ink-dim);
-  max-width: 50ch;
-  margin: 0 0 32px;
+  max-width: 40ch;
+  margin: 0 0 34px;
 }
 
 .cta-row {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 28px;
   flex-wrap: wrap;
 }
 
@@ -369,6 +400,47 @@ main,
 .btn-ghost:hover {
   border-color: var(--teal);
   color: var(--teal);
+}
+
+/* Quiet secondary action — an underlined text link, not a second boxed
+   button competing with the primary CTA. Reserved for the hero, where two
+   equal-weight buttons read as template boilerplate next to the wordmark's
+   scale. */
+.btn-link {
+  background: transparent;
+  border: none;
+  padding: 4px 2px;
+  color: var(--ink-dim);
+  position: relative;
+}
+
+.btn-link::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  height: 1px;
+  background: var(--line-strong);
+  transition: background-color 0.2s ease;
+}
+
+.btn-link:hover {
+  color: var(--ink);
+  transform: none;
+}
+
+.btn-link:hover::after {
+  background: var(--teal);
+}
+
+.btn-link-arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.btn-link:hover .btn-link-arrow {
+  transform: translateX(3px);
 }
 
 /* -------- Hero stage (full-bleed 3D backdrop — mesh floats free, camera flies) -------- */
