@@ -1,5 +1,4 @@
 import HeroIntro from "@/components/HeroIntro";
-import HeroScope from "@/components/HeroScope";
 import HeroPinned from "@/components/HeroPinned";
 import PinnedScene from "@/components/PinnedScene";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -126,7 +125,6 @@ export default function Home() {
               </div>
             </HeroIntro>
           }
-          scope={<HeroScope />}
         />
 
         <ProjectGallery projects={projects} />

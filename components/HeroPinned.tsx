@@ -9,12 +9,11 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-// Pins the hero for an extra scroll span: copy fades/lifts out first while the
-// full-bleed 3D backdrop (see HeroScope) flies the camera through open space,
-// then a vignette wipes to black to resolve into the next section — a cut,
-// not a normal scroll-off. Desktop-only (see .hero-pin CSS): on touch/reduced-
+// Pins the hero for an extra scroll span: copy fades/lifts out first, then a
+// vignette wipes to black to resolve into the next section — a cut, not a
+// normal scroll-off. Desktop-only (see .hero-pin CSS): on touch/reduced-
 // motion the section is skipped here and falls back to plain auto-height flow.
-export default function HeroPinned({ copy, scope }: { copy: ReactNode; scope: ReactNode }) {
+export default function HeroPinned({ copy }: { copy: ReactNode }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   const vignetteRef = useRef<HTMLDivElement>(null);
@@ -61,7 +60,13 @@ export default function HeroPinned({ copy, scope }: { copy: ReactNode; scope: Re
 
   return (
     <div className="hero-pin" id="hero" ref={wrapRef}>
-      {scope}
+      <div className="hero-ghost-wall" aria-hidden="true">
+        {Array.from({ length: 6 }).map((_, row) => (
+          <div className="hero-ghost-row" key={row}>
+            {"RYDER ".repeat(8)}
+          </div>
+        ))}
+      </div>
       <div className="hero-scrim" aria-hidden="true" />
       <div className="hero-character" aria-hidden="true">
         <picture>
@@ -74,9 +79,13 @@ export default function HeroPinned({ copy, scope }: { copy: ReactNode; scope: Re
         <span className="hero-streak hero-streak-a" />
         <span className="hero-streak hero-streak-b" />
       </div>
-      <div className="hero-edge-lockup" aria-hidden="true">
+      <div className="hero-edge-lockup hero-edge-lockup--left" aria-hidden="true">
         <span className="hero-edge-tag">Portfolio reveal</span>
         <span className="hero-edge-word">Ryder</span>
+      </div>
+      <div className="hero-edge-lockup hero-edge-lockup--right" aria-hidden="true">
+        <span className="hero-edge-word">Ryder</span>
+        <span className="hero-edge-tag">Unity developer</span>
       </div>
       <div className="hero-frame" aria-hidden="true">
         <span className="hero-frame-corner tl" />
@@ -90,7 +99,7 @@ export default function HeroPinned({ copy, scope }: { copy: ReactNode; scope: Re
         </div>
       </div>
       <div className="scroll-cue" ref={cueRef}>
-        scroll to render
+        scroll to explore
         <span className="scroll-cue-glyph" aria-hidden="true">↓</span>
       </div>
     </div>

@@ -1,6 +1,6 @@
 ---
-name: Ryder — Render Bench
-description: A Unity shader developer's portfolio that behaves like a live engine viewport, not a page describing one.
+name: Ryder — Agent Reveal
+description: A Unity developer's portfolio staged as a game "agent reveal" card — an illustrated character front and center, gold-bracketed frame, ghosted repeated wordmark — not a live-render tech demo or a category-default hero-photo-and-text-card shell.
 colors:
   bg: "#101214"
   bg-raised: "#17191c"
@@ -42,6 +42,16 @@ typography:
     fontSize: "48px"
     fontWeight: 700
     letterSpacing: "0.04em"
+  hero-ghost-wall:
+    fontFamily: "var(--font-wordmark), sans-serif"
+    fontSize: "64px"
+    fontWeight: 700
+    letterSpacing: "0.06em"
+  hero-ghost-wall-mobile:
+    fontFamily: "var(--font-wordmark), sans-serif"
+    fontSize: "40px"
+    fontWeight: 700
+    letterSpacing: "0.06em"
   body:
     fontFamily: "var(--font-body), system-ui, sans-serif"
     fontSize: "16.5px"
@@ -79,37 +89,37 @@ components:
     padding: "5px 9px"
 ---
 
-# Design System: Ryder — Render Bench
+# Design System: Ryder — Agent Reveal
 
 ## Overview
 
-**Creative North Star: "The Render Bench"**
+**Creative North Star: "Agent Reveal"**
 
-The site is not a page that describes a shader developer — it is presented as the live engine viewport itself, refusing the category-default "hero photo + text card" portfolio shell. A near-black ground reads as a scene backdrop, not a page background; a single live procedural Three.js material (the "blob") is the recurring visual motif rather than a decorative hero graphic; and UI chrome throughout reads as an inspector panel — hairline rules, monospace micro-labels, tick marks, corner brackets — never as glass or gradient decoration for its own sake.
+The hero is staged like a game's character-reveal card, not a category-default "hero photo + text card" portfolio shell: an illustrated bust portrait stands front and center, framed by gold corner brackets, a ghosted repeat of the "RYDER" wordmark tiled across the backdrop, and mirrored vertical wordmark echoes running the left and right edges. This replaced an earlier direction built around a live procedural Three.js shader material (the "Render Bench") — the user pointed at a Valorant agent-reveal poster and asked for that instead, character portrait in hand. Three.js is gone from the stack entirely, not just unused: no live render, no shader telemetry, nothing to fabricate a "live" claim for. Everywhere outside the hero, the site keeps its inspector-panel chrome — hairline rules, monospace micro-labels, tick marks, corner brackets — never glass or gradient decoration for its own sake; that language wasn't tied to the shader and survives the pivot intact.
 
-The build carries two deliberate, non-negotiable typography and motion facts forward as system invariants, not open questions: Unbounded is the one display face for all regular headings, while Oswald ("--font-wordmark") is reserved for exactly one element — the giant hero "RYDER" wordmark — because Unbounded alone read geometric/normal-width where the wordmark needed a condensed, poster-scale character. And the four motion libraries in the stack are lane-disciplined, not overlapping: GSAP + ScrollTrigger + Lenis own all scroll choreography and pinning; Three.js owns only the hero's live procedural shader material; Motion (`motion/react`, `layoutId`) owns exactly one shared-layout micro-interaction (the sliding nav active-link pill); anime.js owns exactly one section's entrance (the skills-grid card/tag stagger). A future edit should not blur these back together or add a redundant library for a job one of the four already owns.
+The build carries two deliberate, non-negotiable typography and motion facts forward as system invariants, not open questions: Unbounded is the one display face for all regular headings, while Oswald ("--font-wordmark") is reserved for the hero — the giant "RYDER" wordmark and its own ghosted echoes (edge lockups, background wall), never a second unrelated heading — because Unbounded alone read geometric/normal-width where the wordmark needed a condensed, poster-scale character. And the motion libraries in the stack are lane-disciplined, not overlapping: GSAP + ScrollTrigger + Lenis own all scroll choreography and pinning; Motion (`motion/react`, `layoutId`) owns exactly one shared-layout micro-interaction (the sliding nav active-link pill); anime.js owns exactly one section's entrance (the skills-grid card/tag stagger). A future edit should not blur these back together or add a redundant library for a job one of the three already owns.
 
-Color is applied as instrumentation, not paint: the near-black/off-white ground is the resting state, and the three accents (teal, gold, coral) appear as small, purposeful signals — a status dot, a tick mark, a tag border — almost never as large fills. The two `backdrop-filter: blur()` uses in the build (sticky nav background, the hero telemetry chip) are narrow legibility scrims over moving content, not a glassmorphism system; they should not be read as license for decorative glass panels elsewhere.
+Color is applied as instrumentation, not paint: the near-black/off-white ground is the resting state, and the three accents (teal, gold, coral) appear as small, purposeful signals — a status dot, a tick mark, a tag border — almost never as large fills. The hero's diagonal light streaks are the one deliberate, capped exception (see Colors — Named Rules). The one `backdrop-filter: blur()` left in the build (sticky nav background) is a narrow legibility scrim over moving content, not a glassmorphism system; it should not be read as license for decorative glass panels elsewhere.
 
 **Key Characteristics:**
-- Near-black engine-viewport ground with three signal accents (teal, gold, coral) used sparingly and functionally.
-- One live WebGL shader material as the page's signature visual, not a static hero image.
-- Inspector-panel chrome: hairlines, monospace micro-labels, corner-bracket details — flat by default, shadow reserved for exactly one floating element.
-- Two-face type system: Unbounded for every heading, Oswald confined to the single hero wordmark.
-- Four animation libraries, four disjoint jobs — no overlap, no redundancy.
+- Near-black instrumentation ground with three signal accents (teal, gold, coral) used sparingly and functionally, everywhere except the hero.
+- The hero is a character-reveal card: illustrated portrait, gold frame, ghosted wordmark repeats — the page's one deliberately louder moment, not the norm to extend elsewhere.
+- Inspector-panel chrome: hairlines, monospace micro-labels, corner-bracket details — flat by default, no shadow except the hero character's own drop-shadow.
+- Two-face type system: Unbounded for every heading, Oswald confined to the hero wordmark and its ghosted echoes.
+- Three animation libraries, three disjoint jobs — no overlap, no redundancy, and no rendering library since Three.js was removed.
 
 ## Colors
 
 A near-black instrumentation ground carries three saturated signal colors used narrowly, plus a three-step ink scale for text hierarchy.
 
 ### Primary
-- **Render Teal** (`#4fd1c5`): the system's default accent — logo dot, active nav state/pill accent color, primary button fill, telemetry status dot, first shader-material color stop, first skill-group tick.
+- **Render Teal** (`#4fd1c5`): the system's default accent — logo dot, active nav state/pill accent color, primary button fill, hero eyebrow text, hero ambient glow, one hero light streak, first skill-group tick.
 
 ### Secondary
-- **Signal Gold** (`#ffd166`): second accent — used for one HUD label (`stage-hud-b`), tag/chip borders and text in the project filmstrip, second shader-material color stop, shimmer/orb vessel color.
+- **Signal Gold** (`#ffd166`): second accent — the hero's corner-bracket frame and ghosted edge wordmark, tag/chip borders and text in the project filmstrip, one hero light streak, shimmer/orb vessel color.
 
 ### Tertiary
-- **Alert Coral** (`#ff6b6b`): reserved for diagnostic/alert-flavored content — the Android ANR case-study's pulse-orb vessel, one skill-group tick, third liquid-layer color in project vessels. Reads as "something under stress," matching its one case-study use.
+- **Alert Coral** (`#ff6b6b`): reserved for diagnostic/alert-flavored content — the Android ANR case-study's pulse-orb vessel, one skill-group tick, third liquid-layer color in project vessels. Reads as "something under stress," matching its one case-study use. Never used in the hero's streaks or frame.
 
 ### Neutral
 - **Viewport Black** (`#101214`, base `--bg`): page background.
@@ -119,12 +129,12 @@ A near-black instrumentation ground carries three saturated signal colors used n
 - **Hairline Strong** (`#3d4147`, `--line-strong`): card/panel borders, ghost-button borders, corner-bracket accents' resting stroke.
 - **Ink** (`#ecece7`, `--ink`): primary text and headings.
 - **Ink Dim** (`#90959b`, `--ink-dim`): body copy, secondary text.
-- **Ink Faint** (`#5b5f64`, `--ink-faint`): tertiary/label text, marquee items, idle telemetry dot.
+- **Ink Faint** (`#5b5f64`, `--ink-faint`): tertiary/label text, marquee items.
 
 ### Named Rules
-**The Instrumentation-Only Rule.** Accent color (teal/gold/coral) is applied to small, functional marks — dots, ticks, borders, single HUD labels — never as a large background fill or a decorative gradient wash. Two large-surface exceptions exist, both deliberate and both capped: the live shader material itself, where color is the subject rather than a signal, and the hero's diagonal light streaks (`.hero-streaks`), a user-directed "agent reveal" escalation confined to a low-opacity, screen-blended band at the very bottom of the hero — see Hero Character & Frame. Coral is excluded from the streaks; it stays confined to its diagnostic/alert uses. Do not add a third.
+**The Instrumentation-Only Rule.** Accent color (teal/gold/coral) is applied to small, functional marks — dots, ticks, borders, single HUD labels — never as a large background fill or a decorative gradient wash, everywhere except the hero. The hero's diagonal light streaks (`.hero-streaks`) are the one large-surface exception: a user-directed "agent reveal" escalation, confined to a low-opacity, screen-blended band at the very bottom of the hero — see Hero Character & Frame. Coral is excluded from it; coral stays confined to its diagnostic/alert uses. Do not add a second large-surface exception outside the hero.
 
-**The Legibility-Scrim, Not Glass, Rule.** `backdrop-filter: blur()` appears in exactly two places (sticky nav background, hero telemetry chip) to keep text readable over moving content underneath. It is not a general glassmorphism device; new panels default to a flat, opaque `--bg-inset` surface with a hairline border instead.
+**The Legibility-Scrim, Not Glass, Rule.** `backdrop-filter: blur()` appears in exactly one place (sticky nav background) to keep text readable over moving content underneath. It is not a general glassmorphism device; new panels default to a flat, opaque `--bg-inset` surface with a hairline border instead.
 
 ## Typography
 
@@ -154,24 +164,23 @@ Single-column content sits inside a `1120px` max-width container with `24px` sid
 The page is one continuous run of full-bleed pinned "stage" moments, book-ended by normal-flow chrome: sticky inspector nav (60px, `position: sticky`) → full-bleed marquee ribbon → full-viewport pinned hero (`100vh`, GSAP ScrollTrigger `pin: true`, desktop/fine-pointer only) → full-viewport pinned horizontal project filmstrip (same pin pattern) → three more full-viewport pinned scenes (skills, about, contact — see `PinnedScene`) → footer. Every pinned scene is full-bleed at its root (its own grid-floor + accent-glow background), with a `.container` div nested inside for the actual text column — the section itself is the scene's viewport, not a centered content block that happens to be pinned. All pinned stages are desktop-with-hover-only; touch and `prefers-reduced-motion` fall back to plain auto-height document flow with scroll-linked (not pinned) entrance animation, never a static frame.
 
 ### Hero Composition (masthead / open stage / pitch)
-Desktop, the hero's copy column does not sit as one centered stacked block — it splits into two groups pinned to opposite ends of the 100vh frame (`.hero-copy-inner`, `display:flex; flex-direction:column; justify-content:space-between`), with the shader mesh given the open middle to breathe: a **masthead** (`.hero-masthead`: eyebrow + wordmark) anchored near the top, and the **pitch** (headline + paragraph + CTA row) anchored near the bottom. This is deliberate — a single eyebrow→h1→paragraph→dual-button stack read as generic template boilerplate at the wordmark's scale; splitting the copy into two small, quiet groups with real negative space between them reads as an edited, considered layout instead. `.hero-copy-inner`'s padding (`110px 0 140px`) is asymmetric on purpose: `.hero-pin` is a full `100vh` box, but the nav + marquee ahead of it in document flow push its top ~100px below the actual viewport top at rest (before GSAP's pin engages on scroll), so the bottom padding is generous enough that the pitch group — CTA included — still lands inside the frame that's actually visible at scroll 0, not just inside the box's own coordinate space. Mobile/touch/reduced-motion never gets this split; it falls back to the plain stacked flow (`.hero-copy-wrap`/`.hero-masthead` render as ordinary blocks with no flex).
+Desktop, the hero's copy column does not sit as one centered stacked block — it splits into two groups pinned to opposite ends of the 100vh frame (`.hero-copy-inner`, `display:flex; flex-direction:column; justify-content:space-between`), with the character portrait given the open middle to stand in: a **masthead** (`.hero-masthead`: eyebrow + wordmark) anchored near the top, and the **pitch** (headline + paragraph + CTA row) anchored near the bottom. This is deliberate — a single eyebrow→h1→paragraph→dual-button stack read as generic template boilerplate at the wordmark's scale; splitting the copy into two small, quiet groups with real negative space between them reads as an edited, considered layout instead. `.hero-copy-inner`'s padding (`110px 0 140px`) is asymmetric on purpose: `.hero-pin` is a full `100vh` box, but the nav + marquee ahead of it in document flow push its top ~100px below the actual viewport top at rest (before GSAP's pin engages on scroll), so the bottom padding is generous enough that the pitch group — CTA included — still lands inside the frame that's actually visible at scroll 0, not just inside the box's own coordinate space. Mobile/touch/reduced-motion never gets this split; it falls back to the plain stacked flow (`.hero-copy-wrap`/`.hero-masthead` render as ordinary blocks with no flex).
 
 Grids used: the skills grid is `repeat(auto-fit, minmax(220px, 1fr))` with a 1px `--line`-colored gap that doubles as hairline dividers between cards. The about section is an `0.8fr 1.2fr` two-column grid collapsing to one column under 760px. The project filmstrip is a horizontal flex track (`gap: 28px`), each slide `min(480px, 82vw)` wide.
 
 ## Elevation & Depth
 
-The system is flat by default: nearly every surface (cards, panels, chips, nav) is a solid `--bg-inset` or `--bg-raised` fill with a 1px hairline border and no shadow. Depth is conveyed by layering (inset vs. raised surface tone) and by the live 3D scene itself (fog, camera dolly, parallax), not by drop shadows.
+The system is flat by default: nearly every surface (cards, panels, chips, nav) is a solid `--bg-inset` or `--bg-raised` fill with a 1px hairline border and no shadow. Depth in the hero comes from real layering (ghost wall behind character, character in front of it, frame chrome on top) rather than drop shadows; elsewhere, depth is conveyed by surface tone alone (inset vs. raised).
 
 ### Shadow Vocabulary
-- **Telemetry lift** (`box-shadow: 0 16px 34px -14px rgba(0,0,0,0.6)`): the one floating element on the page (hero telemetry chip) — a soft ambient shadow to read as detached from the viewport surface. Not reused elsewhere.
-- **Status-dot glow** (`box-shadow: 0 0 0 3px rgba(79,209,197,0.18)`): a soft ring around the live telemetry dot, signaling "active," paired with a pulse opacity animation.
+- **Character lift** (`filter: drop-shadow(0 30px 54px rgba(0,0,0,0.55))`, `.hero-character img`): the one floating element on the page — a soft ambient shadow grounding the portrait against the backdrop. Not reused elsewhere.
 
 ### Named Rules
-**The Flat-Surface Rule.** Cards, panels, chips, and nav are flat at rest — hairline border, no shadow. Shadow is reserved for the single floating telemetry chip; introducing shadows on ordinary cards breaks the inspector-panel flatness the rest of the system depends on.
+**The Flat-Surface Rule.** Cards, panels, chips, and nav are flat at rest — hairline border, no shadow. Shadow is reserved for the hero's character portrait; introducing shadows on ordinary cards breaks the inspector-panel flatness the rest of the system depends on.
 
 ## Shapes
 
-Corners are small and utilitarian: `3px` (`--radius-sm`, the default for buttons, tags, nav pill, telemetry dot) and `6px` (`--radius-md`, the telemetry chip's slightly larger panel). Nothing uses a large or pill-shaped radius except the fully circular telemetry dot and orb vessels (`border-radius: 50%`), which are deliberately circular render objects, not a rounded-corner convention.
+Corners are small and utilitarian: `3px` (`--radius-sm`), the one radius token in the system, default for buttons, tags, and the nav pill. Nothing uses a large or pill-shaped radius except orb vessels (`border-radius: 50%`), which are deliberately circular render objects, not a rounded-corner convention.
 
 Borders are hairline (1px, `--line` or `--line-strong`) throughout — never a heavier structural border. A recurring signature detail is the open corner-bracket ("viewfinder") mark: two 1.5px `--teal` L-shaped strokes at opposite corners of the about-card, the same four-tick pattern in the custom cursor reticle, and — bolder, 2px `--gold`, at all four true corners — the hero's frame (`.hero-frame-corner`, see Hero Character & Frame). This is the system's one non-hairline decorative device, and it is confined to these three uses — it reads as a targeting/inspection reticle (about-card, cursor) or a reveal-poster frame (hero), not a generic corner ornament to scatter on new cards.
 
@@ -197,15 +206,12 @@ Borders are hairline (1px, `--line` or `--line-strong`) throughout — never a h
 
 ### Navigation
 - Sticky top bar (60px), translucent dark background with a 6px legibility blur, 1px bottom hairline. Logo is a small teal square dot + Unbounded wordmark text. Links are mono, uppercase (`text-transform`), 12.5px with `0.07em` tracking, `--ink-dim` at rest, teal on hover/focus/active. The active link's highlight is a single shared Motion (`layoutId="nav-pill"`) element that glides between link positions on scroll-driven section change (via `IntersectionObserver`), rather than snapping or fading — the page's one Motion-owned interaction. Mobile (<640px) hides the link list entirely; no hamburger menu exists in the build.
-- **Chrome-less first frame.** The nav starts invisible (`autoAlpha: 0`) and fades in over the first ~160px of scroll (`SiteNav`'s own GSAP ScrollTrigger on `document.documentElement`), so the very first thing a visitor sees is the render stage alone — no bar, no links — like a title card, matching the reference's nav-less opening frame. It reappears the instant the visitor starts scrolling, not gated behind the full hero span. Desktop/no-reduced-motion only; touch and `prefers-reduced-motion` keep the nav visible from load, since there's no scroll-linked precision to hide it against.
-
-### Render Stage (signature component)
-The hero's full-bleed Three.js canvas: a single `IcosahedronGeometry` with a custom noise-displaced, fresnel-mixed `ShaderMaterial` (teal→gold color stops over a near-black base), a soft additive dust-point field for depth, and a GSAP `quickTo`-driven parallax that tilts the mesh toward the cursor. Camera dollies and fog density are scroll-scrubbed (GSAP ScrollTrigger) against the same span `HeroPinned` uses to pin the section, so the render literally moves the viewer through the scene as they scroll. A `stage-hud` overlay (mono micro-labels, teal/gold) and a floating telemetry chip (live fps + elapsed time, teal pulsing status dot) read the scene like an engine debug view. On WebGL failure it falls back to a static radial-gradient glow rather than an empty box; on `prefers-reduced-motion` it renders one static frame with no telemetry.
+- **Chrome-less first frame.** The nav starts invisible (`autoAlpha: 0`) and fades in over the first ~160px of scroll (`SiteNav`'s own GSAP ScrollTrigger on `document.documentElement`), so the very first thing a visitor sees is the hero alone — no bar, no links — like a title card, matching the reference's nav-less opening frame. It reappears the instant the visitor starts scrolling, not gated behind the full hero span. Desktop/no-reduced-motion only; touch and `prefers-reduced-motion` keep the nav visible from load, since there's no scroll-linked precision to hide it against.
 
 ### Hero Character & Frame (signature component)
-The hero's centerpiece is a commissioned illustrated bust portrait (`public/ryder-portrait.png`/`.webp`, transparent background, pre-trimmed to its content bounds) standing right-of-center in front of the Render Stage's shader mesh — the mesh now reads as the character's own glowing energy/aura rather than a competing abstract graphic. It's framed by four gold corner brackets (`.hero-frame-corner`, 2px `--gold` L-strokes) at the hero's true corners, a ghosted vertical "RYDER" running the left edge (`.hero-edge-lockup`, outline-only Oswald, wide desktop only — narrower desktop widths lose the `.container` margin this needs to clear the masthead/pitch text underneath), and two soft diagonal teal/gold light streaks low in the frame (`.hero-streaks`, `mix-blend-mode: screen`, glowing across the character's lower half). Together these read as a game "agent reveal" card rather than a generic hero photo — a deliberate, user-directed escalation past the system's usual restraint (see Named Rules below for what that costs and where the line still holds). Hidden entirely below 900px width: the character's absolute positioning sizes itself against `.hero-pin`'s 100vh box, which mobile's plain stacked flow doesn't have, so naive scaling buried the copy under a full-resolution portrait — a right-sized non-overlapping mobile treatment is future work, not yet built.
+The hero's centerpiece is a commissioned illustrated bust portrait (`public/ryder-portrait.png`/`.webp`, transparent background, pre-trimmed to its content bounds) standing right-of-center. It's framed by four gold corner brackets (`.hero-frame-corner`, 2px `--gold` L-strokes) at the hero's true corners, mirrored ghosted "RYDER" wordmarks running both edges (`.hero-edge-lockup--left`/`--right`, outline-only Oswald, wide desktop only — narrower desktop widths lose the `.container` margin the left one needs to clear the masthead/pitch text underneath; the right one is deliberately off-center, below `.scroll-hud`'s vertical-center track rather than fighting it for the same space), and two soft diagonal teal/gold light streaks low in the frame (`.hero-streaks`, `mix-blend-mode: screen`, glowing across the character's lower half). Behind all of it, `.hero-ghost-wall` tiles six rows of outline-only "RYDER" at a slight rotation — the backdrop texture, replacing an earlier live Three.js shader material with the same repeated-wordmark technique the Valorant reference actually uses (see Overview). Together these read as a game "agent reveal" card rather than a generic hero photo — a deliberate, user-directed escalation past the system's usual restraint (see Colors — Named Rules for what that costs and where the line still holds). The character is hidden entirely below 900px width: its absolute positioning sizes itself against `.hero-pin`'s 100vh box, which mobile's plain stacked flow doesn't have, so naive scaling buried the copy under a full-resolution portrait — a right-sized non-overlapping mobile treatment is future work, not yet built. The ghost wall and frame chrome still show on mobile at a smaller scale.
 
-**Stacking note.** `.hero-stage` (the Three.js canvas's container) deliberately carries no `z-index` — giving it one would make it a stacking context that traps its children (the canvas, the telemetry chip) at that single layer regardless of their own `z-index`, which silently capped the telemetry chip below anything added later. The hero's real paint order, back to front, is: canvas/stage-hud (auto) → `.hero-scrim` (1) → `.hero-character` (1, after scrim in DOM) → `.telemetry-chip`/`.hero-edge-lockup`/`.hero-streaks` (2) → `.hero-frame-corner` (3) → `.hero-vignette` (4, so the scene's cut to black covers the character and every frame device, not just the shader). A new floating hero element should slot into this scale rather than pick an unrelated number.
+**Stacking note.** The hero's paint order, back to front: `.hero-ghost-wall` (auto, no z-index) → `.hero-scrim` (1) → `.hero-character` (1, after scrim in DOM) → `.hero-edge-lockup`/`.hero-streaks` (2) → `.hero-frame-corner` (3) → `.hero-vignette` (4, so the scene's cut to black covers the character and every frame device, not just the backdrop). A new floating hero element should slot into this scale rather than pick an unrelated number. (History: this section used to warn about a stacking-context trap from the Three.js canvas's container forcing an explicit `z-index: 0` — that container is gone along with the shader, so the trap can't recur here, but the same rule applies to any future `position: absolute` + explicit `z-index` wrapper: it isolates its children's stacking from everything outside it, regardless of their own z-index.)
 
 ### Project Vessel (signature component)
 The small per-project "bottle" or "orb" glyph (`ProjectVessel`) rendered in flat CSS/HTML rather than 3D: a bottle is a bordered rectangle with stacked color-layer divs; an orb is a circle with a radial gradient between two project-specific colors, optionally animated with a diagonal shimmer sweep or a soft coral pulse glow. Each project's vessel colors are drawn from the same teal/gold/coral system palette, making the filmstrip read as variations on one material rather than four unrelated illustrations.
@@ -213,7 +219,7 @@ The small per-project "bottle" or "orb" glyph (`ProjectVessel`) rendered in flat
 ### Scene Transition Grammar (signature interaction)
 Every scroll boundary between pinned stages (hero → projects → skills → about → contact) shares one motion vocabulary: real 3D perspective, not a 2D crossfade standing in for depth. Content arrives tilted back and distant (`rotateX` off vertical, negative `translateZ`, reduced scale, blurred), levels out to a flat, sharp, held dwell for reading, then keeps traveling forward and tilts the other way as it exits (positive `translateZ`, opposite `rotateX`, increased scale, re-blurred) — the same "arrive → dwell → depart" beat `PinnedScene` drives with one GSAP scrub timeline (`transformPerspective` set once per element, `power2.out`/`power2.in` eases shaping the curve, not linear scrub). `HeroPinned`'s copy exit and `ProjectGallery`'s first-slide entrance use the identical grammar so the hero → filmstrip hand-off reads as one continuous camera move rather than a different effect at that one boundary. Within the filmstrip itself, cards additionally bank in `rotateY` as they pass the pin's horizontal center (`ProjectGallery`'s `updateTilt`), like exhibits arranged on a shallow arc the camera pans across.
 
-Each pinned scene is also a distinct "location," not a repeated card on identical ground: `PinnedScene`'s root section is full-bleed (not the `.container`-classed content itself) and carries a persistent low-opacity engine-grid pattern plus one accent-tinted ambient glow (`accent="teal"|"gold"`, positioned per scene via `--glow-x`/`--glow-y`) — same alpha range as the hero's existing WebGL-fallback glow, so this stays inside the Instrumentation-Only Rule rather than introducing a new large color fill. Coral is not used for scene glows; it stays confined to its existing diagnostic/alert uses.
+Each pinned scene is also a distinct "location," not a repeated card on identical ground: `PinnedScene`'s root section is full-bleed (not the `.container`-classed content itself) and carries a persistent low-opacity engine-grid pattern plus one accent-tinted ambient glow (`accent="teal"|"gold"`, positioned per scene via `--glow-x`/`--glow-y`) — same alpha range (~0.1) as the hero's own ambient radial glow on `.hero-pin`, so this stays inside the Instrumentation-Only Rule rather than introducing a new large color fill. Coral is not used for scene glows; it stays confined to its existing diagnostic/alert uses.
 
 ### Named Rules
 **The One Flight Grammar Rule.** Every pinned scene boundary — hero exit, filmstrip entrance, and all three `PinnedScene` sections — uses the same arrive/dwell/depart perspective transform (`rotateX` + `translateZ` + scale + blur), not a mix of fades, wipes, and zooms. A new pinned moment should extend this grammar, not invent a second one.
@@ -223,12 +229,12 @@ Each pinned scene is also a distinct "location," not a repeated card on identica
 ### Do:
 - **Do** keep accent color (teal/gold/coral) to small functional marks — dots, ticks, chip borders, single HUD labels — per the Instrumentation-Only Rule.
 - **Do** set every heading in Unbounded; reserve Oswald for the one hero wordmark only.
-- **Do** keep cards and panels flat (hairline border, no shadow) at rest; the telemetry chip's shadow stays the one exception.
-- **Do** route scroll choreography and pinning through GSAP + ScrollTrigger + Lenis, the hero's live material through Three.js, the nav pill through Motion's `layoutId`, and the skills-grid entrance through anime.js — one library per job, per the Library Lane Rule.
-- **Do** provide a non-pinned, scroll-linked (not static) fallback for any pinned/3D moment on touch and `prefers-reduced-motion`, matching the pattern already in `HeroPinned`, `HeroScope`, and `ProjectGallery`.
+- **Do** keep cards and panels flat (hairline border, no shadow) at rest; the hero character's drop-shadow stays the one exception.
+- **Do** route scroll choreography and pinning through GSAP + ScrollTrigger + Lenis, the nav pill through Motion's `layoutId`, and the skills-grid entrance through anime.js — one library per job, per the Library Lane Rule. Nothing owns a rendering-library lane anymore; don't reintroduce Three.js or another 3D/canvas library without discussing it first.
+- **Do** provide a non-pinned, scroll-linked (not static) fallback for any pinned moment on touch and `prefers-reduced-motion`, matching the pattern already in `HeroPinned` and `ProjectGallery`.
 
 ### Don't:
-- **Don't** add decorative `backdrop-filter` glass panels beyond the two functional legibility scrims (nav, telemetry chip) — the brief explicitly rejects glass/gradient decoration as chrome.
+- **Don't** add decorative `backdrop-filter` glass panels beyond the nav's one functional legibility scrim — the brief explicitly rejects glass/gradient decoration as chrome.
 - **Don't** apply the corner-bracket ("viewfinder") device to arbitrary new cards; it's confined to the about-card, cursor reticle, and hero frame, not a general corner ornament.
 - **Don't** give ordinary content cards a rounded radius — square corners are the panel convention; small radius (3px/6px) is reserved for buttons, tags, and chips.
-- **Don't** introduce a second animation library for a job one of the four (GSAP/Three.js/Motion/anime.js) already owns.
+- **Don't** introduce a second animation library for a job one of the three (GSAP/Motion/anime.js) already owns.
