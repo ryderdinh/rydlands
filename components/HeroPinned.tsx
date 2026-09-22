@@ -63,7 +63,27 @@ export default function HeroPinned({ copy, scope }: { copy: ReactNode; scope: Re
     <div className="hero-pin" id="hero" ref={wrapRef}>
       {scope}
       <div className="hero-scrim" aria-hidden="true" />
+      <div className="hero-character" aria-hidden="true">
+        <picture>
+          <source srcSet="/ryder-portrait.webp" type="image/webp" />
+          <img src="/ryder-portrait.png" alt="" />
+        </picture>
+      </div>
       <div className="hero-vignette" ref={vignetteRef} aria-hidden="true" />
+      <div className="hero-streaks" aria-hidden="true">
+        <span className="hero-streak hero-streak-a" />
+        <span className="hero-streak hero-streak-b" />
+      </div>
+      <div className="hero-edge-lockup" aria-hidden="true">
+        <span className="hero-edge-tag">Portfolio reveal</span>
+        <span className="hero-edge-word">Ryder</span>
+      </div>
+      <div className="hero-frame" aria-hidden="true">
+        <span className="hero-frame-corner tl" />
+        <span className="hero-frame-corner tr" />
+        <span className="hero-frame-corner bl" />
+        <span className="hero-frame-corner br" />
+      </div>
       <div className="container hero">
         <div className="hero-copy-wrap" ref={copyRef}>
           {copy}

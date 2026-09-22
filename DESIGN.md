@@ -33,10 +33,15 @@ typography:
     letterSpacing: "-0.01em"
   hero-h1:
     fontFamily: "var(--font-display), sans-serif"
-    fontSize: "clamp(22px, 2.6vw, 32px)"
-    fontWeight: 600
-    lineHeight: 1.32
-    letterSpacing: "-0.01em"
+    fontSize: "clamp(19px, 1.9vw, 24px)"
+    fontWeight: 500
+    lineHeight: 1.4
+    letterSpacing: "-0.005em"
+  hero-edge-word:
+    fontFamily: "var(--font-wordmark), sans-serif"
+    fontSize: "48px"
+    fontWeight: 700
+    letterSpacing: "0.04em"
   body:
     fontFamily: "var(--font-body), system-ui, sans-serif"
     fontSize: "16.5px"
@@ -117,7 +122,7 @@ A near-black instrumentation ground carries three saturated signal colors used n
 - **Ink Faint** (`#5b5f64`, `--ink-faint`): tertiary/label text, marquee items, idle telemetry dot.
 
 ### Named Rules
-**The Instrumentation-Only Rule.** Accent color (teal/gold/coral) is applied to small, functional marks — dots, ticks, borders, single HUD labels — never as a large background fill or a decorative gradient wash. The only large-surface color exception is the live shader material itself, which is the one place color is the subject rather than a signal.
+**The Instrumentation-Only Rule.** Accent color (teal/gold/coral) is applied to small, functional marks — dots, ticks, borders, single HUD labels — never as a large background fill or a decorative gradient wash. Two large-surface exceptions exist, both deliberate and both capped: the live shader material itself, where color is the subject rather than a signal, and the hero's diagonal light streaks (`.hero-streaks`), a user-directed "agent reveal" escalation confined to a low-opacity, screen-blended band at the very bottom of the hero — see Hero Character & Frame. Coral is excluded from the streaks; it stays confined to its diagnostic/alert uses. Do not add a third.
 
 **The Legibility-Scrim, Not Glass, Rule.** `backdrop-filter: blur()` appears in exactly two places (sticky nav background, hero telemetry chip) to keep text readable over moving content underneath. It is not a general glassmorphism device; new panels default to a flat, opaque `--bg-inset` surface with a hairline border instead.
 
@@ -134,12 +139,13 @@ A near-black instrumentation ground carries three saturated signal colors used n
 - **Eyebrow** (500, 11.5px, JetBrains Mono, letter-spacing `0.14em`, uppercase, teal): one tracked line directly above the hero wordmark (`.hero-eyebrow`) — the two-tier "lead-in + poster lockup" the hero needed instead of the wordmark standing alone with no hierarchy above it. Confined to this one position; it is not a general section-eyebrow component.
 - **Wordmark** (700, `clamp(72px, 14vw, 210px)`, line-height 0.8, letter-spacing `-0.03em`): the single decorative hero "RYDER" lockup, `aria-hidden`; the real `<h1>` is the sentence beneath it. Deliberately past the normal display ceiling — this is the site's one committed signature, not a precedent for other headings. Tracked tight enough that the letterforms read as one poster-scale block, not loose display type.
 - **Display** (600, `clamp(28px, 3.6vw, 44px)`, tight tracking `-0.01em`): section headings (`h2`).
-- **Hero Headline** (600, `clamp(22px, 2.6vw, 32px)`, line-height 1.32, max-width 20ch): the hero's real `<h1>` sentence.
-- **Body** (400, 16.5px hero / 15–15.5px section body, line-height 1.65–1.75): paragraph copy, max-width 50–58ch.
+- **Hero Headline** (500, `clamp(19px, 1.9vw, 24px)`, line-height 1.4, max-width 19ch): the hero's real `<h1>` sentence. Deliberately quiet — the pitch group it leads reads as a small supporting block under the wordmark's scale, not a second headline competing with it.
+- **Body** (400, 15px hero / 15–15.5px section body, line-height 1.68–1.75): paragraph copy, max-width 40ch hero / 50–58ch elsewhere. The hero's column is tighter than section body copy on purpose — a short, edited pitch, not a wide paragraph block.
 - **Label** (400–500, 10–13px, JetBrains Mono, letter-spacing 0.03–0.08em, usually uppercase): nav links, HUD readouts, tags/chips, marquee items, footer credit line.
+- **Hero Edge Word** (700, 48px, Oswald, letter-spacing `0.04em`, outline-only via `-webkit-text-stroke`, no fill): the ghosted vertical "RYDER" running along the hero's left edge (`.hero-edge-lockup`, wide desktop only). A second, deliberately quieter instance of the wordmark face — see the Hero Frame section below for why this doesn't break the One Wordmark Rule.
 
 ### Named Rules
-**The One Wordmark Rule.** Oswald renders exactly one element on the whole site (the hero "RYDER" lockup). Every other heading, including section titles at similar visual weight, stays in Unbounded. Do not introduce a second Oswald instance to "match" the hero elsewhere.
+**The One Wordmark Rule.** Oswald renders exactly one *heading* on the whole site (the hero "RYDER" lockup) — no other h1/h2-weight text, including section titles at similar visual size, is ever set in Oswald. The hero's own ghosted edge repeat (`.hero-edge-word`) is the one sanctioned exception: it isn't a second heading, it's the same wordmark echoed as a frame device around the real one (outline-only, no fill, confined to the hero's edge) — see Hero Frame. Do not introduce a third Oswald instance, or promote the edge echo into a readable heading, to "match" the hero elsewhere.
 
 ## Layout
 
@@ -167,7 +173,7 @@ The system is flat by default: nearly every surface (cards, panels, chips, nav) 
 
 Corners are small and utilitarian: `3px` (`--radius-sm`, the default for buttons, tags, nav pill, telemetry dot) and `6px` (`--radius-md`, the telemetry chip's slightly larger panel). Nothing uses a large or pill-shaped radius except the fully circular telemetry dot and orb vessels (`border-radius: 50%`), which are deliberately circular render objects, not a rounded-corner convention.
 
-Borders are hairline (1px, `--line` or `--line-strong`) throughout — never a heavier structural border. A recurring signature detail is the open corner-bracket ("viewfinder") mark: two 1.5px `--teal` L-shaped strokes at opposite corners of the about-card, and the same four-tick pattern in the custom cursor reticle. This is the system's one non-hairline decorative device, and it is confined to these two uses — it reads as a targeting/inspection reticle, not a generic corner ornament to scatter on new cards.
+Borders are hairline (1px, `--line` or `--line-strong`) throughout — never a heavier structural border. A recurring signature detail is the open corner-bracket ("viewfinder") mark: two 1.5px `--teal` L-shaped strokes at opposite corners of the about-card, the same four-tick pattern in the custom cursor reticle, and — bolder, 2px `--gold`, at all four true corners — the hero's frame (`.hero-frame-corner`, see Hero Character & Frame). This is the system's one non-hairline decorative device, and it is confined to these three uses — it reads as a targeting/inspection reticle (about-card, cursor) or a reveal-poster frame (hero), not a generic corner ornament to scatter on new cards.
 
 ## Components
 
@@ -196,6 +202,11 @@ Borders are hairline (1px, `--line` or `--line-strong`) throughout — never a h
 ### Render Stage (signature component)
 The hero's full-bleed Three.js canvas: a single `IcosahedronGeometry` with a custom noise-displaced, fresnel-mixed `ShaderMaterial` (teal→gold color stops over a near-black base), a soft additive dust-point field for depth, and a GSAP `quickTo`-driven parallax that tilts the mesh toward the cursor. Camera dollies and fog density are scroll-scrubbed (GSAP ScrollTrigger) against the same span `HeroPinned` uses to pin the section, so the render literally moves the viewer through the scene as they scroll. A `stage-hud` overlay (mono micro-labels, teal/gold) and a floating telemetry chip (live fps + elapsed time, teal pulsing status dot) read the scene like an engine debug view. On WebGL failure it falls back to a static radial-gradient glow rather than an empty box; on `prefers-reduced-motion` it renders one static frame with no telemetry.
 
+### Hero Character & Frame (signature component)
+The hero's centerpiece is a commissioned illustrated bust portrait (`public/ryder-portrait.png`/`.webp`, transparent background, pre-trimmed to its content bounds) standing right-of-center in front of the Render Stage's shader mesh — the mesh now reads as the character's own glowing energy/aura rather than a competing abstract graphic. It's framed by four gold corner brackets (`.hero-frame-corner`, 2px `--gold` L-strokes) at the hero's true corners, a ghosted vertical "RYDER" running the left edge (`.hero-edge-lockup`, outline-only Oswald, wide desktop only — narrower desktop widths lose the `.container` margin this needs to clear the masthead/pitch text underneath), and two soft diagonal teal/gold light streaks low in the frame (`.hero-streaks`, `mix-blend-mode: screen`, glowing across the character's lower half). Together these read as a game "agent reveal" card rather than a generic hero photo — a deliberate, user-directed escalation past the system's usual restraint (see Named Rules below for what that costs and where the line still holds). Hidden entirely below 900px width: the character's absolute positioning sizes itself against `.hero-pin`'s 100vh box, which mobile's plain stacked flow doesn't have, so naive scaling buried the copy under a full-resolution portrait — a right-sized non-overlapping mobile treatment is future work, not yet built.
+
+**Stacking note.** `.hero-stage` (the Three.js canvas's container) deliberately carries no `z-index` — giving it one would make it a stacking context that traps its children (the canvas, the telemetry chip) at that single layer regardless of their own `z-index`, which silently capped the telemetry chip below anything added later. The hero's real paint order, back to front, is: canvas/stage-hud (auto) → `.hero-scrim` (1) → `.hero-character` (1, after scrim in DOM) → `.telemetry-chip`/`.hero-edge-lockup`/`.hero-streaks` (2) → `.hero-frame-corner` (3) → `.hero-vignette` (4, so the scene's cut to black covers the character and every frame device, not just the shader). A new floating hero element should slot into this scale rather than pick an unrelated number.
+
 ### Project Vessel (signature component)
 The small per-project "bottle" or "orb" glyph (`ProjectVessel`) rendered in flat CSS/HTML rather than 3D: a bottle is a bordered rectangle with stacked color-layer divs; an orb is a circle with a radial gradient between two project-specific colors, optionally animated with a diagonal shimmer sweep or a soft coral pulse glow. Each project's vessel colors are drawn from the same teal/gold/coral system palette, making the filmstrip read as variations on one material rather than four unrelated illustrations.
 
@@ -218,6 +229,6 @@ Each pinned scene is also a distinct "location," not a repeated card on identica
 
 ### Don't:
 - **Don't** add decorative `backdrop-filter` glass panels beyond the two functional legibility scrims (nav, telemetry chip) — the brief explicitly rejects glass/gradient decoration as chrome.
-- **Don't** apply the corner-bracket ("viewfinder") device to arbitrary new cards; it's confined to the about-card and cursor reticle, not a general corner ornament.
+- **Don't** apply the corner-bracket ("viewfinder") device to arbitrary new cards; it's confined to the about-card, cursor reticle, and hero frame, not a general corner ornament.
 - **Don't** give ordinary content cards a rounded radius — square corners are the panel convention; small radius (3px/6px) is reserved for buttons, tags, and chips.
 - **Don't** introduce a second animation library for a job one of the four (GSAP/Three.js/Motion/anime.js) already owns.
