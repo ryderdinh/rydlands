@@ -50,3 +50,9 @@ coverage/
 
 # Misc
 *.pem
+
+# Impeccable (skill inspection artifacts; surfaces/config stay tracked)
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/build/
+.impeccable/config.local.json

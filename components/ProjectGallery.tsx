@@ -21,7 +21,9 @@ export interface Project {
 // Pins the section and drags the case-study strip left as the page scrolls
 // vertically — a "filmstrip" you scrub through rather than a stacked list.
 // On touch/reduced-motion the pin is skipped and the strip is left as a plain
-// swipeable horizontal scroller (see .projects-track CSS fallback).
+// swipeable horizontal scroller (see .projects-track CSS fallback), with a
+// scroll-linked per-card entrance below standing in for the pin/scrub so
+// touch still gets real scroll-tied motion, not a static stack.
 export default function ProjectGallery({ projects }: { projects: Project[] }) {
   const pinRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -31,9 +33,46 @@ export default function ProjectGallery({ projects }: { projects: Project[] }) {
     const track = trackRef.current;
     if (!pin || !track) return;
     if (prefersReducedMotion()) return;
-    if (window.matchMedia("(pointer: coarse), (hover: none)").matches) return;
+
+    const coarse = window.matchMedia("(pointer: coarse), (hover: none)").matches;
 
     const ctx = gsap.context(() => {
+      // The signature hand-off: the first slide arrives through the same
+      // scroll span where the hero's vignette cuts to black, so the cut
+      // resolves into a project rather than into an empty static heading.
+      const firstSlide = track.querySelector<HTMLElement>(".project-slide");
+      if (firstSlide) {
+        gsap.fromTo(
+          firstSlide,
+          { opacity: 0.15, scale: 0.94, filter: "blur(10px)" },
+          {
+            opacity: 1,
+            scale: 1,
+            filter: "blur(0px)",
+            ease: "none",
+            scrollTrigger: { trigger: pin, start: "top bottom", end: "top 55%", scrub: true },
+          }
+        );
+      }
+
+      if (coarse) {
+        gsap.utils.toArray<HTMLElement>(".project-slide").forEach((slide, i) => {
+          if (i === 0) return; // first slide already animates via the crossfade above
+          gsap.fromTo(
+            slide,
+            { opacity: 0, y: 24 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+              ease: "power2.out",
+              scrollTrigger: { trigger: slide, start: "top 88%", once: true },
+            }
+          );
+        });
+        return;
+      }
+
       const distance = () => Math.max(0, track.scrollWidth - pin.clientWidth);
       gsap.to(track, {
         x: () => -distance(),
@@ -55,9 +94,12 @@ export default function ProjectGallery({ projects }: { projects: Project[] }) {
   return (
     <section id="projects" className="projects-pin" ref={pinRef}>
       <div className="projects-viewport">
-        <div className="projects-head">
-          <p className="eyebrow">đã triển khai</p>
-          <h2>Case study kỹ thuật</h2>
+        <div className="projects-head section-head">
+          <h2>Case studies</h2>
+          <p className="section-sub">
+            Four shipped problems: a liquid shader, an event shimmer, an Android ANR
+            root-cause, and an iOS ad-mediation system.
+          </p>
         </div>
         <div className="projects-track" ref={trackRef}>
           {projects.map((p) => (
@@ -70,8 +112,8 @@ export default function ProjectGallery({ projects }: { projects: Project[] }) {
                   shimmer={p.vessel.shimmer}
                 />
               </div>
-              <span className="project-tag">{p.tag}</span>
               <h3>{p.title}</h3>
+              <span className="project-tag">{p.tag}</span>
               <p>{p.desc}</p>
               <div className="project-stack">
                 {p.stack.map((s) => (

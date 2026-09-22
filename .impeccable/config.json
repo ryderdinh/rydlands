@@ -1,0 +1,233 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font-size",
+        "value": "6px",
+        "createdAt": "2026-09-22T09:26:49.066Z",
+        "reason": "marquee-dot is a decorative separator glyph between ticker items, not text content — outside the 10-13px label range by design"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "13.5px",
+        "createdAt": "2026-09-22T09:26:49.103Z",
+        "reason": "btn label sits in the same mono/label family as the documented 10-13px range, 0.5px over the ceiling; pre-existing button size"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "10px",
+        "createdAt": "2026-09-22T09:26:49.140Z",
+        "reason": "stage-hud/telemetry-label/scroll-hud-label sit at the floor of the documented 10-13px label range"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "12px",
+        "createdAt": "2026-09-22T09:26:49.176Z",
+        "reason": "marquee-item/footer-inner sit within the documented 10-13px label range"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "17px",
+        "createdAt": "2026-09-22T09:26:49.212Z",
+        "reason": "nav logotype is its own one-off brand-mark size, distinct from the body/label/display ramp, pre-existing"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "11px",
+        "createdAt": "2026-09-22T09:26:49.247Z",
+        "reason": "scroll-cue/project-tag sit within the documented 10-13px label range"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "11.5px",
+        "createdAt": "2026-09-22T09:26:49.281Z",
+        "reason": "skill tag chip sits within the documented 10-13px label range"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "10.5px",
+        "createdAt": "2026-09-22T09:26:49.315Z",
+        "reason": "project stack chip sits within the documented 10-13px label range"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "15px",
+        "createdAt": "2026-09-22T09:26:49.350Z",
+        "reason": "about-section body paragraph sits at the floor of the documented 15-15.5px section-body range"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "14px",
+        "createdAt": "2026-09-22T09:26:49.386Z",
+        "reason": "project-slide description is a compact card-scoped body variant, smaller than the 15-15.5px section body by design"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "clamp(19px, 2.2vw, 24px)",
+        "createdAt": "2026-09-22T09:26:55.151Z",
+        "reason": "project-slide h3 is an intermediate card-title step, distinct from the display (28-44px) and hero-h1 (22-32px) steps"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "clamp(22px, 3vw, 30px)",
+        "createdAt": "2026-09-22T09:26:55.188Z",
+        "reason": "contact-panel h2 is a CTA-heading step distinct from the section h2 display step, pre-existing"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "clamp(20px, 2.4vw, 26px)",
+        "createdAt": "2026-09-22T09:26:55.222Z",
+        "reason": "about pull-quote emphasis step, deliberately introduced in the border-removal fix to carry emphasis via size instead of a colored rule"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#06201d",
+        "createdAt": "2026-09-22T09:27:00.705Z",
+        "reason": "already documented in DESIGN.md components.button-primary.textColor"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#6fe0d4",
+        "createdAt": "2026-09-22T09:27:00.742Z",
+        "reason": "already documented in DESIGN.md components.button-primary-hover.backgroundColor"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(79, 209, 197, 0.18)",
+        "createdAt": "2026-09-22T09:27:00.776Z",
+        "reason": "documented verbatim in DESIGN.md Shadow Vocabulary as the telemetry status-dot glow"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(255, 209, 102, 0.28)",
+        "createdAt": "2026-09-22T09:27:00.810Z",
+        "reason": "documented verbatim in DESIGN.md Chips/Tags as the project stack chip's gold-tinted border"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(16, 18, 20, 0.9)",
+        "createdAt": "2026-09-22T09:27:10.280Z",
+        "reason": "opacity tint of --bg (#101214) for the sticky nav's translucent background"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(16, 18, 20, 0.75)",
+        "createdAt": "2026-09-22T09:27:10.317Z",
+        "reason": "opacity tint of --bg used in the hero-scrim legibility gradient"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(16, 18, 20, 0.65)",
+        "createdAt": "2026-09-22T09:27:10.352Z",
+        "reason": "opacity tint of --bg used in the mobile hero-scrim gradient"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(11, 12, 14, 0.74)",
+        "createdAt": "2026-09-22T09:27:10.405Z",
+        "reason": "opacity tint of --bg-inset for the floating telemetry chip's legibility scrim, documented in DESIGN.md as the Legibility-Scrim Rule"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0, 0, 0, 0.6)",
+        "createdAt": "2026-09-22T09:27:10.437Z",
+        "reason": "neutral black ambient shadow on the telemetry chip, matches DESIGN.md's Telemetry lift shadow vocabulary entry"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(236, 236, 231, 0.06)",
+        "createdAt": "2026-09-22T09:27:10.469Z",
+        "reason": "opacity tint of --ink for the tilt-card diagonal glare sweep"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(236, 236, 231, 0.35)",
+        "createdAt": "2026-09-22T09:27:10.502Z",
+        "reason": "opacity tint of --ink for the shimmer-orb highlight sweep"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(255, 107, 107, 0)",
+        "createdAt": "2026-09-22T09:27:10.535Z",
+        "reason": "coral pulse-glow keyframe start (0 alpha) for the ANR case-study orb vessel"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(255, 107, 107, 0.4)",
+        "createdAt": "2026-09-22T09:27:10.569Z",
+        "reason": "coral pulse-glow keyframe peak, an animated variant of the documented Alert Coral accent"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(255, 255, 255, 0.025)",
+        "createdAt": "2026-09-22T09:27:10.603Z",
+        "reason": "near-invisible grid-paper texture lines in the hero backdrop, not a signal color"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(79, 209, 197, 0.16)",
+        "createdAt": "2026-09-22T09:27:16.380Z",
+        "reason": "opacity tint of --teal for the no-WebGL fallback radial glow"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(255, 209, 102, 0.1)",
+        "createdAt": "2026-09-22T09:27:16.419Z",
+        "reason": "opacity tint of --gold for the no-WebGL fallback radial glow"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#8fd8d0",
+        "files": [
+          "components/HeroScope.tsx"
+        ],
+        "createdAt": "2026-09-22T09:27:16.456Z",
+        "reason": "pre-existing lighter-teal tint for the Three.js ambient dust-particle field, distinguishing it from the primary --teal material color"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "15.5px",
+        "createdAt": "2026-09-22T09:31:10.203Z",
+        "reason": "already ignored (section-sub, within documented 15-15.5px body range) — re-affirming after a line-number shift from later edits"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "19px",
+        "createdAt": "2026-09-22T09:31:10.238Z",
+        "reason": "clamp() min endpoint for project-slide h3's card-title step (already covered as a whole string; the detector also matches clamp endpoints individually)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "24px",
+        "createdAt": "2026-09-22T09:31:10.273Z",
+        "reason": "clamp() max endpoint for project-slide h3's card-title step"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "20px",
+        "createdAt": "2026-09-22T09:31:10.308Z",
+        "reason": "clamp() min endpoint for the about pull-quote emphasis step"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "26px",
+        "createdAt": "2026-09-22T09:31:10.345Z",
+        "reason": "clamp() max endpoint for the about pull-quote emphasis step"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "22px",
+        "createdAt": "2026-09-22T09:31:10.455Z",
+        "reason": "clamp() min endpoint for the contact-panel CTA heading step"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "30px",
+        "createdAt": "2026-09-22T09:31:10.491Z",
+        "reason": "clamp() max endpoint for the contact-panel CTA heading step"
+      }
+    ]
+  }
+}

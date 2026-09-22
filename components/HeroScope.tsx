@@ -136,11 +136,14 @@ export default function HeroScope() {
     }
 
     // Real 3D depth, not a CSS scale trick: fly the camera through open space
-    // as the hero pin scrolls, tied to the same trigger HeroPinned uses.
+    // as the hero scrolls, tied to the same span HeroPinned uses to pin on
+    // desktop. Kept on touch too (unpinned there, so this plays out while the
+    // hero scrolls by) so mobile still gets real scroll-linked render motion
+    // rather than a static frame.
     const dolly = { z: 5.4, x: 1.4, fog: 0.09 };
     let scrollTrigger: ScrollTrigger | undefined;
     const heroEl = document.getElementById("hero");
-    if (!reduced && !coarse && heroEl) {
+    if (!reduced && heroEl) {
       scrollTrigger = ScrollTrigger.create({
         trigger: heroEl,
         start: "top top",
@@ -239,17 +242,26 @@ export default function HeroScope() {
     >
       {!webglFailed && <div className="hero-stage-canvas" ref={mountRef} />}
       <div className="stage-hud stage-hud-a">SHADER_PREVIEW · URP</div>
-      <div className="stage-hud stage-hud-b">
-        {webglFailed ? "NO WEBGL" : fps !== null ? `${fps} FPS` : "STATIC"}
-      </div>
       <div className="stage-hud stage-hud-c">
         noise(pos, t) · fresnel mix
         <br />
         vial: teal → gold
       </div>
-      <div className="stage-hud stage-hud-d">{webglFailed ? "rendered server-side" : `T+ ${elapsed}`}</div>
-      <div className="stage-hud stage-hud-e">MESH · ICOSPHERE_48</div>
-      <div className="stage-hud stage-hud-f">MAT · URP/LIT</div>
+
+      {/* Floating live-render chip — the oryzo.ai "▶ reel" chip position, but
+          honest: no video exists yet, so this shows the shader's own real
+          telemetry instead of a fabricated demo clip. */}
+      <div className="telemetry-chip" role="status">
+        <span className={`telemetry-dot${webglFailed ? " is-idle" : ""}`} aria-hidden="true" />
+        <div className="telemetry-copy">
+          <span className="telemetry-label">
+            {webglFailed ? "STATIC PREVIEW" : "LIVE RENDER"}
+          </span>
+          <span className="telemetry-value">
+            {webglFailed ? "no webgl" : fps !== null ? `${fps} fps · T+${elapsed}` : "warming up…"}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

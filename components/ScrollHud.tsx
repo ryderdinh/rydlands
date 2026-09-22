@@ -9,7 +9,7 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-const SECTION_IDS = ["hero", "skills", "projects", "about", "contact"];
+const SECTION_IDS = ["hero", "projects", "skills", "about", "contact"];
 
 // A fixed scroll-position readout — reads like a render/profiler timeline
 // scrubber rather than a generic "back to top" progress bar.
@@ -22,14 +22,6 @@ export default function ScrollHud() {
     if (prefersReducedMotion()) return;
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
-    // Section elements double as pin targets (hero, projects), so their own
-    // ScrollTrigger boundaries are unreliable once pinned/fixed — read live
-    // getBoundingClientRect() on every update instead of caching a trigger
-    // per section.
-    const sectionEls = SECTION_IDS.map((id) => document.getElementById(id)).filter(
-      (el): el is HTMLElement => !!el
-    );
-
     const trigger = ScrollTrigger.create({
       trigger: document.documentElement,
       start: "top top",
@@ -39,17 +31,33 @@ export default function ScrollHud() {
         if (fillRef.current) {
           fillRef.current.style.transform = `scaleY(${self.progress})`;
         }
-
-        const mid = window.innerHeight * 0.5;
-        let active = sectionEls[0]?.id ?? "hero";
-        for (const el of sectionEls) {
-          if (el.getBoundingClientRect().top <= mid) active = el.id;
-        }
-        setSection(active);
       },
     });
 
-    return () => trigger.kill();
+    // Section elements double as pin targets (hero, projects), which makes a
+    // manual getBoundingClientRect-in-onUpdate reading unreliable while a pin
+    // is engaged — an IntersectionObserver (same approach as SiteNav's active
+    // link) tracks which section is centered instead.
+    const sectionEls = SECTION_IDS.map((id) => document.getElementById(id)).filter(
+      (el): el is HTMLElement => !!el
+    );
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setSection(entry.target.id);
+            break;
+          }
+        }
+      },
+      { rootMargin: "-45% 0px -50% 0px", threshold: 0 }
+    );
+    sectionEls.forEach((el) => observer.observe(el));
+
+    return () => {
+      trigger.kill();
+      observer.disconnect();
+    };
   }, []);
 
   return (

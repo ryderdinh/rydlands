@@ -1,11 +1,13 @@
 import HeroIntro from "@/components/HeroIntro";
 import HeroScope from "@/components/HeroScope";
 import HeroPinned from "@/components/HeroPinned";
+import PinnedScene from "@/components/PinnedScene";
 import ScrollReveal from "@/components/ScrollReveal";
 import SplitReveal from "@/components/SplitReveal";
 import Marquee from "@/components/Marquee";
 import MagneticButton from "@/components/MagneticButton";
-import TiltCard from "@/components/TiltCard";
+import SiteNav from "@/components/SiteNav";
+import SkillGrid from "@/components/SkillGrid";
 import ProjectGallery, { type Project } from "@/components/ProjectGallery";
 
 const marqueeItems = [
@@ -42,9 +44,9 @@ const skillGroups = [
 
 const projects: Project[] = [
   {
-    tag: "Puzzle Game · Shader",
+    tag: "Puzzle game · Shader",
     title: "Water Sort Puzzle Color Master",
-    desc: "Shader chất lỏng nhiều lớp cho chai nước (URP/HLSL): mặt cong meniscus, nghiêng chai theo góc thực (tan), preview WebGL đồng bộ với bản Unity.",
+    desc: "A multi-layer liquid shader written in URP/HLSL: meniscus curvature at the surface, bottle tilt driven by the real tangent angle, and a WebGL preview kept in sync with the Unity build.",
     stack: ["HLSL", "ShaderLab", "URP", "WebGL"],
     vessel: {
       type: "bottle",
@@ -56,9 +58,9 @@ const projects: Project[] = [
     },
   },
   {
-    tag: "Live Event · Animation",
+    tag: "Live event · Animation",
     title: "WinStreakEvent1",
-    desc: "Shader shine/shimmer cho URP, cùng chuỗi animation scale + đếm số tuần tự dùng UniTask và CancellationTokenSource, đồng bộ âm thanh qua AudioController.",
+    desc: "A shine/shimmer URP shader paired with a sequential scale-and-count animation built on UniTask and CancellationTokenSource, synced to AudioController for the win-streak payoff.",
     stack: ["UniTask", "URP Shader", "AudioController"],
     vessel: {
       type: "orb",
@@ -69,7 +71,7 @@ const projects: Project[] = [
   {
     tag: "Performance · Diagnostics",
     title: "Android ANR Root-Cause",
-    desc: "Phân tích log ANR từ Google Play Console, xác định nguyên nhân do GPU fence stall khi WebView ad creative (Pangle/ByteDance) chặn RenderThread của Unity.",
+    desc: "Traced Google Play Console ANR logs back to a GPU fence stall caused by a WebView ad creative (Pangle/ByteDance) blocking Unity's RenderThread.",
     stack: ["Android", "Profiling", "AppLovin MAX"],
     vessel: {
       type: "orb",
@@ -78,9 +80,9 @@ const projects: Project[] = [
     },
   },
   {
-    tag: "Monetization System",
+    tag: "Monetization system",
     title: "Bid Floor Interstitial (iOS)",
-    desc: "Hệ thống quảng cáo interstitial nhiều tầng bid floor bằng Objective-C, mở rộng từ 2 lên 9 đơn vị quảng cáo, cấu hình linh hoạt qua Info.plist.",
+    desc: "A multi-tier bid-floor interstitial ad system built in Objective-C, expanded from 2 to 9 ad units and configured through Info.plist.",
     stack: ["Objective-C", "AppLovin MAX", "iOS"],
     vessel: {
       type: "bottle",
@@ -92,45 +94,31 @@ const projects: Project[] = [
 export default function Home() {
   return (
     <>
-      <nav className="nav">
-        <div className="container nav-inner">
-          <a href="#top" className="logo">
-            <span className="logo-dot" />
-            RYDER
-          </a>
-          <ul className="nav-links">
-            <li><a href="#skills">Kỹ năng</a></li>
-            <li><a href="#projects">Dự án</a></li>
-            <li><a href="#about">Giới thiệu</a></li>
-            <li><a href="#contact">Liên hệ</a></li>
-          </ul>
-        </div>
-      </nav>
-
+      <SiteNav />
       <Marquee items={marqueeItems} />
 
       <main id="top">
         <HeroPinned
           copy={
             <HeroIntro>
+              <div className="hero-wordmark" aria-hidden="true">RYDER</div>
               <div className="hero-copy">
-                <p className="eyebrow">unity game developer · mobile</p>
-                <h1>
-                  Gameplay chắc tay, shader tự viết, và không né phần khó của mobile game.
-                </h1>
+                <SplitReveal as="h1">
+                  Gameplay that ships. Shaders I write myself.
+                </SplitReveal>
                 <p>
-                  Mình là Ryder — Unity developer tập trung vào mobile: gameplay logic bằng C#,
-                  shader URP/HLSL cho hiệu ứng đặc thù (chất lỏng nhiều lớp, shimmer sự kiện), và
-                  phần ít người nhận làm — tích hợp quảng cáo native (AppLovin MAX) trên Android/iOS,
-                  debug hiệu năng tới tận RenderThread. Đang nhận dự án freelance ngắn hạn, và mở cho
-                  cơ hội full-time.
+                  Unity developer focused on mobile: C# gameplay systems, hand-written
+                  URP/HLSL shaders for signature effects — multi-layer liquid materials,
+                  event shimmer — and the parts most portfolios skip: native
+                  ad-mediation integration on Android/iOS, and root-causing hard
+                  performance bugs. Open to freelance engagements and full-time roles.
                 </p>
                 <div className="cta-row">
                   <MagneticButton href="#projects" className="btn btn-primary">
-                    Xem case study
+                    View case studies
                   </MagneticButton>
                   <MagneticButton href="#contact" className="btn btn-ghost">
-                    Liên hệ hợp tác
+                    Get in touch
                   </MagneticButton>
                 </div>
               </div>
@@ -139,63 +127,56 @@ export default function Home() {
           scope={<HeroScope />}
         />
 
-        <section id="skills" className="container section">
-          <div className="section-head">
-            <p className="eyebrow">bộ công cụ</p>
-            <SplitReveal as="h2">Công cụ đang dùng hằng ngày</SplitReveal>
-          </div>
-          <ScrollReveal className="skill-groups">
-            {skillGroups.map((g) => (
-              <TiltCard as="div" className="skill-card" key={g.title} maxTilt={6} glare>
-                <span className="skill-tick" style={{ "--skill-c": g.tick } as React.CSSProperties} />
-                <h3>{g.title}</h3>
-                <div className="tag-row">
-                  {g.tags.map((t) => (
-                    <span className="tag" key={t}>{t}</span>
-                  ))}
-                </div>
-              </TiltCard>
-            ))}
-          </ScrollReveal>
-        </section>
-
         <ProjectGallery projects={projects} />
 
-        <section id="about" className="container section about-section">
-          <div className="section-head">
-            <p className="eyebrow">giới thiệu</p>
-            <SplitReveal as="h2">Về mình</SplitReveal>
-          </div>
-          <ScrollReveal className="about" stagger={0.15}>
-            <div className="about-card">
-              <div><span>Vai trò</span><span>Unity Developer</span></div>
-              <div><span>Mảng chính</span><span>Mobile games</span></div>
-              <div><span>Thế mạnh</span><span>Gameplay + Shader</span></div>
-              <div><span>Domain</span><span>rydlands.com</span></div>
+        <PinnedScene id="skills" className="container section">
+          <ScrollReveal className="section-head" pinOwned>
+            <h2>Tools I reach for daily</h2>
+            <p className="section-sub">
+              The stack behind the case studies above — gameplay, rendering, tooling,
+              and the native/monetization layer.
+            </p>
+          </ScrollReveal>
+          <SkillGrid groups={skillGroups} pinOwned />
+        </PinnedScene>
+
+        <PinnedScene id="about" className="container section about-section">
+          <ScrollReveal focusPull stagger={0.18} pinOwned>
+            <div className="section-head">
+              <h2>About</h2>
             </div>
-            <div>
-              <p className="pull">
-                Ở Unity URP, mình đi từ gameplay logic bằng C# đến tự viết shader
-                ShaderLab/HLSL cho hiệu ứng riêng — chất lỏng nhiều lớp, shimmer sự kiện.
-              </p>
-              <p>
-                Ngoài phần gameplay, mình trực tiếp làm luôn <strong>tích hợp quảng cáo
-                native</strong> (AppLovin MAX mediation) trên cả Android và iOS, và từng debug
-                một ca ANR khó do WebView ad creative chặn RenderThread của Unity.
-              </p>
-              <p>
-                Cách làm việc: code gọn, comment tiếng Anh rõ ràng, ưu tiên giải pháp
-                production-ready hơn là demo minh hoạ dài dòng.
-              </p>
+            <div className="about">
+              <div className="about-card">
+                <div><span>Role</span><span>Unity Developer</span></div>
+                <div><span>Focus</span><span>Mobile games</span></div>
+                <div><span>Core strength</span><span>Gameplay + shaders</span></div>
+                <div><span>Domain</span><span>rydlands.com</span></div>
+              </div>
+              <div>
+                <p className="pull">
+                  In Unity URP, I go from gameplay logic in C# to hand-written
+                  ShaderLab/HLSL for effects nobody else on the team can build —
+                  multi-layer liquids, event shimmer.
+                </p>
+                <p>
+                  Beyond gameplay, I own <strong>native ad-mediation integration</strong>{" "}
+                  (AppLovin MAX) on both Android and iOS, and once root-caused a hard
+                  ANR down to a WebView ad creative blocking Unity's RenderThread.
+                </p>
+                <p>
+                  How I work: lean code, clear English comments, production-ready
+                  solutions over long illustrative demos.
+                </p>
+              </div>
             </div>
           </ScrollReveal>
-        </section>
+        </PinnedScene>
 
-        <section id="contact" className="container section">
-          <ScrollReveal>
+        <PinnedScene id="contact" className="container section">
+          <ScrollReveal focusPull pinOwned>
             <div className="contact-panel">
-              <h2>Có dự án cần một Unity dev chỉn chu?</h2>
-              <p>Trả lời trong vòng 24h. Nhận cả dự án freelance ngắn hạn và hợp tác dài hạn.</p>
+              <h2>Got a project that needs a careful Unity dev?</h2>
+              <p>I reply within 24 hours. Open to short-term freelance work and longer full-time roles.</p>
               <div className="contact-links">
                 <MagneticButton href="mailto:hello@rydlands.com" className="btn btn-primary">
                   hello@rydlands.com
@@ -205,13 +186,13 @@ export default function Home() {
               </div>
             </div>
           </ScrollReveal>
-        </section>
+        </PinnedScene>
       </main>
 
       <footer className="footer">
         <div className="container footer-inner">
           <span>© {new Date().getFullYear()} rydlands.com</span>
-          <span>built with Next.js · Three.js · GSAP</span>
+          <span>built with Next.js · Three.js · GSAP · Motion · anime.js</span>
         </div>
       </footer>
     </>

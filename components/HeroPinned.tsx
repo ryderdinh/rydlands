@@ -18,11 +18,13 @@ export default function HeroPinned({ copy, scope }: { copy: ReactNode; scope: Re
   const wrapRef = useRef<HTMLDivElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   const vignetteRef = useRef<HTMLDivElement>(null);
+  const cueRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const wrap = wrapRef.current;
     const copyEl = copyRef.current;
     const vignetteEl = vignetteRef.current;
+    const cueEl = cueRef.current;
     if (!wrap || !copyEl || !vignetteEl) return;
     if (prefersReducedMotion()) return;
     if (window.matchMedia("(pointer: coarse), (hover: none)").matches) return;
@@ -37,11 +39,12 @@ export default function HeroPinned({ copy, scope }: { copy: ReactNode; scope: Re
           pin: true,
         },
       });
-      tl.to(copyEl, { autoAlpha: 0, y: -50, ease: "none", duration: 0.4 }, 0).to(
-        vignetteEl,
-        { autoAlpha: 1, ease: "none", duration: 0.28 },
-        0.72
-      );
+      tl.to(copyEl, { autoAlpha: 0, y: -50, ease: "none", duration: 0.4 }, 0)
+        .to(cueEl, { autoAlpha: 0, ease: "none", duration: 0.15 }, 0)
+        // The pin's own scroll-out cross-dissolves the render surface to black —
+        // this is the "cut" the next (pinned) section fades up from, rather than
+        // an ordinary section boundary.
+        .to(vignetteEl, { autoAlpha: 1, ease: "none", duration: 0.28 }, 0.72);
     }, wrap);
 
     return () => ctx.revert();
@@ -56,6 +59,10 @@ export default function HeroPinned({ copy, scope }: { copy: ReactNode; scope: Re
         <div className="hero-copy-wrap" ref={copyRef}>
           {copy}
         </div>
+      </div>
+      <div className="scroll-cue" ref={cueRef}>
+        scroll to render
+        <span className="scroll-cue-glyph" aria-hidden="true">↓</span>
       </div>
     </div>
   );

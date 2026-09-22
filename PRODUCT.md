@@ -24,14 +24,14 @@ Deep, specific Unity URP/HLSL shader work (multi-layer liquid shaders, shimmer/e
 
 ## Operating Context
 
-Single-page Next.js site (`app/page.tsx`) with sections: nav, hero, skills marquee, skills grid, project case studies (4), about, contact, footer. Built with Next.js, Three.js, and GSAP for motion/interaction (custom cursor, magnetic buttons, tilt cards, scroll reveal, an ocean/3D scene). Copy is currently in Vietnamese.
+Single-page Next.js site (`app/page.tsx`) with sections: nav, skills marquee, hero (pinned live Three.js shader stage), project case studies (4, pinned horizontal filmstrip), skills grid, about, contact, footer. Built with Next.js, Three.js, and GSAP (custom cursor, magnetic buttons, tilt cards, pinned scroll-scrubbed hero and filmstrip) plus Motion (nav active-link layout animation) and anime.js (skills-grid entrance) for interaction/motion. Copy is in English.
 
 ## Capabilities and Constraints
 
-- Stack is fixed: Next.js (App Router), React, TypeScript, GSAP, Three.js — do not introduce a different framework.
+- Stack is fixed: Next.js (App Router), React, TypeScript, GSAP, Three.js, Motion, anime.js — do not introduce a different animation/rendering framework without discussing it first.
 - Brand name "RYDER" and domain "rydlands.com" are real and must be preserved exactly as-is through the redesign.
 - GitHub/LinkedIn contact links are currently placeholders (`#`); real URLs are not yet available — keep them as placeholder links, not fabricated ones.
-- This redesign replaces both the visual system and the copy (see Product Principles) — it is not a narrow visual refinement preserving current text verbatim.
+- No demo video/reel exists; the hero's floating chip shows real live shader telemetry (fps/elapsed) instead of a fabricated video, echoing the reference's chip position without inventing footage.
 
 ## Evidence on Hand
 
