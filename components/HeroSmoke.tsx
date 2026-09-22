@@ -3,11 +3,11 @@
 import { useEffect, useRef } from "react";
 import { prefersReducedMotion } from "@/lib/motion";
 
-// Dense, one-directional light ribbons sweeping the hero's lower-right,
-// echoing the reference's trails — not isotropic drifting noise. The
-// fragment shader works in a rotated "flow" frame (one fixed diagonal) and
-// renders parallel lane-shaped ribbons along it, with a hot near-white core
-// where they're brightest. Plain WebGL (no Three.js): this is one
+// Thick, one-directional light ribbons sweeping the hero's lower-right,
+// echoing the reference's trails. Explicit gaussian-band ribbons (5, each
+// with its own bent centerline and color mix) in a rotated "flow" frame —
+// not an emergent noise pattern, which kept reading as thin sparse lines no
+// matter how it was tuned. Plain WebGL (no Three.js): this is one
 // fullscreen-triangle fragment shader, not a scene — the scene-graph/camera
 // machinery Three.js exists for would be dead weight for a single flat
 // pass. Desktop/fine-pointer/no-reduced-motion only, layered above the
@@ -63,45 +63,60 @@ void main() {
   // Rotate into a "flow" frame: fuv.x runs along the streak direction,
   // fuv.y across it — the reference's trails sweep one consistent diagonal,
   // not noise drifting isotropically.
-  float angle = radians(-13.0);
+  float angle = radians(-16.0);
   mat2 rot = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
   vec2 fuv = rot * centered;
 
-  float speed = 0.22;
-  float along = fuv.x * 1.15 + uTime * speed;
-  float across = fuv.y * 8.5;
+  float t = uTime * 0.09;
 
-  // Lanes wobble along their length instead of running dead straight.
-  float wobble = fbm(vec2(along * 0.35, 7.0)) - 0.5;
-  across += wobble * 1.4;
+  // A handful of explicit thick ribbons rather than an emergent noise
+  // pattern — noise-derived bands kept reading as thin, sparse lines no
+  // matter how the thresholds were tuned. Each ribbon is a soft gaussian
+  // band around a centerline that bends slowly along its length (not a
+  // rigid straight diagonal) and drifts sideways over time.
+  vec3 accumColor = vec3(0.0);
+  float accumAlpha = 0.0;
 
-  // Distance from the nearest lane centerline (lanes spaced 1 unit apart).
-  float laneDist = abs(fract(across) - 0.5) * 2.0;
-  float ribbon = pow(clamp(1.0 - laneDist, 0.0, 1.0), 2.0);
+  for (int i = 0; i < 5; i++) {
+    float fi = float(i);
+    // Spread across the frame's actual visible vertical range (roughly
+    // -0.5..0.5 in this rotated space) — the previous spacing put 2 of 5
+    // ribbons' centerlines entirely off-frame, which is why only one was
+    // ever visible regardless of width/color tuning. Biased low: the
+    // reference's trails sit low in the frame, not sweeping up across the
+    // character's chest — the canvas box itself was also shortened to
+    // match instead of relying on falloff alone to keep them down there.
+    float baseOffset = -0.7 + fi * 0.22;
+    float driftSpeed = 0.35 + fi * 0.09;
+    float bend = fbm(vec2(fuv.x * 0.55 + fi * 11.0, t * driftSpeed)) - 0.5;
+    float centerline = baseOffset + bend * 0.55 + sin(fuv.x * 1.1 + fi * 2.3 + t * 1.1) * 0.1;
+    float dist = fuv.y - centerline;
 
-  // Not every lane is lit the whole way — large-scale fbm turns stretches
-  // of each one on and off along its length, so it reads as flowing light
-  // catching a surface rather than a static striped pattern. Loose
-  // threshold: several lanes lit at once for a denser sheet of streaks
-  // instead of one isolated line.
-  float strength = fbm(vec2(along * 0.22, floor(across) * 1.7));
-  ribbon *= smoothstep(0.12, 0.42, strength);
+    // Narrow enough that neighboring ribbons stay visually distinct
+    // (dark shows between them) instead of merging into one wash.
+    float width = 0.075 + 0.02 * sin(fi * 3.1 + t * 0.4);
+    float band = exp(-(dist * dist) / (2.0 * width * width));
+    float core = exp(-(dist * dist) / (2.0 * (width * 0.22) * (width * 0.22)));
+
+    vec3 ribbonTint = mix(uColorA, uColorB, fract(fi * 0.37 + 0.2));
+    // A thin hot highlight, not a wash toward white — the character's own
+    // jacket is already near-white, so a wide white core disappears into it.
+    vec3 ribbonColor = mix(ribbonTint, vec3(1.0), core * 0.45);
+
+    accumColor += ribbonColor * band;
+    accumAlpha = 1.0 - (1.0 - accumAlpha) * (1.0 - band);
+  }
 
   // Region falloff: concentrated through the lower-right, fading out
   // toward the top and left rather than filling the whole frame.
-  float regionFall = smoothstep(0.95, -0.35, fuv.y - fuv.x * 0.25);
-  // Pushed further right than the region falloff alone would put it — the
+  float regionFall = smoothstep(0.85, -0.55, fuv.y * 0.6 - fuv.x * 0.3);
+  // Pushed right of where the region falloff alone would put it — the
   // hero's copy column lives in this frame's left third, so the ribbons
   // clear it instead of washing out the pitch text.
-  float edgeFall = smoothstep(0.24, 0.56, vUv.x) * smoothstep(1.05, 0.7, vUv.x);
+  float edgeFall = smoothstep(0.2, 0.5, vUv.x) * smoothstep(1.05, 0.75, vUv.x);
 
-  float density = clamp(ribbon * regionFall, 0.0, 1.0);
-  vec3 tint = mix(uColorA, uColorB, clamp(strength * 1.3, 0.0, 1.0));
-  // Hot core: where a ribbon is at its brightest, blow it toward white
-  // rather than staying saturated, like the reference's near-white trails.
-  vec3 color = mix(tint, vec3(1.0), pow(density, 3.0) * 0.6);
-
-  float alpha = density * 1.0 * edgeFall;
+  vec3 color = clamp(accumColor, 0.0, 1.6);
+  float alpha = accumAlpha * regionFall * edgeFall;
 
   gl_FragColor = vec4(color, alpha);
 }
