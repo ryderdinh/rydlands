@@ -4,17 +4,17 @@ import { useEffect, useRef, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { prefersReducedMotion } from "@/lib/motion";
+import HeroSmoke from "@/components/HeroSmoke";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-// Pins the hero for an extra scroll span: copy fades/lifts out first while the
-// full-bleed 3D backdrop (see HeroScope) flies the camera through open space,
-// then a vignette wipes to black to resolve into the next section — a cut,
-// not a normal scroll-off. Desktop-only (see .hero-pin CSS): on touch/reduced-
+// Pins the hero for an extra scroll span: copy fades/lifts out first, then a
+// vignette wipes to black to resolve into the next section — a cut, not a
+// normal scroll-off. Desktop-only (see .hero-pin CSS): on touch/reduced-
 // motion the section is skipped here and falls back to plain auto-height flow.
-export default function HeroPinned({ copy, scope }: { copy: ReactNode; scope: ReactNode }) {
+export default function HeroPinned({ copy }: { copy: ReactNode }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   const vignetteRef = useRef<HTMLDivElement>(null);
@@ -30,16 +30,25 @@ export default function HeroPinned({ copy, scope }: { copy: ReactNode; scope: Re
     if (window.matchMedia("(pointer: coarse), (hover: none)").matches) return;
 
     const ctx = gsap.context(() => {
+      gsap.set(copyEl, { transformPerspective: 900, transformOrigin: "0% 100%" });
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: wrap,
           start: "top top",
           end: "+=130%",
-          scrub: 1,
+          scrub: 0.4,
           pin: true,
         },
       });
-      tl.to(copyEl, { autoAlpha: 0, y: -50, ease: "none", duration: 0.4 }, 0)
+      // The copy doesn't just fade up — it tilts and pulls back like the
+      // camera lifting off it, the same flight grammar PinnedScene uses for
+      // every later scene boundary.
+      tl.to(
+        copyEl,
+        { autoAlpha: 0, y: -60, z: 80, rotateX: -10, filter: "blur(6px)", ease: "power2.in", duration: 0.4 },
+        0
+      )
         .to(cueEl, { autoAlpha: 0, ease: "none", duration: 0.15 }, 0)
         // The pin's own scroll-out cross-dissolves the render surface to black —
         // this is the "cut" the next (pinned) section fades up from, rather than
@@ -52,16 +61,47 @@ export default function HeroPinned({ copy, scope }: { copy: ReactNode; scope: Re
 
   return (
     <div className="hero-pin" id="hero" ref={wrapRef}>
-      {scope}
+      <div className="hero-ghost-wall" aria-hidden="true">
+        {Array.from({ length: 6 }).map((_, row) => (
+          <div className="hero-ghost-row" key={row}>
+            {"RYDER ".repeat(8)}
+          </div>
+        ))}
+      </div>
       <div className="hero-scrim" aria-hidden="true" />
+      <div className="hero-character" aria-hidden="true">
+        <picture>
+          <source srcSet="/ryder-portrait.webp" type="image/webp" />
+          <img src="/ryder-portrait.png" alt="" />
+        </picture>
+      </div>
       <div className="hero-vignette" ref={vignetteRef} aria-hidden="true" />
+      <div className="hero-streaks" aria-hidden="true">
+        <span className="hero-streak hero-streak-a" />
+        <span className="hero-streak hero-streak-b" />
+      </div>
+      <HeroSmoke />
+      <div className="hero-edge-lockup hero-edge-lockup--left" aria-hidden="true">
+        <span className="hero-edge-tag">Portfolio reveal</span>
+        <span className="hero-edge-word">Ryder</span>
+      </div>
+      <div className="hero-edge-lockup hero-edge-lockup--right" aria-hidden="true">
+        <span className="hero-edge-word">Ryder</span>
+        <span className="hero-edge-tag">Unity developer</span>
+      </div>
+      <div className="hero-frame" aria-hidden="true">
+        <span className="hero-frame-corner tl" />
+        <span className="hero-frame-corner tr" />
+        <span className="hero-frame-corner bl" />
+        <span className="hero-frame-corner br" />
+      </div>
       <div className="container hero">
         <div className="hero-copy-wrap" ref={copyRef}>
           {copy}
         </div>
       </div>
       <div className="scroll-cue" ref={cueRef}>
-        scroll to render
+        scroll to explore
         <span className="scroll-cue-glyph" aria-hidden="true">↓</span>
       </div>
     </div>

@@ -2,6 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { prefersReducedMotion } from "@/lib/motion";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const LINKS = [
   { id: "projects", label: "Projects" },
@@ -17,6 +24,7 @@ const LINKS = [
 export default function SiteNav() {
   const [active, setActive] = useState<string | null>(null);
   const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
+  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const sections = LINKS.map((l) => document.getElementById(l.id)).filter(
@@ -39,8 +47,39 @@ export default function SiteNav() {
     return () => observer.disconnect();
   }, []);
 
+  // The chrome earns its place: the very first frame is the render stage
+  // alone, nav-less like a title card, and the nav fades in the instant the
+  // visitor actually starts scrolling rather than sitting there from load.
+  // Desktop/no-reduced-motion only — touch and reduced-motion keep the nav
+  // visible immediately, since there's no scroll-linked precision to hide it.
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    if (prefersReducedMotion()) return;
+    if (window.matchMedia("(pointer: coarse), (hover: none)").matches) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        nav,
+        { autoAlpha: 0 },
+        {
+          autoAlpha: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: document.documentElement,
+            start: "top top",
+            end: "+=160",
+            scrub: true,
+          },
+        }
+      );
+    });
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <nav className="nav">
+    <nav className="nav" ref={navRef}>
       <div className="container nav-inner">
         <a href="#top" className="logo">
           <span className="logo-dot" />

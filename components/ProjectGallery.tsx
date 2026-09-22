@@ -40,17 +40,21 @@ export default function ProjectGallery({ projects }: { projects: Project[] }) {
       // The signature hand-off: the first slide arrives through the same
       // scroll span where the hero's vignette cuts to black, so the cut
       // resolves into a project rather than into an empty static heading.
+      // Same tilted-arrival grammar PinnedScene uses everywhere else.
       const firstSlide = track.querySelector<HTMLElement>(".project-slide");
       if (firstSlide) {
+        gsap.set(firstSlide, { transformPerspective: 1000, transformOrigin: "50% 100%" });
         gsap.fromTo(
           firstSlide,
-          { opacity: 0.15, scale: 0.94, filter: "blur(10px)" },
+          { opacity: 0.1, scale: 0.92, rotateX: 10, z: -160, filter: "blur(12px)" },
           {
             opacity: 1,
             scale: 1,
+            rotateX: 0,
+            z: 0,
             filter: "blur(0px)",
-            ease: "none",
-            scrollTrigger: { trigger: pin, start: "top bottom", end: "top 55%", scrub: true },
+            ease: "power2.out",
+            scrollTrigger: { trigger: pin, start: "top bottom", end: "top 55%", scrub: 0.4 },
           }
         );
       }
@@ -73,6 +77,22 @@ export default function ProjectGallery({ projects }: { projects: Project[] }) {
         return;
       }
 
+      const slides = gsap.utils.toArray<HTMLElement>(".project-slide", track);
+      slides.forEach((slide) => gsap.set(slide, { transformPerspective: 1200 }));
+
+      // As the camera pans across the row, each card banks slightly toward
+      // or away from center — like passing exhibits arranged on an arc,
+      // not a flat strip sliding under a static viewport.
+      const updateTilt = () => {
+        const pinRect = pin.getBoundingClientRect();
+        const center = pinRect.left + pinRect.width / 2;
+        slides.forEach((slide) => {
+          const rect = slide.getBoundingClientRect();
+          const delta = (rect.left + rect.width / 2 - center) / pinRect.width;
+          gsap.set(slide, { rotateY: gsap.utils.clamp(-12, 12, delta * 22) });
+        });
+      };
+
       const distance = () => Math.max(0, track.scrollWidth - pin.clientWidth);
       gsap.to(track, {
         x: () => -distance(),
@@ -84,6 +104,7 @@ export default function ProjectGallery({ projects }: { projects: Project[] }) {
           pin: true,
           scrub: 1,
           invalidateOnRefresh: true,
+          onUpdate: updateTilt,
         },
       });
     }, pin);

@@ -4,7 +4,13 @@ import { useEffect, useRef, ReactNode } from "react";
 import gsap from "gsap";
 import { prefersReducedMotion } from "@/lib/motion";
 
-export default function HeroIntro({ children }: { children: ReactNode }) {
+export default function HeroIntro({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,5 +34,9 @@ export default function HeroIntro({ children }: { children: ReactNode }) {
     return () => ctx.revert();
   }, []);
 
-  return <div ref={ref}>{children}</div>;
+  return (
+    <div ref={ref} className={className}>
+      {children}
+    </div>
+  );
 }

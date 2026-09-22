@@ -1,5 +1,4 @@
 import HeroIntro from "@/components/HeroIntro";
-import HeroScope from "@/components/HeroScope";
 import HeroPinned from "@/components/HeroPinned";
 import PinnedScene from "@/components/PinnedScene";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -100,36 +99,37 @@ export default function Home() {
       <main id="top">
         <HeroPinned
           copy={
-            <HeroIntro>
-              <div className="hero-wordmark" aria-hidden="true">RYDER</div>
+            <HeroIntro className="hero-copy-inner">
+              <div className="hero-masthead">
+                <span className="hero-eyebrow">Unity developer · gameplay, shaders, native performance</span>
+                <div className="hero-wordmark" aria-hidden="true">RYDER</div>
+              </div>
               <div className="hero-copy">
                 <SplitReveal as="h1">
                   Gameplay that ships. Shaders I write myself.
                 </SplitReveal>
                 <p>
-                  Unity developer focused on mobile: C# gameplay systems, hand-written
-                  URP/HLSL shaders for signature effects — multi-layer liquid materials,
-                  event shimmer — and the parts most portfolios skip: native
-                  ad-mediation integration on Android/iOS, and root-causing hard
-                  performance bugs. Open to freelance engagements and full-time roles.
+                  Unity developer for mobile games — hand-written URP/HLSL shaders,
+                  C# gameplay systems, and the native/performance work most
+                  portfolios skip.
                 </p>
                 <div className="cta-row">
                   <MagneticButton href="#projects" className="btn btn-primary">
                     View case studies
                   </MagneticButton>
-                  <MagneticButton href="#contact" className="btn btn-ghost">
+                  <MagneticButton href="#contact" className="btn btn-link">
                     Get in touch
+                    <span className="btn-link-arrow" aria-hidden="true">→</span>
                   </MagneticButton>
                 </div>
               </div>
             </HeroIntro>
           }
-          scope={<HeroScope />}
         />
 
         <ProjectGallery projects={projects} />
 
-        <PinnedScene id="skills" className="container section">
+        <PinnedScene id="skills" className="section" accent="teal">
           <ScrollReveal className="section-head" pinOwned>
             <h2>Tools I reach for daily</h2>
             <p className="section-sub">
@@ -140,7 +140,7 @@ export default function Home() {
           <SkillGrid groups={skillGroups} pinOwned />
         </PinnedScene>
 
-        <PinnedScene id="about" className="container section about-section">
+        <PinnedScene id="about" className="section about-section" accent="gold">
           <ScrollReveal focusPull stagger={0.18} pinOwned>
             <div className="section-head">
               <h2>About</h2>
@@ -172,7 +172,7 @@ export default function Home() {
           </ScrollReveal>
         </PinnedScene>
 
-        <PinnedScene id="contact" className="container section">
+        <PinnedScene id="contact" className="section" accent="teal">
           <ScrollReveal focusPull pinOwned>
             <div className="contact-panel">
               <h2>Got a project that needs a careful Unity dev?</h2>

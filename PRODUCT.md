@@ -24,14 +24,14 @@ Deep, specific Unity URP/HLSL shader work (multi-layer liquid shaders, shimmer/e
 
 ## Operating Context
 
-Single-page Next.js site (`app/page.tsx`) with sections: nav, skills marquee, hero (pinned live Three.js shader stage), project case studies (4, pinned horizontal filmstrip), skills grid, about, contact, footer. Built with Next.js, Three.js, and GSAP (custom cursor, magnetic buttons, tilt cards, pinned scroll-scrubbed hero and filmstrip) plus Motion (nav active-link layout animation) and anime.js (skills-grid entrance) for interaction/motion. Copy is in English.
+Single-page Next.js site (`app/page.tsx`) with sections: nav, skills marquee, hero (pinned "agent reveal" card — illustrated character portrait, gold corner-bracket frame, ghosted repeated-wordmark backdrop, an animated teal/gold noise-flow band low in the frame), project case studies (4, pinned horizontal filmstrip), skills grid, about, contact, footer. Built with Next.js and GSAP (custom cursor, magnetic buttons, tilt cards, pinned scroll-scrubbed hero and filmstrip) plus Motion (nav active-link layout animation) and anime.js (skills-grid entrance) for interaction/motion. Three.js was in the original build (a live procedural shader material in the hero) and was later removed entirely at the user's direction in favor of the illustrated-character hero; the hero's low color band is instead plain browser WebGL (`components/HeroSmoke.tsx`, one fullscreen-shader pass, no library). Copy is in English.
 
 ## Capabilities and Constraints
 
-- Stack is fixed: Next.js (App Router), React, TypeScript, GSAP, Three.js, Motion, anime.js — do not introduce a different animation/rendering framework without discussing it first.
+- Stack is fixed: Next.js (App Router), React, TypeScript, GSAP, Motion, anime.js — do not introduce a different animation/rendering framework without discussing it first. Three.js was removed from the stack (see Operating Context); don't reintroduce it or another 3D/scene-graph library without discussing it first. Plain browser WebGL for a single shader pass (no library, no scene graph — see `HeroSmoke`) is the one sanctioned exception; it isn't "a framework."
 - Brand name "RYDER" and domain "rydlands.com" are real and must be preserved exactly as-is through the redesign.
 - GitHub/LinkedIn contact links are currently placeholders (`#`); real URLs are not yet available — keep them as placeholder links, not fabricated ones.
-- No demo video/reel exists; the hero's floating chip shows real live shader telemetry (fps/elapsed) instead of a fabricated video, echoing the reference's chip position without inventing footage.
+- No demo video/reel exists. The hero originally substituted real live shader telemetry (fps/elapsed) for a fabricated video; that chip was removed along with the shader it reported on rather than left showing fake numbers. The user later supplied a commissioned illustrated character portrait (`public/ryder-portrait.png`/`.webp`), which now stands in the hero as the reveal's centerpiece — this is a real asset the user provided, not a stand-in for a photo.
 
 ## Evidence on Hand
 
@@ -41,7 +41,7 @@ Four real project case studies with technical specifics (do not invent additiona
 3. Android ANR Root-Cause — diagnosed Google Play Console ANR logs to a GPU fence stall caused by WebView ad creative (Pangle/ByteDance) blocking Unity's RenderThread.
 4. Bid Floor Interstitial (iOS) — multi-tier bid-floor interstitial ad system in Objective-C, expanded from 2 to 9 ad units, configured via Info.plist.
 
-No photos, logo, resume, or testimonials on hand. Do not fabricate any of these.
+No photos, logo, resume, or testimonials on hand — the hero's illustrated character portrait (see Capabilities and Constraints) is a commissioned asset, not a substitute for a real photo. Do not fabricate any of the above.
 
 ## Product Principles
 
@@ -52,4 +52,4 @@ No photos, logo, resume, or testimonials on hand. Do not fabricate any of these.
 
 ## Accessibility & Inclusion
 
-No specific standard confirmed yet; treat as a general web audience requirement (reasonable contrast, keyboard-operable interactive elements, motion that respects `prefers-reduced-motion`) given the site leans heavily on GSAP/Three.js motion.
+No specific standard confirmed yet; treat as a general web audience requirement (reasonable contrast, keyboard-operable interactive elements, motion that respects `prefers-reduced-motion`) given the site leans heavily on GSAP-driven motion.
