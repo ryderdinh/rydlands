@@ -4,6 +4,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { prefersReducedMotion } from "@/lib/motion";
+import HeroSmoke from "@/components/HeroSmoke";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -79,6 +80,7 @@ export default function HeroPinned({ copy }: { copy: ReactNode }) {
         <span className="hero-streak hero-streak-a" />
         <span className="hero-streak hero-streak-b" />
       </div>
+      <HeroSmoke />
       <div className="hero-edge-lockup hero-edge-lockup--left" aria-hidden="true">
         <span className="hero-edge-tag">Portfolio reveal</span>
         <span className="hero-edge-word">Ryder</span>

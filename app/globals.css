@@ -600,10 +600,13 @@ main,
   }
 }
 
-/* Soft diagonal light trails low in the frame — the one place besides the
-   live shader that accent color is allowed to read as a surface rather
-   than a mark, deliberately confined to this bottom band. Teal + gold
-   only: coral stays reserved for its diagnostic/alert uses elsewhere. */
+/* Soft diagonal light trails low in the frame — the one place accent color
+   is allowed to read as a surface rather than a mark, deliberately confined
+   to this bottom band. Teal + gold only: coral stays reserved for its
+   diagnostic/alert uses elsewhere. Always-on CSS fallback for HeroSmoke's
+   WebGL layer (see .hero-smoke-canvas) — visible on its own where that
+   can't run, and still visible underneath/around it otherwise since the
+   shader's density never reaches 1. */
 .hero-streaks {
   position: absolute;
   left: 0;
@@ -650,8 +653,33 @@ main,
   }
 }
 
-/* Guarantees copy legibility regardless of where the mesh drifts to underneath
-   it — a fixed dark read-zone on the left, independent of the 3D scene. */
+/* Flowing color-noise wisps (see HeroSmoke.tsx) — a plain WebGL fragment
+   shader, not Three.js: this is one fullscreen triangle, no scene graph
+   needed. Same footprint and z-index tier as .hero-streaks (its always-on
+   fallback), just richer where WebGL/motion/a fine pointer allow it. The
+   shader's own vertical falloff does the fading; this canvas can safely
+   fill its whole box. */
+.hero-smoke-canvas {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100px;
+  height: 38%;
+  width: 100%;
+  z-index: 2;
+  display: block;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+@media (max-width: 900px) {
+  .hero-smoke-canvas {
+    display: none;
+  }
+}
+
+/* Guarantees copy legibility regardless of what's behind it — a fixed dark
+   read-zone on the left, independent of the hero backdrop. */
 .hero-scrim {
   position: absolute;
   top: 0;
