@@ -653,18 +653,19 @@ main,
   }
 }
 
-/* Flowing color-noise wisps (see HeroSmoke.tsx) — a plain WebGL fragment
-   shader, not Three.js: this is one fullscreen triangle, no scene graph
-   needed. Same footprint and z-index tier as .hero-streaks (its always-on
-   fallback), just richer where WebGL/motion/a fine pointer allow it. The
-   shader's own vertical falloff does the fading; this canvas can safely
-   fill its whole box. */
+/* One-directional light ribbons (see HeroSmoke.tsx) — a plain WebGL
+   fragment shader, not Three.js: this is one fullscreen triangle, no scene
+   graph needed. Same z-index tier and bottom offset as .hero-streaks (its
+   always-on fallback, still visible around/under it), just taller: the
+   shader sweeps its ribbons diagonally up from the bottom-right rather than
+   sitting in a shallow horizontal band, so it needs more vertical room to
+   read. The shader's own region falloff does the fading within that box. */
 .hero-smoke-canvas {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 100px;
-  height: 38%;
+  height: 62%;
   width: 100%;
   z-index: 2;
   display: block;

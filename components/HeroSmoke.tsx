@@ -3,12 +3,16 @@
 import { useEffect, useRef } from "react";
 import { prefersReducedMotion } from "@/lib/motion";
 
-// Flowing color-noise wisps low in the hero, echoing the reference's light
-// trails. Plain WebGL (no Three.js): this is one fullscreen-triangle
-// fragment shader, not a scene — the scene-graph/camera machinery Three.js
-// exists for would be dead weight for a single flat pass. Desktop/fine-
-// pointer/no-reduced-motion only, layered above the always-on CSS
-// `.hero-streaks` band, which stays the fallback everywhere this can't run.
+// Dense, one-directional light ribbons sweeping the hero's lower-right,
+// echoing the reference's trails — not isotropic drifting noise. The
+// fragment shader works in a rotated "flow" frame (one fixed diagonal) and
+// renders parallel lane-shaped ribbons along it, with a hot near-white core
+// where they're brightest. Plain WebGL (no Three.js): this is one
+// fullscreen-triangle fragment shader, not a scene — the scene-graph/camera
+// machinery Three.js exists for would be dead weight for a single flat
+// pass. Desktop/fine-pointer/no-reduced-motion only, layered above the
+// always-on CSS `.hero-streaks` band, which stays the fallback everywhere
+// this can't run.
 const VERTEX_SRC = `
 attribute vec2 aPosition;
 varying vec2 vUv;
@@ -54,24 +58,52 @@ float fbm(vec2 p) {
 
 void main() {
   float aspect = uResolution.x / uResolution.y;
-  vec2 uv = vUv;
-  vec2 p = vec2(uv.x * aspect * 2.6, uv.y * 1.7);
+  vec2 centered = (vUv - 0.5) * vec2(aspect, 1.0);
 
-  vec2 flow = vec2(uTime * 0.05, -uTime * 0.035);
-  float n1 = fbm(p + flow);
-  vec2 warp = vec2(n1, fbm(p + flow + 4.2));
-  float n2 = fbm(p * 1.5 + warp * 1.3 + flow * 1.4);
+  // Rotate into a "flow" frame: fuv.x runs along the streak direction,
+  // fuv.y across it — the reference's trails sweep one consistent diagonal,
+  // not noise drifting isotropically.
+  float angle = radians(-13.0);
+  mat2 rot = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+  vec2 fuv = rot * centered;
 
-  float vfall = smoothstep(1.0, 0.05, uv.y);
-  float hfall = smoothstep(0.0, 0.18, uv.x) * smoothstep(1.0, 0.82, uv.x);
+  float speed = 0.22;
+  float along = fuv.x * 1.15 + uTime * speed;
+  float across = fuv.y * 8.5;
 
-  float density = smoothstep(0.38, 0.7, n2) * vfall;
-  vec3 color = mix(uColorA, uColorB, clamp(n1 * 1.4, 0.0, 1.0));
-  // Push saturated color through at full wisp strength but let thin edges
-  // stay soft — density² keeps the silhouette from reading as a flat wash.
-  float alpha = density * density * 1.15 + density * 0.25;
+  // Lanes wobble along their length instead of running dead straight.
+  float wobble = fbm(vec2(along * 0.35, 7.0)) - 0.5;
+  across += wobble * 1.4;
 
-  gl_FragColor = vec4(color, alpha * hfall);
+  // Distance from the nearest lane centerline (lanes spaced 1 unit apart).
+  float laneDist = abs(fract(across) - 0.5) * 2.0;
+  float ribbon = pow(clamp(1.0 - laneDist, 0.0, 1.0), 2.0);
+
+  // Not every lane is lit the whole way — large-scale fbm turns stretches
+  // of each one on and off along its length, so it reads as flowing light
+  // catching a surface rather than a static striped pattern. Loose
+  // threshold: several lanes lit at once for a denser sheet of streaks
+  // instead of one isolated line.
+  float strength = fbm(vec2(along * 0.22, floor(across) * 1.7));
+  ribbon *= smoothstep(0.12, 0.42, strength);
+
+  // Region falloff: concentrated through the lower-right, fading out
+  // toward the top and left rather than filling the whole frame.
+  float regionFall = smoothstep(0.95, -0.35, fuv.y - fuv.x * 0.25);
+  // Pushed further right than the region falloff alone would put it — the
+  // hero's copy column lives in this frame's left third, so the ribbons
+  // clear it instead of washing out the pitch text.
+  float edgeFall = smoothstep(0.24, 0.56, vUv.x) * smoothstep(1.05, 0.7, vUv.x);
+
+  float density = clamp(ribbon * regionFall, 0.0, 1.0);
+  vec3 tint = mix(uColorA, uColorB, clamp(strength * 1.3, 0.0, 1.0));
+  // Hot core: where a ribbon is at its brightest, blow it toward white
+  // rather than staying saturated, like the reference's near-white trails.
+  vec3 color = mix(tint, vec3(1.0), pow(density, 3.0) * 0.6);
+
+  float alpha = density * 1.0 * edgeFall;
+
+  gl_FragColor = vec4(color, alpha);
 }
 `;
 
