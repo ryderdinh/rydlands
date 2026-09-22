@@ -9,22 +9,27 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-// Pins a section for one scroll "beat" and scrubs it in and back out with a
-// focus-pull (blur + scale + opacity) rather than letting it slide past in
-// normal document flow — every section becomes a scene the page cuts to,
-// matching the pattern HeroPinned/ProjectGallery already use, instead of a
-// stop along a continuous slide. Desktop/fine-pointer only: on touch or
-// reduced-motion this renders as a plain block and the section's own
-// content (ScrollReveal `pinOwned`, SkillGrid `pinOwned`) supplies its
-// normal scroll-triggered entrance instead.
+// Pins a section for one scroll "beat" and flies the camera through it: the
+// content arrives tilted back and out of focus in real 3D perspective
+// (rotateX + translateZ, not a CSS scale trick standing in for depth),
+// levels out flat for a clear dwell, then keeps traveling forward and tilts
+// away as the next scene cuts in — each section reads as a place the camera
+// visits, not a card that fades past on a flat page. Desktop/fine-pointer
+// only: on touch or reduced-motion this renders as a plain block and the
+// section's own content (ScrollReveal `pinOwned`, SkillGrid `pinOwned`)
+// supplies its normal scroll-triggered entrance instead.
 export default function PinnedScene({
   children,
   id,
   className,
+  accent = "teal",
 }: {
   children: ReactNode;
   id?: string;
   className?: string;
+  /** Which system accent tints this scene's ambient glow — a distinct
+   * "location" per scene rather than every section sharing one backdrop. */
+  accent?: "teal" | "gold";
 }) {
   const sceneRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -37,34 +42,57 @@ export default function PinnedScene({
     if (window.matchMedia("(pointer: coarse), (hover: none)").matches) return;
 
     const ctx = gsap.context(() => {
+      gsap.set(content, { transformPerspective: 1000, transformOrigin: "50% 30%" });
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: scene,
           start: "top top",
-          end: "+=100%",
-          scrub: 1,
+          end: "+=120%",
+          scrub: 0.4,
           pin: true,
         },
       });
+      // Arrive: tilted back and distant, leveling out to a clear, held read.
       tl.fromTo(
         content,
-        { autoAlpha: 0, scale: 0.94, filter: "blur(14px)" },
-        { autoAlpha: 1, scale: 1, filter: "blur(0px)", ease: "none", duration: 0.3 },
+        { autoAlpha: 0, scale: 0.9, rotateX: 12, y: 90, z: -240, filter: "blur(18px)" },
+        {
+          autoAlpha: 1,
+          scale: 1,
+          rotateX: 0,
+          y: 0,
+          z: 0,
+          filter: "blur(0px)",
+          ease: "power2.out",
+          duration: 0.16,
+        },
         0
-      ).to(
-        content,
-        { autoAlpha: 0, scale: 1.05, filter: "blur(14px)", ease: "none", duration: 0.3 },
-        0.7
-      );
+      )
+        // Depart: keep flying forward, tilting away past the viewer.
+        .to(
+          content,
+          {
+            autoAlpha: 0,
+            scale: 1.08,
+            rotateX: -10,
+            y: -80,
+            z: 180,
+            filter: "blur(18px)",
+            ease: "power2.in",
+            duration: 0.16,
+          },
+          0.84
+        );
     }, scene);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <section id={id} className={`scene-pin ${className ?? ""}`} ref={sceneRef}>
+    <section id={id} className={`scene-pin scene-pin--${accent} ${className ?? ""}`} ref={sceneRef}>
       <div className="scene-pin-content" ref={contentRef}>
-        {children}
+        <div className="container">{children}</div>
       </div>
     </section>
   );

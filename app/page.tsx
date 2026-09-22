@@ -129,7 +129,7 @@ export default function Home() {
 
         <ProjectGallery projects={projects} />
 
-        <PinnedScene id="skills" className="container section">
+        <PinnedScene id="skills" className="section" accent="teal">
           <ScrollReveal className="section-head" pinOwned>
             <h2>Tools I reach for daily</h2>
             <p className="section-sub">
@@ -140,7 +140,7 @@ export default function Home() {
           <SkillGrid groups={skillGroups} pinOwned />
         </PinnedScene>
 
-        <PinnedScene id="about" className="container section about-section">
+        <PinnedScene id="about" className="section about-section" accent="gold">
           <ScrollReveal focusPull stagger={0.18} pinOwned>
             <div className="section-head">
               <h2>About</h2>
@@ -172,7 +172,7 @@ export default function Home() {
           </ScrollReveal>
         </PinnedScene>
 
-        <PinnedScene id="contact" className="container section">
+        <PinnedScene id="contact" className="section" accent="teal">
           <ScrollReveal focusPull pinOwned>
             <div className="contact-panel">
               <h2>Got a project that needs a careful Unity dev?</h2>

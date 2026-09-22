@@ -30,16 +30,25 @@ export default function HeroPinned({ copy, scope }: { copy: ReactNode; scope: Re
     if (window.matchMedia("(pointer: coarse), (hover: none)").matches) return;
 
     const ctx = gsap.context(() => {
+      gsap.set(copyEl, { transformPerspective: 900, transformOrigin: "0% 100%" });
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: wrap,
           start: "top top",
           end: "+=130%",
-          scrub: 1,
+          scrub: 0.4,
           pin: true,
         },
       });
-      tl.to(copyEl, { autoAlpha: 0, y: -50, ease: "none", duration: 0.4 }, 0)
+      // The copy doesn't just fade up — it tilts and pulls back like the
+      // camera lifting off it, the same flight grammar PinnedScene uses for
+      // every later scene boundary.
+      tl.to(
+        copyEl,
+        { autoAlpha: 0, y: -60, z: 80, rotateX: -10, filter: "blur(6px)", ease: "power2.in", duration: 0.4 },
+        0
+      )
         .to(cueEl, { autoAlpha: 0, ease: "none", duration: 0.15 }, 0)
         // The pin's own scroll-out cross-dissolves the render surface to black —
         // this is the "cut" the next (pinned) section fades up from, rather than

@@ -11,6 +11,8 @@
   --teal: #4fd1c5;
   --gold: #ffd166;
   --coral: #ff6b6b;
+  --teal-rgb: 79, 209, 197;
+  --gold-rgb: 255, 209, 102;
 
   --radius-sm: 3px;
   --radius-md: 6px;
@@ -565,6 +567,28 @@ main,
 }
 
 /* -------- Pinned scenes (see PinnedScene.tsx) -------- */
+/* Full-bleed like .hero-pin/.projects-pin — the section itself is the scene's
+   viewport (edge to edge, its own grid-floor + accent glow "location"), with
+   a .container div nested inside for the actual text column. Content used to
+   sit directly in a .container-classed root, which made these three sections
+   read as ordinary centered page copy instead of a cinematic scene like the
+   hero and filmstrip either side of them. */
+.scene-pin {
+  position: relative;
+  background:
+    radial-gradient(560px circle at var(--glow-x, 20%) var(--glow-y, 18%), rgba(var(--accent-rgb, var(--teal-rgb)), 0.1), transparent 62%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.022) 0, rgba(255, 255, 255, 0.022) 1px, transparent 1px, transparent 40px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.022) 0, rgba(255, 255, 255, 0.022) 1px, transparent 1px, transparent 40px),
+    var(--bg);
+}
+
+.scene-pin--teal { --accent-rgb: var(--teal-rgb); }
+.scene-pin--gold { --accent-rgb: var(--gold-rgb); }
+
+#skills.scene-pin { --glow-x: 82%; --glow-y: 14%; }
+#about.scene-pin { --glow-x: 12%; --glow-y: 22%; }
+#contact.scene-pin { --glow-x: 84%; --glow-y: 86%; }
+
 /* Desktop/fine-pointer only — a normal auto-height block otherwise, letting
    each section's own content supply the entrance (see ScrollReveal/SkillGrid
    `pinOwned`). */
@@ -579,6 +603,7 @@ main,
 
 .scene-pin-content {
   width: 100%;
+  will-change: transform, filter, opacity;
 }
 
 .section-sub {
