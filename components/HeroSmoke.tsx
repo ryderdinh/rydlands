@@ -16,9 +16,13 @@ import { prefersReducedMotion } from "@/lib/motion";
 // particle renderer with blend modes, not a 3D scene graph — the same
 // reasoning that kept the smoke's previous version on plain WebGL instead of
 // pulling in Three.js applies here too; this is a sprite compositor, not a
-// 3D engine. Desktop/fine-pointer/no-reduced-motion only, layered above the
-// always-on CSS `.hero-streaks` band, which stays the fallback everywhere
-// this can't run.
+// 3D engine. No-reduced-motion only — unlike the shader version this
+// replaced, there's no separate pointer/hover gate: a ~90-sprite particle
+// pool is a trivial GPU workload (mobile games run far larger ones), so the
+// old "desktop/fine-pointer only" restriction (really a proxy for "don't
+// run a per-pixel fragment shader on a weak mobile GPU") doesn't apply to
+// it. Layered above the always-on CSS `.hero-streaks` band, which stays the
+// fallback wherever this can't run (reduced motion, WebGL unavailable).
 
 const TEAL: [number, number, number] = [79, 209, 197];
 const GOLD: [number, number, number] = [255, 209, 102];
@@ -86,7 +90,6 @@ export default function HeroSmoke() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     if (prefersReducedMotion()) return;
-    if (window.matchMedia("(pointer: coarse), (hover: none)").matches) return;
 
     let destroyed = false;
     let app: Application | null = null;
