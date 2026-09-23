@@ -98,6 +98,7 @@ export default function Home() {
 
       <main id="top">
         <HeroPinned
+          skillsItems={marqueeItems}
           copy={
             <HeroIntro className="hero-copy-inner">
               <div className="hero-masthead">

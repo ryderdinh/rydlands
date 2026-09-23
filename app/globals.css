@@ -497,6 +497,66 @@ main,
   }
 }
 
+/* -------- Skills ring (see SkillsRing.tsx) — a Three.js CSS3DRenderer
+   scene, not WebGL: the marquee's own items orbiting the character in
+   real 3D (perspective + rotation), rendered as real DOM text via CSS
+   matrix3d transforms rather than a rasterized canvas texture. Same
+   z-index tier and DOM position as .hero-character (both 1, ring first in
+   the DOM) so the character paints on top where they overlap, per the
+   hero's stacking scale — the ring reads as passing behind him, not
+   through him. Wider than the character's own box on purpose: the
+   character has no fixed width (sized by its image's aspect ratio against
+   height: 86%), so this brackets generously around where it renders
+   rather than trying to match it exactly. Desktop/fine-pointer/no-
+   reduced-motion only, same gating as HeroSmoke; the flat .marquee ticker
+   up top is the permanent, always-visible, accessible version of these
+   same items — this is a purely decorative hero flourish layered on top
+   of it, not a replacement. */
+.skills-ring {
+  position: absolute;
+  right: 2%;
+  /* Anchored near the top, not the character's full height: the ring
+     sits at one fixed screen height as it spins (see SkillsRing.tsx —
+     every item's local Y is 0), and centering that on his broad torso
+     hid the whole ring behind his (opaque) jacket. Head/shoulder height
+     has a narrower silhouette, so far more of the ring actually clears
+     him as it rotates. */
+  top: 8%;
+  height: 46%;
+  width: 38%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .skills-ring {
+    display: none;
+  }
+}
+
+.skills-ring-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+  /* Without this, an item rotated past 90° from the camera (the far side
+     of the ring) doesn't disappear the way a WebGL backface would — the
+     browser keeps rendering the same flat element from behind, which
+     reads as its text mirrored left-right. */
+  backface-visibility: hidden;
+}
+
+.skills-ring-dot {
+  color: var(--teal);
+  font-size: 6px;
+}
+
 /* -------- Hero character (the agent-reveal centerpiece) -------- */
 .hero-character {
   position: absolute;

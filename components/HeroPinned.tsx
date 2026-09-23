@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { prefersReducedMotion } from "@/lib/motion";
 import HeroSmoke from "@/components/HeroSmoke";
+import SkillsRing from "@/components/SkillsRing";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -14,7 +15,7 @@ if (typeof window !== "undefined") {
 // vignette wipes to black to resolve into the next section — a cut, not a
 // normal scroll-off. Desktop-only (see .hero-pin CSS): on touch/reduced-
 // motion the section is skipped here and falls back to plain auto-height flow.
-export default function HeroPinned({ copy }: { copy: ReactNode }) {
+export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; skillsItems: string[] }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   const vignetteRef = useRef<HTMLDivElement>(null);
@@ -94,6 +95,11 @@ export default function HeroPinned({ copy }: { copy: ReactNode }) {
           {copy}
         </div>
       </div>
+      {/* Before .hero-character in the DOM on purpose: both sit at
+          z-index: 1, so the character (later in the DOM) paints on top of
+          the ring where they overlap — it reads as passing behind him,
+          not through him. Desktop only (see .skills-ring CSS). */}
+      <SkillsRing items={skillsItems} />
       {/* Desktop: absolutely positioned centerpiece, sized off .hero-pin's
           100vh box (see .hero-character). Mobile: that box doesn't exist, so
           this same element switches to normal document flow after the copy
