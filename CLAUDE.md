@@ -33,7 +33,8 @@ renders only `HeroPinned`; the other sections, the nav and the footer are pulled
   and one gesture plays one step of a paused GSAP timeline (`play()` forward, `reverse()` back).
   Input is locked while a transition runs (+150ms so trackpad inertia is swallowed).
   Events from inside `[data-dev-tuner]` are ignored so dragging a tuner slider can't change scenes.
-- **Scene 1**: the poster (gold frame, backdrop, ghost wall, portrait, edge lockups, the
+- **Scene 1**: the poster (gold frame, backdrop, ghost wall, portrait with an occasional glitch
+  burst (`HeroPortrait.tsx`), edge lockups, the
   `SkillsRing` three.js CSS3D ring, streaks, scroll cue).
 - **Scene 2**: content blurs out (opacity + filter only — several of those elements position
   themselves with CSS transforms, so don't tween transforms on them), the frame and its backdrop
@@ -47,11 +48,13 @@ renders only `HeroPinned`; the other sections, the nav and the footer are pulled
 
 ## Live-tuning pattern (dev only)
 
-Each tuned scene exports a module-level object read every frame — `ringTuning` in
-`SkillsRing.tsx`, `cardTuning` in `CardScene.tsx`. `RingTuner` / `CardTuner` (both thin wrappers
-over `TunerPanel`) are dev-only sliders that write into it; `HeroPinned` shows the one for the
-current scene. To finish tuning, copy the numbers into the constants at the top of the file.
-Panels must keep the `data-dev-tuner` attribute (see above).
+Each tuned scene exports a module-level object read every frame (or at the start of each burst):
+`ringTuning` in `SkillsRing.tsx`, `glitchTuning` in `HeroPortrait.tsx`, `cardTuning` in
+`CardScene.tsx`. `RingTuner`, `GlitchTuner` and `CardTuner` (thin wrappers over `TunerPanel`) are
+dev-only sliders that write into them; `HeroPinned` shows the ones for the current scene (scene one:
+ring on the left, glitch on the right; scene two: card). To finish tuning, copy the numbers into the
+constants at the top of the file. Panels must keep the `data-dev-tuner` attribute (see above); a
+panel's hidden/shown state is saved per panel in localStorage.
 
 ## Metal card assets
 

@@ -5,9 +5,11 @@ import gsap from "gsap";
 import { Observer } from "gsap/Observer";
 import { prefersReducedMotion } from "@/lib/motion";
 import CardScene, { cardReveal } from "@/components/CardScene";
+import HeroPortrait from "@/components/HeroPortrait";
 import HeroSmoke from "@/components/HeroSmoke";
 import SkillsRing from "@/components/SkillsRing";
 import CardTuner from "@/components/CardTuner";
+import GlitchTuner from "@/components/GlitchTuner";
 import RingTuner from "@/components/RingTuner";
 
 if (typeof window !== "undefined") {
@@ -182,18 +184,14 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
       <CardScene />
       <SkillsRing items={skillsItems} />
       <RingTuner visible={scene === 0} />
+      <GlitchTuner visible={scene === 0} />
       <CardTuner visible={scene === 1} />
       {/* Desktop: absolutely positioned centerpiece, sized off .hero-pin's
           100vh box (see .hero-character). Mobile: that box doesn't exist, so
           this same element switches to normal document flow after the copy
           instead — DOM position here only matters for mobile's stacked
           layout, since desktop's absolute positioning is order-independent. */}
-      <div className="hero-character" aria-hidden="true">
-        <picture>
-          <source srcSet="/ryder-portrait.webp" type="image/webp" />
-          <img src="/ryder-portrait.png" alt="" />
-        </picture>
-      </div>
+      <HeroPortrait />
       <div className="scroll-cue">
         scroll to explore
         <span className="scroll-cue-glyph" aria-hidden="true">↓</span>

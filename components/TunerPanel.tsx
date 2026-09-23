@@ -40,7 +40,6 @@ const subscribeToStorage = (onChange: () => void) => {
 
 const panelBox = {
 	position: 'fixed',
-	left: 16,
 	bottom: 16,
 	zIndex: 10000,
 	background: 'rgba(11,12,14,0.92)',
@@ -62,6 +61,7 @@ export default function TunerPanel({
 	controls,
 	colors = [],
 	actions = [],
+	side = 'left',
 	visible
 }: {
 	title: string
@@ -69,6 +69,8 @@ export default function TunerPanel({
 	controls: readonly TunerControl[]
 	colors?: readonly TunerColor[]
 	actions?: readonly TunerAction[]
+	// Which bottom corner it docks to, so two panels on one scene don't overlap.
+	side?: 'left' | 'right'
 	visible: boolean
 }) {
 	const [, force] = useState(0)
@@ -107,6 +109,7 @@ export default function TunerPanel({
 				onClick={() => setHidden(false)}
 				style={{
 					...panelBox,
+					[side]: 16,
 					padding: '6px 10px',
 					color: '#4fd1c5',
 					cursor: 'pointer'
@@ -118,7 +121,10 @@ export default function TunerPanel({
 	}
 
 	return (
-		<div data-dev-tuner style={{ ...panelBox, width: 240, padding: 12, color: '#ecece7' }}>
+		<div
+			data-dev-tuner
+			style={{ ...panelBox, [side]: 16, width: 240, padding: 12, color: '#ecece7' }}
+		>
 			<div
 				style={{
 					display: 'flex',

@@ -47,7 +47,10 @@ import {
 // only way to actually occlude against something outside the scene.
 
 const RADIUS = 200
-const ROTATION_SPEED = 0.22 // rad/s — a slow, readable drift, not a spin
+const ROTATION_SPEED = 0.5 // rad/s — a steady, still readable drift, not a spin
+// While the pointer is over a letter of the ring it eases down to this fraction
+// of its speed (so a word can be read), and back up when the pointer leaves.
+const HOVER_SLOW = 0.2
 // Tilts the ring's plane about the X axis (0 = flat horizontal circle, text
 // only ever slides sideways; positive tilts the far side up and the near
 // side down, like a Saturn ring or a tilted coin) — this is the ring's
@@ -98,6 +101,11 @@ const FONT_COLOR = '#ffc342'
 const GLOW = 1
 // Glow colour (applied as --ring-glow-color), independent of the glyph colour.
 const GLOW_COLOR = '#ffc342'
+// A word under the pointer turns this colour with a glow of its own (applied as
+// --ring-hover-color / --ring-hover-glow-color / --ring-hover-glow).
+const HOVER_COLOR = '#ffffff'
+const HOVER_GLOW_COLOR = '#ffffff'
+const HOVER_GLOW = 1.2 // 0 (none) to 1.2
 // Shifts the whole ring in scene units (+X right, +Y up); the ring stays
 // centered on its container otherwise.
 const MOVE_X = -22
@@ -112,12 +120,16 @@ export const ringTuning = {
 	yaw: 0,
 	roll: ROLL_ANGLE,
 	speed: ROTATION_SPEED,
+	hoverSlow: HOVER_SLOW,
 	size: RING_SCALE,
 	fontSize: FONT_SIZE,
 	fontWeight: FONT_WEIGHT,
 	color: FONT_COLOR,
 	glow: GLOW,
 	glowColor: GLOW_COLOR,
+	hoverColor: HOVER_COLOR,
+	hoverGlowColor: HOVER_GLOW_COLOR,
+	hoverGlow: HOVER_GLOW,
 	moveX: MOVE_X,
 	moveY: MOVE_Y
 }
@@ -197,6 +209,9 @@ export default function SkillsRing({ items }: { items: string[] }) {
 		const firstCenter = wordCenters[0]
 		wordCenters.forEach((c, k) => (wordCenters[k] = c - firstCenter))
 
+		// word index -> its letter elements (the dot between words is not one of them)
+		const wordEls = new Map<number, HTMLElement[]>()
+
 		repeated.forEach((text, i) => {
 			const slotAngle = wordCenters[i]
 			// Each word is its own run of glyphs (plus a trailing gap and dot),
@@ -216,6 +231,13 @@ export default function SkillsRing({ items }: { items: string[] }) {
 						? 'skills-ring-char skills-ring-dot'
 						: 'skills-ring-char'
 				el.textContent = glyph
+				if (glyph !== '◆') {
+					// Which word this letter belongs to, for the hover highlight.
+					el.dataset.word = String(i)
+					const els = wordEls.get(i) ?? []
+					els.push(el)
+					wordEls.set(i, els)
+				}
 
 				const object = new CSS3DObject(el)
 				const offsetIndex = gi - (glyphs.length - 1) / 2
@@ -246,6 +268,9 @@ export default function SkillsRing({ items }: { items: string[] }) {
 		let appliedColor = ''
 		let appliedGlow = -1
 		let appliedGlowColor = ''
+		let appliedHoverColor = ''
+		let appliedHoverGlowColor = ''
+		let appliedHoverGlow = -1
 
 		function resize() {
 			const w = backContainer!.clientWidth
@@ -293,6 +318,44 @@ export default function SkillsRing({ items }: { items: string[] }) {
 		let raf = 0
 		let rotation = 0
 		let lastT = performance.now()
+		// 1 = full speed. Eases toward ringTuning.hoverSlow while the pointer is
+		// over one of the ring's letters, instead of snapping between the two
+		// speeds. The trigger is the glyphs themselves (each is a real DOM node),
+		// not the ring's bounding box: that box covers the middle of the screen,
+		// where the pointer usually rests, and kept the ring slowed all the time.
+		// A short release delay bridges the gaps between letters.
+		let speedFactor = 1
+		let hovering = false
+		let releaseTimer = 0
+		const glyphOf = (t: EventTarget | null) =>
+			t instanceof Element
+				? (t.closest('.skills-ring-char') as HTMLElement | null)
+				: null
+		// The word currently lit; the highlight is a class, styled in CSS.
+		let hotWord = -1
+		const setHot = (word: number) => {
+			if (word === hotWord) return
+			wordEls.get(hotWord)?.forEach(el => el.classList.remove('is-hot'))
+			wordEls.get(word)?.forEach(el => el.classList.add('is-hot'))
+			hotWord = word
+		}
+		const onPointerOver = (e: PointerEvent) => {
+			const glyph = glyphOf(e.target)
+			if (!glyph) return
+			window.clearTimeout(releaseTimer)
+			hovering = true
+			setHot(glyph.dataset.word === undefined ? -1 : Number(glyph.dataset.word))
+		}
+		const onPointerOut = (e: PointerEvent) => {
+			if (!glyphOf(e.target)) return
+			window.clearTimeout(releaseTimer)
+			releaseTimer = window.setTimeout(() => {
+				hovering = false
+				setHot(-1)
+			}, 250)
+		}
+		window.addEventListener('pointerover', onPointerOver)
+		window.addEventListener('pointerout', onPointerOut)
 		const rotationMatrix = new THREE.Matrix4()
 		const worldPosition = new THREE.Vector3()
 
@@ -300,7 +363,10 @@ export default function SkillsRing({ items }: { items: string[] }) {
 			const now = performance.now()
 			const dt = Math.min((now - lastT) / 1000, 1 / 30)
 			lastT = now
-			rotation += dt * ringTuning.speed
+			speedFactor +=
+				((hovering ? ringTuning.hoverSlow : 1) - speedFactor) *
+				(1 - Math.exp(-dt * 4))
+			rotation += dt * ringTuning.speed * speedFactor
 			// Both groups share one rotation value, kept in sync by hand every
 			// frame (not a shared Three.js parent) — that's what lets an item
 			// move from one scene's group to the other's mid-rotation without
@@ -365,6 +431,27 @@ export default function SkillsRing({ items }: { items: string[] }) {
 				}
 			}
 
+			if (ringTuning.hoverColor !== appliedHoverColor) {
+				appliedHoverColor = ringTuning.hoverColor
+				for (const c of [backContainer, frontContainer]) {
+					c.style.setProperty('--ring-hover-color', appliedHoverColor)
+				}
+			}
+
+			if (ringTuning.hoverGlowColor !== appliedHoverGlowColor) {
+				appliedHoverGlowColor = ringTuning.hoverGlowColor
+				for (const c of [backContainer, frontContainer]) {
+					c.style.setProperty('--ring-hover-glow-color', appliedHoverGlowColor)
+				}
+			}
+
+			if (ringTuning.hoverGlow !== appliedHoverGlow) {
+				appliedHoverGlow = ringTuning.hoverGlow
+				for (const c of [backContainer, frontContainer]) {
+					c.style.setProperty('--ring-hover-glow', `${appliedHoverGlow}`)
+				}
+			}
+
 			for (const item of ringItems) {
 				const angle =
 					wordCenters[item.wordIndex] + item.offsetIndex * step
@@ -422,6 +509,9 @@ export default function SkillsRing({ items }: { items: string[] }) {
 
 		return () => {
 			if (raf) cancelAnimationFrame(raf)
+			window.removeEventListener('pointerover', onPointerOver)
+			window.removeEventListener('pointerout', onPointerOut)
+			window.clearTimeout(releaseTimer)
 			ro.disconnect()
 			document.removeEventListener('visibilitychange', onVisibility)
 			backContainer!.removeChild(back.renderer.domElement)
