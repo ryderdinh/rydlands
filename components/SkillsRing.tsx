@@ -93,7 +93,7 @@ const FONT_SIZE = 25
 // every hundred, see app/layout.tsx).
 const FONT_WEIGHT = 800
 // Glyph colour (applied as --ring-color).
-const FONT_COLOR = '#ffffff'
+const FONT_COLOR = '#ffc342'
 // Glow around the glyphs, 0 (none) to 1.4 (applied as --ring-glow).
 const GLOW = 1
 // Glow colour (applied as --ring-glow-color), independent of the glyph colour.
