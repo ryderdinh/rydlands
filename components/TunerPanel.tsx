@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 
 export interface TunerControl {
 	key: string
@@ -25,6 +25,19 @@ export interface TunerColor {
 
 const RAD = Math.PI / 180
 
+const SERVER = 'server'
+const readStorage = (key: string) => {
+	try {
+		return window.localStorage.getItem(key) ?? '0'
+	} catch {
+		return '0'
+	}
+}
+const subscribeToStorage = (onChange: () => void) => {
+	window.addEventListener('storage', onChange)
+	return () => window.removeEventListener('storage', onChange)
+}
+
 const panelBox = {
 	position: 'fixed',
 	left: 16,
@@ -39,8 +52,9 @@ const panelBox = {
 // straight into `target` (a live object the scene reads every frame), so
 // nothing re-renders the scene; copy the numbers shown into the scene's
 // constants when done. `visible` hides it without unmounting, so the
-// collapsed/expanded state survives a scene change. The data-dev-tuner
-// attribute is how the page's scroll/gesture handling (HeroPinned) knows to
+// collapsed/expanded state survives a scene change; that state is also saved
+// per panel in localStorage, so a panel you hid stays hidden on the next visit.
+// The data-dev-tuner attribute is how the page's scroll/gesture handling (HeroPinned) knows to
 // leave input on the panel alone.
 export default function TunerPanel({
 	title,
@@ -58,8 +72,29 @@ export default function TunerPanel({
 	visible: boolean
 }) {
 	const [, force] = useState(0)
-	const [hidden, setHidden] = useState(false)
-	if (process.env.NODE_ENV !== 'development' || !visible) return null
+	// The hidden/shown choice is saved per panel in localStorage. The server can't
+	// see it, so useSyncExternalStore renders nothing for the server pass (and the
+	// matching hydration pass) and then switches to the saved value; `override`
+	// carries a click straight away and covers storage being unavailable.
+	const storageKey = `tuner-hidden:${title}`
+	const saved = useSyncExternalStore(
+		subscribeToStorage,
+		() => readStorage(storageKey),
+		() => SERVER
+	)
+	const [override, setOverride] = useState<boolean | null>(null)
+	const hidden = override ?? saved === '1'
+
+	const setHidden = (next: boolean) => {
+		setOverride(next)
+		try {
+			window.localStorage.setItem(storageKey, next ? '1' : '0')
+		} catch {
+			// storage blocked: the choice simply won't survive a reload
+		}
+	}
+
+	if (process.env.NODE_ENV !== 'development' || !visible || saved === SERVER) return null
 
 	const read = (c: TunerControl) =>
 		c.angle ? (target[c.key] as number) / RAD : (target[c.key] as number)
