@@ -687,15 +687,17 @@ main,
 /* One-directional light-trail particles (see HeroSmoke.tsx) — a Pixi.js
    sprite system, not Three.js: a 2D sprite/particle renderer, no 3D scene
    graph needed. Same z-index tier and bottom offset as .hero-streaks (its
-   always-on fallback, still visible around/under it), just taller: the
-   particles sweep diagonally up from the bottom-right rather than sitting
-   in a shallow horizontal band, so it needs more vertical room to read.
-   The component's own alpha falloffs do the fading within that box, and
-   they're computed against the canvas's own rendered dimensions, so they
-   hold up at any height this resolves to — including the shorter mobile
-   one below. Shown on mobile too (unlike the shader version this
-   replaced): a ~90-sprite pool is cheap enough to run there, see
-   HeroSmoke.tsx. */
+   always-on fallback, still visible around/under it). The particles sweep
+   low across the frame left-to-right (confirmed against the actual
+   Chamber reference image — it's a bottom-hugging band, not a comet
+   shooting diagonally up from a corner, which an earlier pass got wrong),
+   staying inside roughly the lower half of this box; the taller-than-
+   strictly-needed box just gives that low band more room to breathe. The
+   component's own alpha falloffs do the confining, computed against the
+   canvas's own rendered dimensions so they hold up at any height this
+   resolves to — including the shorter mobile one below. Shown on mobile
+   too (unlike the shader version this replaced): a ~90-sprite pool is
+   cheap enough to run there, see HeroSmoke.tsx. */
 .hero-smoke-canvas {
   position: absolute;
   left: 0;
@@ -707,6 +709,18 @@ main,
   display: block;
   pointer-events: none;
   mix-blend-mode: screen;
+}
+
+/* This class now names the wrapper div (see HeroSmoke.tsx), not the canvas
+   directly — Pixi's resizeTo targets the wrapper specifically so its own
+   autoDensity-applied inline width/height on the canvas element can't
+   feed back into the size Pixi measures next (see the component's own
+   comment on that bug). The inner canvas just fills whatever box the
+   wrapper's plain CSS percentages above resolve to. */
+.hero-smoke-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* Guarantees copy legibility regardless of what's behind it — a fixed dark

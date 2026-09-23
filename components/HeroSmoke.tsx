@@ -72,10 +72,12 @@ interface Particle {
   hue: number;
 }
 
-// Up and to the left, steep — same flow direction the previous shader
-// tuned against user feedback, kept here since that direction itself was
-// validated; screen-space y-down, so "up" is negative y.
-const FLOW = normalize(-0.848, -0.53);
+// Low across the bottom of the frame, left to right, with only a gentle
+// rise — not a comet shooting diagonally up from a corner. Confirmed
+// against the actual Chamber reference image: the trail starts low-left,
+// stays low the whole way, and only lifts slightly as it sweeps right.
+// Screen-space y-down, so "rising" is a small negative y component.
+const FLOW = normalize(1, -0.16);
 const ACROSS = normalize(-FLOW[1], FLOW[0]);
 
 function normalize(x: number, y: number): [number, number] {
@@ -84,16 +86,29 @@ function normalize(x: number, y: number): [number, number] {
 }
 
 export default function HeroSmoke() {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
+    const wrapper = wrapperRef.current;
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!wrapper || !canvas) return;
     if (prefersReducedMotion()) return;
+
+    // Mobile isn't just a smaller version of the same layout — the copy
+    // column runs full-width there with the CTA row roughly mid-canvas
+    // and the character starting below it (see HeroPinned's mobile flow),
+    // instead of desktop's narrow left column with the CTA tucked low.
+    // The safe region for the trail to start from and stay inside of is
+    // genuinely different, not just scaled, so it's tuned per layout
+    // rather than as one set of fractions. Calibrated against the actual
+    // on-page bounding boxes of .cta-row/.hero-character at this
+    // breakpoint, the same way the desktop thresholds were against the
+    // headline.
+    const isNarrow = window.matchMedia("(max-width: 900px)").matches;
 
     let destroyed = false;
     let app: Application | null = null;
-    let ro: ResizeObserver | null = null;
     let onVisibility: (() => void) | null = null;
 
     (async () => {
@@ -101,7 +116,21 @@ export default function HeroSmoke() {
       try {
         await application.init({
           canvas,
-          resizeTo: canvas,
+          // Pointed at the wrapper, not the canvas itself: resizeTo: canvas
+          // creates a self-referential loop — Pixi's autoDensity sets an
+          // inline width/height style directly on the canvas, which (being
+          // more specific than the CSS width: 100% rule) becomes the
+          // canvas's own new authoritative size, which Pixi then measures
+          // again on the next resize check. In practice this got stuck at
+          // Pixi's 800×600 fallback default the instant that first
+          // measurement landed before layout was fully settled, silently
+          // capping the canvas at 800px wide regardless of the hero's
+          // actual (1440px+) width — every position tuned as a fraction of
+          // "canvas width" was quietly wrong by whatever that ratio was.
+          // The wrapper only ever gets sized by plain CSS percentages
+          // against .hero-pin, so it can't be corrupted by Pixi's own
+          // inline styling the way the canvas can.
+          resizeTo: wrapper,
           backgroundAlpha: 0,
           antialias: true,
           resolution: Math.min(window.devicePixelRatio, 1.5),
@@ -131,22 +160,28 @@ export default function HeroSmoke() {
       // smaller, dimmer sprites leave the overlaps additive blending is
       // good at (bright where several genuinely coincide) without every
       // near-source frame clipping to white.
-      const POOL_SIZE = 90;
+      const POOL_SIZE = 130;
       const particles: Particle[] = [];
 
       function resetParticle(p: Particle, fresh: boolean) {
         const w = app!.renderer.width / app!.renderer.resolution;
         const h = app!.renderer.height / app!.renderer.resolution;
-        // Source sits low and to the right — a fixed origin point the
-        // whole tail flares from, matching the reference's colorful mass
-        // low in the frame with pale wisps extending away from it. Each
+        // Source sits low and just clear of the copy — on desktop that
+        // means to the right of the narrow text column (which runs out to
+        // roughly x=0.42w); on mobile the copy runs full-width with the
+        // CTA row mid-canvas, so "clear of the copy" instead means near
+        // the left edge, below where the CTA row ends and the character
+        // begins. Either way, a fixed origin point the whole trail flares
+        // from and sweeps right from, matching the reference. Each
         // particle also gets its own perpendicular offset at spawn (not
-        // just a velocity-angle spread), so the tail has width from the
+        // just a velocity-angle spread), so the trail has width from the
         // start instead of every particle emitting from one exact point.
-        const perpOffset = (Math.random() - 0.5) * h * 0.1;
-        const sx = w * 0.8 + (Math.random() - 0.5) * w * 0.04 + ACROSS[0] * perpOffset;
-        const sy = h * 0.92 + (Math.random() - 0.5) * h * 0.03 + ACROSS[1] * perpOffset;
-        const speed = h * (0.22 + Math.random() * 0.22); // px/sec, scales with canvas
+        const perpOffset = (Math.random() - 0.5) * h * 0.07;
+        const sourceXFrac = isNarrow ? 0.12 : 0.46;
+        const sourceYFrac = isNarrow ? 0.78 : 0.9;
+        const sx = w * sourceXFrac + (Math.random() - 0.5) * w * 0.03 + ACROSS[0] * perpOffset;
+        const sy = h * sourceYFrac + (Math.random() - 0.5) * h * 0.03 + ACROSS[1] * perpOffset;
+        const speed = w * (0.2 + Math.random() * 0.14); // px/sec, scales with canvas width now that travel is mostly horizontal
         const spread = (Math.random() - 0.5) * 0.6;
         p.vx = (FLOW[0] + ACROSS[0] * spread) * speed;
         p.vy = (FLOW[1] + ACROSS[1] * spread) * speed;
@@ -166,7 +201,12 @@ export default function HeroSmoke() {
         p.wobblePhase = Math.random() * Math.PI * 2;
         p.wobbleSpeed = 0.6 + Math.random() * 0.8;
         p.wobbleAmp = h * (0.01 + Math.random() * 0.02);
-        p.baseScale = (0.05 + Math.random() * 0.09) * (h / 128);
+        // Sized off the canvas's smaller dimension, not always h: on
+        // desktop's wide box those're the same thing, but on mobile's much
+        // narrower, tall box, sizing purely off h produced sprites wide
+        // enough relative to the actual (narrow) width to blow out into
+        // one solid cluster instead of a readable trail.
+        p.baseScale = (0.05 + Math.random() * 0.09) * (Math.min(w, h) / 128);
         p.hue = Math.random();
         p.sprite.tint = mixColor(p.hue);
       }
@@ -226,21 +266,32 @@ export default function HeroSmoke() {
           p.sprite.rotation = Math.atan2(p.vy, p.vx);
           p.sprite.scale.set(p.baseScale * growth * 2.6, p.baseScale * growth * 0.6);
 
-          // Fade in fast, hold, fade out — and fade extra hard once a
-          // particle drifts left past the copy column so the tail never
-          // washes out the pitch text there.
+          // Fade in fast, hold, fade out over each particle's own life.
           const fadeIn = Math.min(tNorm / 0.12, 1);
           const fadeOut = Math.min((1 - tNorm) / 0.35, 1);
-          const edgeFall = Math.min(Math.max((p.sprite.x / w - 0.14) / 0.28, 0), 1);
-          // Fades out again once a particle has traveled far enough up
-          // the frame to reach the headline's row — without this the trail
-          // (which easily outlives the ~1-2s it takes to get there)
-          // regularly crossed "Gameplay that ships. / Shaders I write
-          // myself." in testing. Keeps the effect reading as "low in the
-          // frame" the way the reference does, rather than letting reach
-          // alone push it into the copy above.
-          const topFall = Math.min(Math.max((p.sprite.y / h - 0.65) / 0.23, 0), 1);
-          p.sprite.alpha = 0.22 * fadeIn * fadeOut * edgeFall * topFall;
+          // A defensive left-edge cutoff on desktop, not the main
+          // containment (the source already spawns clear of the copy
+          // column at x=0.46w) — guards against perpendicular wobble
+          // drifting a particle back toward the text. Not needed on
+          // mobile: the copy sits above this effect's vertical band there
+          // (see topFall), not beside it, so there's no text to its left
+          // to protect.
+          const edgeFall = isNarrow
+            ? 1
+            : Math.min(Math.max((p.sprite.x / w - 0.14) / 0.28, 0), 1);
+          // Keeps the trail low in the frame the way the reference does.
+          // On desktop it never rises past roughly the lower half even as
+          // it sweeps right and gently up — the flow direction/speed
+          // already keep a typical particle well within this on their
+          // own, so this is a safety net for outliers, not the primary
+          // mechanism. On mobile the margin is much tighter (the CTA row
+          // ends around y=0.57h and the character starts around y=0.65h),
+          // so the cutoff has to do more of the actual containment work
+          // there, calibrated directly against those bounding boxes.
+          const topFall = isNarrow
+            ? Math.min(Math.max((p.sprite.y / h - 0.66) / 0.1, 0), 1)
+            : Math.min(Math.max((p.sprite.y / h - 0.45) / 0.15, 0), 1);
+          p.sprite.alpha = 0.28 * fadeIn * fadeOut * edgeFall * topFall;
         }
       };
 
@@ -252,21 +303,18 @@ export default function HeroSmoke() {
         else app.ticker.start();
       };
       document.addEventListener("visibilitychange", onVisibility);
-
-      ro = new ResizeObserver(() => {
-        // resizeTo handles the renderer/canvas size itself; particles just
-        // keep animating in the new dimensions on their next reset.
-      });
-      ro.observe(canvas);
     })();
 
     return () => {
       destroyed = true;
       if (onVisibility) document.removeEventListener("visibilitychange", onVisibility);
-      if (ro) ro.disconnect();
       if (app) app.destroy(true, { children: true, texture: true });
     };
   }, []);
 
-  return <canvas className="hero-smoke-canvas" ref={canvasRef} aria-hidden="true" />;
+  return (
+    <div className="hero-smoke-canvas" ref={wrapperRef} aria-hidden="true">
+      <canvas ref={canvasRef} />
+    </div>
+  );
 }
