@@ -95,10 +95,12 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
           {copy}
         </div>
       </div>
-      {/* Before .hero-character in the DOM on purpose: both sit at
-          z-index: 1, so the character (later in the DOM) paints on top of
-          the ring where they overlap — it reads as passing behind him,
-          not through him. Desktop only (see .skills-ring CSS). */}
+      {/* Renders two layers (see .skills-ring--back/--front in globals.css
+          and SkillsRing.tsx): one behind .hero-character, one in front of
+          him, so the ring actually loops around his body — items on the
+          far side of the rotation are hidden by him, items on the near
+          side show over him — rather than just steering clear of his
+          silhouette. Desktop only (see .skills-ring CSS). */}
       <SkillsRing items={skillsItems} />
       {/* Desktop: absolutely positioned centerpiece, sized off .hero-pin's
           100vh box (see .hero-character). Mobile: that box doesn't exist, so

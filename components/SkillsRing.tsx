@@ -6,7 +6,7 @@ import { CSS3DObject, CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRe
 import { prefersReducedMotion } from "@/lib/motion";
 
 // A real 3D scene graph — camera, perspective, a rotating group of
-// positioned objects — is exactly what Three.js is for for. Deliberately
+// positioned objects — is exactly what Three.js is for. Deliberately
 // CSS3DRenderer, not the WebGL renderer: it drives the same Three.js scene/
 // camera math, but the "pixels" it outputs are real DOM text nodes
 // positioned via CSS matrix3d transforms, not a rasterized canvas — so the
@@ -17,33 +17,58 @@ import { prefersReducedMotion } from "@/lib/motion";
 // entirely decorative — the flat marquee ticker up top remains the
 // always-visible, accessible list of the same items; this is a hero
 // flourish layered on top of it, not a replacement for it.
+//
+// Actually loops AROUND the character, not just beside him: two
+// synchronized scenes/renderers, one painted behind .hero-character and
+// one in front of it, with each item handed from one to the other the
+// instant its own rotation carries it past the character's picture plane.
+// A single CSS3DRenderer can't do this by itself — it can sort its own
+// objects by depth relative to each other, but has no way to interleave
+// that sort with an external DOM element (the character image) that isn't
+// part of its scene at all. Two DOM layers at different z-index is the
+// only way to actually occlude against something outside the scene.
 
-const RADIUS = 210;
+const RADIUS = 220;
+const ROTATION_SPEED = 0.22; // rad/s — a slow, readable drift, not a spin
+
+function createScene(container: HTMLDivElement) {
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, 1, 1, 2000);
+  camera.position.z = 640;
+
+  const renderer = new CSS3DRenderer();
+  renderer.domElement.style.position = "absolute";
+  renderer.domElement.style.inset = "0";
+  container.appendChild(renderer.domElement);
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  return { scene, camera, renderer, group };
+}
+
+interface RingItem {
+  object: CSS3DObject;
+  angle: number;
+  inFront: boolean;
+}
 
 export default function SkillsRing({ items }: { items: string[] }) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<HTMLDivElement>(null);
+  const frontRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const backContainer = backRef.current;
+    const frontContainer = frontRef.current;
+    if (!backContainer || !frontContainer) return;
     if (prefersReducedMotion()) return;
     if (window.matchMedia("(pointer: coarse), (hover: none)").matches) return;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(50, 1, 1, 2000);
-    camera.position.z = 640;
+    const back = createScene(backContainer);
+    const front = createScene(frontContainer);
 
-    const renderer = new CSS3DRenderer();
-    renderer.domElement.style.position = "absolute";
-    renderer.domElement.style.inset = "0";
-    container.appendChild(renderer.domElement);
-
-    const group = new THREE.Group();
-    scene.add(group);
-
-    const objects: { object: CSS3DObject; angle: number }[] = [];
     const count = items.length;
-    items.forEach((text, i) => {
+    const ringItems: RingItem[] = items.map((text, i) => {
       const el = document.createElement("div");
       el.className = "skills-ring-item";
       el.innerHTML = `${text}<span class="skills-ring-dot">◆</span>`;
@@ -53,25 +78,30 @@ export default function SkillsRing({ items }: { items: string[] }) {
       object.position.set(RADIUS * Math.sin(angle), 0, RADIUS * Math.cos(angle));
       // Faces outward from the ring's center, tangent to the circle —
       // reads normally at the front, foreshortens toward edge-on as it
-      // swings round to the side/back, which is what actually sells the
+      // swings round to the side, which is what actually sells the
       // "wrapping around a 3D cylinder" illusion rather than a flat
       // carousel of billboards that always face the camera.
       object.rotation.y = angle;
-      group.add(object);
-      objects.push({ object, angle });
+
+      // Starts in the back scene; the render loop's very first pass
+      // immediately reassigns it if that's not actually correct yet.
+      back.group.add(object);
+      return { object, angle, inFront: false };
     });
 
     function resize() {
-      const w = container!.clientWidth;
-      const h = container!.clientHeight;
+      const w = backContainer!.clientWidth;
+      const h = backContainer!.clientHeight;
       if (w === 0 || h === 0) return;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
+      for (const { camera, renderer } of [back, front]) {
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      }
     }
     resize();
     const ro = new ResizeObserver(resize);
-    ro.observe(container);
+    ro.observe(backContainer);
 
     let raf = 0;
     let rotation = 0;
@@ -81,21 +111,39 @@ export default function SkillsRing({ items }: { items: string[] }) {
       const now = performance.now();
       const dt = Math.min((now - lastT) / 1000, 1 / 30);
       lastT = now;
-      rotation += dt * 0.22; // rad/s — a slow, readable drift, not a spin
-      group.rotation.y = rotation;
+      rotation += dt * ROTATION_SPEED;
+      // Both groups share one rotation value, kept in sync by hand every
+      // frame (not a shared Three.js parent) — that's what lets an item
+      // move from one scene's group to the other's mid-rotation without
+      // any visual pop, since both parents always have an identical
+      // transform at the moment of the handoff.
+      back.group.rotation.y = rotation;
+      front.group.rotation.y = rotation;
 
-      // Fades the far side of the ring so it reads as receding into
-      // depth instead of every label sitting at identical strength —
-      // the CSS3DRenderer doesn't shade objects by depth on its own the
-      // way the WebGL renderer would with fog/lighting, so this is done
-      // by hand per item, from each one's current angle around the ring.
-      for (const { object, angle } of objects) {
-        const worldAngle = angle + rotation;
-        const depth = Math.cos(worldAngle); // 1 = nearest camera, -1 = farthest
-        object.element.style.opacity = String(0.22 + 0.68 * ((depth + 1) / 2));
+      for (const item of ringItems) {
+        const worldAngle = item.angle + rotation;
+        // 1 = nearest the camera (in front of the character), -1 =
+        // farthest (behind him) — the same value used both to fade the
+        // far side toward the character's own background and to decide
+        // which of the two scenes currently owns this item.
+        const depth = Math.cos(worldAngle);
+        item.object.element.style.opacity = String(0.35 + 0.65 * ((depth + 1) / 2));
+
+        const shouldBeFront = depth > 0;
+        if (shouldBeFront !== item.inFront) {
+          if (shouldBeFront) {
+            back.group.remove(item.object);
+            front.group.add(item.object);
+          } else {
+            front.group.remove(item.object);
+            back.group.add(item.object);
+          }
+          item.inFront = shouldBeFront;
+        }
       }
 
-      renderer.render(scene, camera);
+      back.renderer.render(back.scene, back.camera);
+      front.renderer.render(front.scene, front.camera);
       raf = requestAnimationFrame(render);
     };
 
@@ -116,9 +164,15 @@ export default function SkillsRing({ items }: { items: string[] }) {
       if (raf) cancelAnimationFrame(raf);
       ro.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
-      container!.removeChild(renderer.domElement);
+      backContainer!.removeChild(back.renderer.domElement);
+      frontContainer!.removeChild(front.renderer.domElement);
     };
   }, [items]);
 
-  return <div className="skills-ring" ref={containerRef} aria-hidden="true" />;
+  return (
+    <>
+      <div className="skills-ring skills-ring--back" ref={backRef} aria-hidden="true" />
+      <div className="skills-ring skills-ring--front" ref={frontRef} aria-hidden="true" />
+    </>
+  );
 }
