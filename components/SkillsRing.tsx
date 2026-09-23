@@ -32,6 +32,12 @@ import { prefersReducedMotion } from "@/lib/motion";
 
 const RADIUS = 380;
 const ROTATION_SPEED = 0.22; // rad/s — a slow, readable drift, not a spin
+// Tilts the ring's plane about the X axis (0 = flat horizontal circle, text
+// only ever slides sideways; positive tilts the far side up and the near
+// side down, like a Saturn ring or a tilted coin) — this is the ring's
+// "angle" to change: increase for a more dramatic incline, decrease toward
+// 0 to flatten it back out.
+const TILT_ANGLE = THREE.MathUtils.degToRad(14);
 
 // Angular gap between adjacent glyphs, tuned against RADIUS the same way the
 // item spacing was (see the file-level comment on the spacing fix): arc
@@ -74,6 +80,14 @@ export default function SkillsRing({ items }: { items: string[] }) {
 
     const back = createScene(backContainer);
     const front = createScene(frontContainer);
+    // Tilting rotates the whole group about its local origin, which drags
+    // the near (front, most visually prominent) side down by RADIUS ×
+    // sin(TILT_ANGLE) — nudge the group back up by that same amount so the
+    // front of the ring settles at roughly the same height it sat at
+    // untilted, rather than drooping toward the character's waist.
+    const tiltLift = RADIUS * Math.sin(TILT_ANGLE);
+    back.group.position.y = tiltLift;
+    front.group.position.y = tiltLift;
 
     // Repeated, like the flat marquee's own content duplication — six
     // items spread once around the full circle left wide, empty gaps
@@ -151,9 +165,11 @@ export default function SkillsRing({ items }: { items: string[] }) {
       // frame (not a shared Three.js parent) — that's what lets an item
       // move from one scene's group to the other's mid-rotation without
       // any visual pop, since both parents always have an identical
-      // transform at the moment of the handoff.
-      back.group.rotation.y = rotation;
-      front.group.rotation.y = rotation;
+      // transform at the moment of the handoff. The X tilt is constant,
+      // but set here too rather than once outside the loop, so it stays
+      // trivially in sync with rotation.y the same way.
+      back.group.rotation.set(TILT_ANGLE, rotation, 0);
+      front.group.rotation.set(TILT_ANGLE, rotation, 0);
 
       for (const item of ringItems) {
         const worldAngle = item.angle + rotation;
