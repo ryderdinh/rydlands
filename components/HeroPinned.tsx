@@ -23,7 +23,7 @@ const SHOW_SMOKE = false;
 // timed animation, one step per gesture. Scene one -> two: the poster's
 // content lets go (edge lockups, skills ring, portrait, backdrop devices all
 // blur out) while the frame and its backdrop contract from the whole screen
-// down to the left half, leaving the right half for scene two, where the metal card (CardScene) turns in. Scrolling
+// down to the left half, and the metal card (CardScene) rises into it from below. Scrolling
 // back up runs the same timeline in reverse. Desktop-only (see .hero-pin
 // CSS): on touch/reduced-motion nothing is locked and the hero just stays a
 // static full-screen poster.
@@ -70,9 +70,10 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
       // vertical midline. Explicit percent endpoints so GSAP never has to
       // convert from computed pixels.
       tl.fromTo([bgEl, frameEl], { right: "0%" }, { right: "50%", ease: "power3.inOut", duration: 0.9 }, 0.55);
-      // Scene two's card arrives in the freed right half as the frame settles.
+      // Scene two's card rises into the contracted frame as it settles.
       tl.to(".card-scene", { autoAlpha: 1, ease: "none", duration: 0.4 }, 1.05);
-      tl.to(cardReveal, { v: 1, ease: "power3.out", duration: 1.0 }, 1.05);
+      // Linear on purpose: CardScene runs its own damped springs after this target.
+      tl.to(cardReveal, { v: 1, ease: "none", duration: 0.8 }, 1.05);
 
       // A short cooldown after each transition swallows the tail of a
       // trackpad's inertia, which would otherwise read as a fresh gesture.
@@ -95,8 +96,13 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
 
       // wheelSpeed -1 is the Observer convention for "wheel down = onUp":
       // onUp means "advance", onDown means "go back", for wheel and swipe alike.
+      // Dragging a tuner slider is a pointer drag, and arrow keys move a
+      // focused slider — neither may count as a scene change.
+      const inTuner = (t: EventTarget | null) => t instanceof Element && !!t.closest("[data-dev-tuner]");
+
       const observer = Observer.create({
         target: window,
+        ignoreCheck: (e) => inTuner(e.target),
         type: "wheel,touch,pointer",
         wheelSpeed: -1,
         tolerance: 10,
@@ -106,6 +112,7 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
       });
 
       const onKey = (e: KeyboardEvent) => {
+        if (inTuner(e.target)) return;
         if (["ArrowDown", "PageDown", " "].includes(e.key)) go(current + 1);
         else if (["ArrowUp", "PageUp"].includes(e.key)) go(current - 1);
         else if (e.key === "End") go(1);

@@ -1,22 +1,32 @@
 'use client'
 
-import { cardTuning } from '@/components/CardScene'
-import TunerPanel, { type TunerColor, type TunerControl } from '@/components/TunerPanel'
+import { cardTuning, replayCardEntrance } from '@/components/CardScene'
+import TunerPanel, {
+	type TunerAction,
+	type TunerColor,
+	type TunerControl
+} from '@/components/TunerPanel'
 
 const controls: readonly TunerControl[] = [
 	{ key: 'exposure', label: 'exposure', min: 0.2, max: 3, step: 0.05 },
 	{ key: 'envIntensity', label: 'environment light', min: 0, max: 3, step: 0.05 },
-	{ key: 'glint', label: 'pointer light', min: 0, max: 30, step: 0.5 },
+	{ key: 'light', label: 'top light', min: 0, max: 5, step: 0.05 },
 	{ key: 'normal', label: 'relief strength', min: 0, max: 3, step: 0.05 },
 	{ key: 'roughness', label: 'roughness ×', min: 0, max: 3, step: 0.05 },
 	{ key: 'clearcoat', label: 'clearcoat', min: 0.02, max: 1, step: 0.02 },
-	{ key: 'tilt', label: 'tilt amount', min: 0, max: 2.5, step: 0.05, unit: '×' },
-	{ key: 'size', label: 'size (scale)', min: 0.5, max: 1.5, step: 0.02, unit: '×' }
+	{ key: 'idle', label: 'idle sway', min: 0, max: 3, step: 0.05, unit: '×' },
+	{ key: 'size', label: 'size (scale)', min: 0.5, max: 1.5, step: 0.02, unit: '×' },
+	{ key: 'stiffness', label: 'entrance stiffness', min: 10, max: 120, step: 1 },
+	{ key: 'damping', label: 'entrance damping', min: 0.2, max: 1.5, step: 0.02 }
 ]
 
 const colors: readonly TunerColor[] = [
 	{ key: 'tint', label: 'card tint' },
-	{ key: 'glintColor', label: 'pointer light color' }
+	{ key: 'lightColor', label: 'top light color' }
+]
+
+const actions: readonly TunerAction[] = [
+	{ label: '▶ replay entrance', onClick: replayCardEntrance }
 ]
 
 // Sliders for the metal card (scene two). Values go straight into
@@ -28,6 +38,7 @@ export default function CardTuner({ visible }: { visible: boolean }) {
 			target={cardTuning}
 			controls={controls}
 			colors={colors}
+			actions={actions}
 			visible={visible}
 		/>
 	)

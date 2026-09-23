@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import gsap from "gsap";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
@@ -15,14 +16,35 @@ import { prefersReducedMotion } from "@/lib/motion";
 //   rough  : polished gold, slightly rougher black
 //   normal : the ornament stands proud of the plate (bevelled edges catch light)
 // Metal only reads as metal when there is something to reflect, so the scene
-// gets an environment (three's RoomEnvironment, a soft-box studio) plus a
-// light that follows the pointer; tilting the card sweeps those reflections
-// across the gold.
+// gets an environment (three's RoomEnvironment, a soft-box studio) plus one
+// soft light from above; the card's idle sway then slides that light across
+// the relief and the reflections across the gold. Nothing here reacts to the
+// pointer.
 
 // Drives the entrance from outside (HeroPinned tweens it as part of the
 // scene-one -> scene-two timeline, so it reverses with it): 0 = tucked away
-// and turned edge-on, 1 = settled. Read every frame, like ringTuning.
+// below the frame, 1 = settled in the middle of it. Read every frame, like
+// ringTuning.
 export const cardReveal = { v: 0 };
+
+// The two springs that chase `cardReveal.v` (see the render loop). Module-level
+// so the entrance can be replayed from outside.
+const rise = { x: 0, v: 0 };
+const spin = { x: 0, v: 0 };
+// The idle sway's weight (0..1, a critically damped spring so it starts and
+// ends with zero slope) and its own clock. The clock only advances by `w` per
+// second, and every sway term is a plain sine, so at the moment the sway starts
+// every term is 0 with zero speed: the hand-off from the entrance is seamless.
+const idle = { w: 0, v: 0, t: 0 };
+
+// Dev helper (CardTuner's "replay" button): put the card back below the frame
+// with the springs at rest, then bring it in again over the same 0.8s the scene
+// transition uses.
+export function replayCardEntrance() {
+  rise.x = rise.v = spin.x = spin.v = idle.w = idle.v = idle.t = 0;
+  cardReveal.v = 0;
+  gsap.to(cardReveal, { v: 1, ease: "none", duration: 0.8 });
+}
 
 // Live values the render loop reads every frame, seeded with the defaults
 // below. CardTuner (the dev-only sliders) writes here so a look can be found
@@ -30,28 +52,41 @@ export const cardReveal = { v: 0 };
 export const cardTuning = {
   exposure: 1.05,
   envIntensity: 1,
-  glint: 6, // intensity of the pointer-following light
+  light: 1.2, // intensity of the soft light from above
   normal: 1, // strength of the ornament's relief
   roughness: 1, // multiplies the roughness map
   clearcoat: 0.25,
-  tilt: 1, // multiplies how far the card follows the pointer
-  size: 1,
+  idle: 1, // multiplies the idle sway once the entrance has finished
+  size: 0.76,
+  stiffness: 40, // spring pulling the entrance toward its target (higher = snappier)
+  damping: 0.6, // damping ratio: 1 = no overshoot, lower = bouncier settle
   tint: "#ffffff", // multiplies the color map
-  glintColor: "#fff0d0",
+  lightColor: "#fff4e0",
 };
 
 const CARD_W = 1576 / 923; // aspect of the art (1576 x 923); height is 1
 const CARD_H = 1;
+// The art is landscape; the card stands upright, so it is rolled a quarter turn
+// (counter-clockwise: the two logos along the top, the striped ornament at the
+// bottom). Flip the sign to turn it the other way up.
+const CARD_ROLL = Math.PI / 2;
 const CARD_D = 0.03;
 // Corner radius, in card heights (a bank card is ~0.055). Keep it under ~0.06
 // or it starts to clip the art's own chamfered frame corners.
 const CORNER_RADIUS = 0.02;
-// Fractions of the canvas the card may fill before tilt would clip it.
+// Fractions of the canvas the card may fill before the idle sway would clip it.
 const FILL_W = 0.74;
-const FILL_H = 0.62;
+const FILL_H = 0.72;
 const FOV = 30;
-const TILT_Y = 0.38; // rad of yaw at the far edge of the window
-const TILT_X = 0.26;
+// Turns about its vertical axis on the way up (1 = one full turn), so the back
+// swings into view mid-flight and it lands face-on.
+const ENTRY_TURNS = 0.5;
+// Idle sway (radians / world units at idle = 1): a slow yaw and pitch that let
+// the light travel across the relief, a hint of roll, and a gentle float.
+const IDLE_YAW = 0.2;
+const IDLE_PITCH = 0.07;
+const IDLE_ROLL = 0.02;
+const IDLE_FLOAT = 0.035;
 
 // A rounded-rectangle slab, extruded to the card's thickness. The art's UVs
 // are rewritten from the shape's own coordinates so the front face maps the
@@ -121,11 +156,12 @@ export default function CardScene() {
     scene.environmentIntensity = cardTuning.envIntensity;
     roomEnv.dispose();
 
-    // A warm light that follows the pointer, for a moving specular glint on
-    // top of the (static) environment reflections.
-    const glint = new THREE.PointLight(cardTuning.glintColor, cardTuning.glint, 0, 2);
-    glint.position.set(0, 0, 1.6);
-    scene.add(glint);
+    // One soft light from above, slightly in front: it skims the raised
+    // ornament's upper edges (the relief) and leaves the flat faces evenly lit,
+    // on top of the environment's reflections. Fixed; the card moves under it.
+    const light = new THREE.DirectionalLight(cardTuning.lightColor, cardTuning.light);
+    light.position.set(0, 3, 1.5);
+    scene.add(light);
 
     const loader = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
@@ -153,11 +189,17 @@ export default function CardScene() {
     const geometry = createCardGeometry();
     // Groups (see createCardGeometry): 0 = the rim, 1 = front face, 2 = back.
     const card = new THREE.Mesh(geometry, [plain, face, plain]);
+    card.rotation.z = CARD_ROLL;
     const pivot = new THREE.Group();
     pivot.add(card);
     scene.add(pivot);
 
-    // Pull the camera back just far enough that the card fits the canvas.
+    // How far below the middle the card starts, so it begins fully out of
+    // view (set by resize, in world units at the card's depth).
+    let travel = 3;
+
+    // Pull the camera back just far enough that the card fits the canvas. The
+    // card stands upright, so its on-screen width is CARD_H and height CARD_W.
     const resize = () => {
       const w = wrap.clientWidth;
       const h = wrap.clientHeight;
@@ -165,62 +207,80 @@ export default function CardScene() {
       renderer.setSize(w, h);
       camera.aspect = w / h;
       const k = 2 * Math.tan(THREE.MathUtils.degToRad(FOV) / 2);
-      const d = Math.max(CARD_W / (FILL_W * camera.aspect * k), CARD_H / (FILL_H * k));
+      const d = Math.max(CARD_H / (FILL_W * camera.aspect * k), CARD_W / (FILL_H * k));
       camera.position.set(0, 0, d);
+      travel = (d * k) / 2 + CARD_W * 0.6;
       camera.updateProjectionMatrix();
     };
     const ro = new ResizeObserver(resize);
     ro.observe(wrap);
     resize();
 
-    const pointer = { x: 0, y: 0 };
-    const onMove = (e: PointerEvent) => {
-      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-      pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
-    };
-    window.addEventListener("pointermove", onMove);
-
     let raf = 0;
     let last = performance.now();
-    let rotX = 0;
-    let rotY = 0;
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
       const dt = Math.min((now - last) / 1000, 1 / 20);
       last = now;
       const v = cardReveal.v;
-      // Nothing to draw while the card is tucked away: don't spend the GPU.
-      if (v < 0.001) return;
+
+      // The entrance is not glued to the timeline: `v` is the target, and two
+      // damped springs chase it — the rise, and the spin a touch heavier so it
+      // trails the rise. Underdamped, so the card overshoots its landing a
+      // little and settles, instead of stopping dead where the tween ends.
+      const stiffness = cardTuning.stiffness;
+      const stepSpring = (s: { x: number; v: number }, damping: number) => {
+        const c = 2 * damping * Math.sqrt(stiffness);
+        const steps = 2; // sub-steps keep the integration stable on a slow frame
+        for (let i = 0; i < steps; i++) {
+          s.v += ((v - s.x) * stiffness - s.v * c) * (dt / steps);
+          s.x += s.v * (dt / steps);
+        }
+      };
+      stepSpring(rise, cardTuning.damping);
+      stepSpring(spin, Math.min(cardTuning.damping + 0.15, 1.5));
+
+      // Nothing to draw while the card is tucked away (target at rest and both
+      // springs settled at it): don't spend the GPU.
+      const moving = Math.max(Math.abs(rise.x - v), Math.abs(rise.v), Math.abs(spin.x - v), Math.abs(spin.v));
+      if (v < 0.001 && moving < 0.001) return;
 
       renderer.toneMappingExposure = cardTuning.exposure;
       scene.environmentIntensity = cardTuning.envIntensity;
-      glint.intensity = cardTuning.glint;
-      glint.color.set(cardTuning.glintColor);
+      light.intensity = cardTuning.light;
+      light.color.set(cardTuning.lightColor);
       face.normalScale.setScalar(cardTuning.normal);
       face.roughness = cardTuning.roughness;
       face.clearcoat = cardTuning.clearcoat;
       face.color.set(cardTuning.tint);
 
-      // Ease toward the pointer-driven tilt (time-based, so frame rate
-      // doesn't change how it feels), with a slow idle drift on top.
-      const t = now / 1000;
-      const k = 1 - Math.exp(-dt * 5);
-      rotY += (pointer.x * TILT_Y * cardTuning.tilt - rotY) * k;
-      rotX += (pointer.y * TILT_X * cardTuning.tilt - rotX) * k;
-      const enter = 1 - v;
-      pivot.rotation.y = rotY + Math.sin(t * 0.55) * 0.05 - enter * 1.1;
-      pivot.rotation.x = rotX + Math.cos(t * 0.45) * 0.03;
-      pivot.position.set(enter * 0.9, Math.sin(t * 0.8) * 0.02, -enter * 0.6);
-      pivot.scale.setScalar((0.8 + 0.2 * v) * cardTuning.size);
+      // The idle sway starts when the entrance target is reached, and is simply
+      // added on top of the entrance springs: it is not gated on those springs
+      // being at rest (an underdamped one keeps ringing for a while, and a gate
+      // on it flickers on and off as it passes through the landing point).
+      const kIdle = 8;
+      idle.v += ((v > 0.99 ? 1 : 0) - idle.w) * kIdle * dt - idle.v * 2 * Math.sqrt(kIdle) * dt;
+      idle.w = Math.max(0, idle.w + idle.v * dt);
+      idle.t += dt * idle.w;
+      const sway = idle.w * cardTuning.idle;
+      const t = idle.t;
+      const enterRise = 1 - rise.x;
+      const enterSpin = 1 - spin.x;
+      // Entrance: rises from below the frame while spinning about its vertical
+      // axis, leaning back a little; all of it goes to nothing as the springs
+      // settle. Idle: the slow sway on top.
+      pivot.rotation.y = enterSpin * ENTRY_TURNS * Math.PI * 2 + sway * IDLE_YAW * Math.sin(t * 0.5);
+      pivot.rotation.x = -enterRise * 0.35 + sway * IDLE_PITCH * Math.sin(t * 0.37);
+      pivot.rotation.z = sway * IDLE_ROLL * Math.sin(t * 0.29);
+      pivot.position.set(0, -enterRise * travel + sway * IDLE_FLOAT * Math.sin(t * 0.7), 0);
+      pivot.scale.setScalar(cardTuning.size);
 
-      glint.position.set(pointer.x * 1.8, -pointer.y * 1.2, 1.6);
       renderer.render(scene, camera);
     };
     raf = requestAnimationFrame(frame);
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("pointermove", onMove);
       ro.disconnect();
       geometry.dispose();
       face.dispose();

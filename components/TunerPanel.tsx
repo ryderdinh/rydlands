@@ -13,6 +13,11 @@ export interface TunerControl {
 	angle?: boolean
 }
 
+export interface TunerAction {
+	label: string
+	onClick: () => void
+}
+
 export interface TunerColor {
 	key: string
 	label: string
@@ -34,18 +39,22 @@ const panelBox = {
 // straight into `target` (a live object the scene reads every frame), so
 // nothing re-renders the scene; copy the numbers shown into the scene's
 // constants when done. `visible` hides it without unmounting, so the
-// collapsed/expanded state survives a scene change.
+// collapsed/expanded state survives a scene change. The data-dev-tuner
+// attribute is how the page's scroll/gesture handling (HeroPinned) knows to
+// leave input on the panel alone.
 export default function TunerPanel({
 	title,
 	target,
 	controls,
 	colors = [],
+	actions = [],
 	visible
 }: {
 	title: string
 	target: Record<string, number | string>
 	controls: readonly TunerControl[]
 	colors?: readonly TunerColor[]
+	actions?: readonly TunerAction[]
 	visible: boolean
 }) {
 	const [, force] = useState(0)
@@ -59,6 +68,7 @@ export default function TunerPanel({
 		return (
 			<button
 				type='button'
+				data-dev-tuner
 				onClick={() => setHidden(false)}
 				style={{
 					...panelBox,
@@ -73,7 +83,7 @@ export default function TunerPanel({
 	}
 
 	return (
-		<div style={{ ...panelBox, width: 240, padding: 12, color: '#ecece7' }}>
+		<div data-dev-tuner style={{ ...panelBox, width: 240, padding: 12, color: '#ecece7' }}>
 			<div
 				style={{
 					display: 'flex',
@@ -147,6 +157,26 @@ export default function TunerPanel({
 						/>
 					</span>
 				</label>
+			))}
+			{actions.map(a => (
+				<button
+					key={a.label}
+					type='button'
+					onClick={a.onClick}
+					style={{
+						display: 'block',
+						width: '100%',
+						marginTop: 4,
+						padding: '6px 0',
+						background: 'transparent',
+						border: '1px solid #4fd1c5',
+						font: 'inherit',
+						color: '#4fd1c5',
+						cursor: 'pointer'
+					}}
+				>
+					{a.label}
+				</button>
 			))}
 		</div>
 	)
