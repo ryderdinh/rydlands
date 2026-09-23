@@ -3,13 +3,12 @@ import HeroPinned from "@/components/HeroPinned";
 import PinnedScene from "@/components/PinnedScene";
 import ScrollReveal from "@/components/ScrollReveal";
 import SplitReveal from "@/components/SplitReveal";
-import Marquee from "@/components/Marquee";
 import MagneticButton from "@/components/MagneticButton";
 import SiteNav from "@/components/SiteNav";
 import SkillGrid from "@/components/SkillGrid";
 import ProjectGallery, { type Project } from "@/components/ProjectGallery";
 
-const marqueeItems = [
+const skillsRingItems = [
   "Unity Engine",
   "URP Shaders",
   "Gameplay Systems",
@@ -94,11 +93,10 @@ export default function Home() {
   return (
     <>
       <SiteNav />
-      <Marquee items={marqueeItems} />
 
       <main id="top">
         <HeroPinned
-          skillsItems={marqueeItems}
+          skillsItems={skillsRingItems}
           copy={
             <HeroIntro className="hero-copy-inner">
               <div className="hero-masthead">
