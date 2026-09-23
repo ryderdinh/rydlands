@@ -15,6 +15,22 @@
   --gold-rgb: 255, 209, 102;
 
   --radius-sm: 3px;
+
+  /* Self-hosted via @fontsource (see app/layout.tsx), not next/font/google:
+     Turbopack's next/font/google implementation resolves Google Fonts
+     through @vercel/turbopack-next, an internal Vercel-only package that
+     isn't available building on Cloudflare Pages — the build failed there
+     with "Module not found" on every font, even though it worked fine
+     locally and on Vercel itself. Self-hosting sidesteps that entirely: no
+     network fetch and no Vercel-specific resolver needed at build time,
+     on any platform. */
+  /* Bare font names, no fallback here — every call site already appends
+     its own (var(--font-display), sans-serif), matching how next/font's
+     generated variables worked before. */
+  --font-display: "Unbounded";
+  --font-wordmark: "Oswald";
+  --font-body: "IBM Plex Sans";
+  --font-mono: "JetBrains Mono";
 }
 
 * {
