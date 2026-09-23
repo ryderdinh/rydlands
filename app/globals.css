@@ -117,44 +117,6 @@ main,
   }
 }
 
-/* -------- Marquee -------- */
-.marquee {
-  overflow: hidden;
-  border-bottom: 1px solid var(--line);
-  background: var(--bg-inset);
-}
-
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation-name: marquee-scroll;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-
-@keyframes marquee-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-.marquee-item {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 12px 22px;
-  font-family: var(--font-mono), monospace;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  white-space: nowrap;
-}
-
-.marquee-dot {
-  color: var(--teal);
-  font-size: 6px;
-}
-
 /* -------- Nav -------- */
 .nav {
   position: sticky;
@@ -312,12 +274,12 @@ main,
     flex-direction: column;
     justify-content: space-between;
     /* Bottom padding is generous on purpose: .hero-pin is a full 100vh box,
-       but the nav + marquee ahead of it in flow push its top ~100px below
+       but the sticky nav ahead of it in flow pushes its top ~60px below
        the actual viewport top at rest (before GSAP's pin engages), so
        naive space-between math would park the CTA row past the fold on
        first load. This keeps it inside the frame that's actually visible
        at scroll 0. */
-    padding: 110px 0 140px;
+    padding: 70px 0 140px;
   }
 }
 
@@ -498,24 +460,25 @@ main,
 }
 
 /* -------- Skills ring (see SkillsRing.tsx) — a Three.js CSS3DRenderer
-   scene, not WebGL: the marquee's own items orbiting the character in
-   real 3D (perspective + rotation), rendered as real DOM text via CSS
-   matrix3d transforms rather than a rasterized canvas texture. Two
-   layers, not one — .skills-ring--back (z-index: 1, same tier as
-   .hero-character, so it paints behind him) and .skills-ring--front
-   (z-index: 2, same tier as .hero-streaks/.hero-smoke-canvas, so it
-   paints in front of him) — because a real "loop around him" needs items
-   on the far side of the rotation actually hidden by his body, not just
-   steered clear of it; SkillsRing.tsx hands each item between the two
-   scenes as its own rotation carries it past his picture plane. Wider
-   than the character's own box on purpose: the character has no fixed
-   width (sized by its image's aspect ratio against height: 86%), so this
-   brackets generously around where it renders rather than trying to
-   match it exactly. Desktop/fine-pointer/no-reduced-motion only, same
-   gating as HeroSmoke; the flat .marquee ticker up top is the permanent,
-   always-visible, accessible version of these same items — this is a
-   purely decorative hero flourish layered on top of it, not a
-   replacement. */
+   scene, not WebGL: items orbiting the character in real 3D (perspective +
+   rotation), rendered as real DOM text via CSS matrix3d transforms rather
+   than a rasterized canvas texture. Two layers, not one — .skills-ring--back
+   (z-index: 1, same tier as .hero-character, so it paints behind him) and
+   .skills-ring--front (z-index: 2, same tier as .hero-streaks/
+   .hero-smoke-canvas, so it paints in front of him) — because a real "loop
+   around him" needs items on the far side of the rotation actually hidden
+   by his body, not just steered clear of it; SkillsRing.tsx hands each item
+   between the two scenes as its own rotation carries it past his picture
+   plane. Wider than the character's own box on purpose: the character has
+   no fixed width (sized by its image's aspect ratio against height: 86%),
+   so this brackets generously around where it renders rather than trying
+   to match it exactly. Desktop/fine-pointer/no-reduced-motion only, same
+   gating as HeroSmoke; the same items are listed again, plainly, in the
+   Skills Grid section further down the page — aria-hidden and decorative
+   here is fine since that section is the accessible, always-visible
+   listing. The flat marquee ticker that used to sit above the nav was
+   removed once this ring shipped — it duplicated the same items and read
+   as redundant next to the ring. */
 .skills-ring {
   position: absolute;
   right: 2%;
@@ -633,8 +596,8 @@ main,
 /* Same at-rest fold offset as .scroll-cue (see its note) — bottom corners
    sit further in from the edge than the top pair so the frame still reads
    intact before the hero is actually pinned. */
-.hero-frame-corner.bl { bottom: 110px; left: 20px; border-right: none; border-top: none; }
-.hero-frame-corner.br { bottom: 110px; right: 20px; border-left: none; border-top: none; }
+.hero-frame-corner.bl { bottom: 70px; left: 20px; border-right: none; border-top: none; }
+.hero-frame-corner.br { bottom: 70px; right: 20px; border-left: none; border-top: none; }
 
 @media (max-width: 640px) {
   .hero-frame-corner {
@@ -720,7 +683,7 @@ main,
   /* Not flush to 0: same at-rest fold offset as .scroll-cue (see its
      note) — anchoring this band to the true bottom of the 100vh box would
      put both streaks below the viewport before the hero is pinned. */
-  bottom: 100px;
+  bottom: 70px;
   height: 38%;
   /* Above hero-character (z-index: 1) on purpose — screen-blended, it
      glows across the character's lower half like the reference's light
@@ -783,7 +746,7 @@ main,
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 100px;
+  bottom: 70px;
   height: 82%;
   width: 100%;
   z-index: 2;
@@ -870,13 +833,13 @@ main,
 .scroll-cue {
   position: absolute;
   left: 50%;
-  /* Not flush to the edge: .hero-pin is a full 100vh box, but the nav +
-     marquee ahead of it in flow push its top ~100px below the viewport top
+  /* Not flush to the edge: .hero-pin is a full 100vh box, but the sticky
+     nav ahead of it in flow pushes its top ~60px below the viewport top
      at rest (before GSAP's pin engages), so a naive small offset parks
      this below the fold on first load — see the matching note on
      .hero-copy-inner. .hero-frame-corner's bottom pair and .hero-streaks
      share this same offset. */
-  bottom: 110px;
+  bottom: 70px;
   transform: translateX(-50%);
   z-index: 2;
   display: flex;
