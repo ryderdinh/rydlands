@@ -75,6 +75,14 @@ aspect ratio. Details: `docs/card-assets.md`.
   `MagneticButton`, `SplitReveal`, `HeroIntro`, `ScrollHud`, `SmoothScroll` (Lenis), `TiltCard`.
   Their CSS is still in `globals.css`. Don't delete them unless asked.
 
+## Custom cursor
+
+`CustomCursor.tsx` is one box that eases toward a target box each frame: a small square under
+the pointer, larger over `a`/`button`, and — over any element marked `data-cursor-target` — that
+element's own rectangle plus padding (hit-tested by rectangle on mouse move, so it works with
+`pointer-events: none`). Currently the two `RYDER` edge words and the "scroll to explore" cue carry it. A skills-ring word
+also locks on (the union of its letters' rectangles, re-measured every frame as it orbits).
+
 ## Design docs
 
 `PRODUCT.md` and `DESIGN.md` (with `.impeccable/`, `.claude/agents/`, `.claude/skills/impeccable`)

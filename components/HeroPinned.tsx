@@ -166,10 +166,14 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
       {SHOW_SMOKE && <HeroSmoke />}
       <div className="hero-edge-lockup hero-edge-lockup--left" aria-hidden="true">
         <span className="hero-edge-tag">Game developer</span>
-        <span className="hero-edge-word">Ryder</span>
+        <span className="hero-edge-word" data-cursor-target>
+          Ryder
+        </span>
       </div>
       <div className="hero-edge-lockup hero-edge-lockup--right" aria-hidden="true">
-        <span className="hero-edge-word">Ryder</span>
+        <span className="hero-edge-word" data-cursor-target>
+          Ryder
+        </span>
         <span className="hero-edge-tag">Game developer</span>
       </div>
       <div className="container hero">
@@ -192,7 +196,7 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
           instead — DOM position here only matters for mobile's stacked
           layout, since desktop's absolute positioning is order-independent. */}
       <HeroPortrait />
-      <div className="scroll-cue">
+      <div className="scroll-cue" data-cursor-target>
         scroll to explore
         <span className="scroll-cue-glyph" aria-hidden="true">↓</span>
       </div>

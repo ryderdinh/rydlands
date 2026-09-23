@@ -188,9 +188,10 @@ html.scene-locked .hero-pin {
   position: fixed;
   top: 0;
   left: 0;
+  /* Size and position are set every frame by CustomCursor.tsx (it stretches to
+     wrap [data-cursor-target] elements); 22px is just the resting size. */
   width: 22px;
   height: 22px;
-  margin: -11px 0 0 -11px;
   pointer-events: none;
   z-index: 9999;
   will-change: transform;
@@ -198,15 +199,24 @@ html.scene-locked .hero-pin {
 
 .cursor-tick {
   position: absolute;
-  width: 7px;
-  height: 7px;
-  border: 1.5px solid var(--teal);
+  width: 9px;
+  height: 9px;
+  /* Stroke weight of the brackets, both resting and locked on. */
+  border: 3px solid var(--teal);
   opacity: 0.85;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, width 0.2s ease, height 0.2s ease;
 }
 
 .cursor-reticle.is-active .cursor-tick {
   border-color: var(--gold);
+}
+
+/* Locked onto an object: gold, and bigger brackets to suit the bigger box. */
+.cursor-reticle.is-locked .cursor-tick {
+  width: 18px;
+  height: 18px;
+  border-color: var(--gold);
+  opacity: 1;
 }
 
 .cursor-tick-tl { top: 0; left: 0; border-right: none; border-bottom: none; }
