@@ -28,8 +28,6 @@ import "@fontsource/jetbrains-mono/800.css";
 import CustomCursor from "@/components/CustomCursor";
 import GrainOverlay from "@/components/GrainOverlay";
 import Preloader from "@/components/Preloader";
-import SmoothScroll from "@/components/SmoothScroll";
-import ScrollHud from "@/components/ScrollHud";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -59,8 +57,7 @@ export default function RootLayout({
         <Preloader />
         <GrainOverlay />
         <CustomCursor />
-        <ScrollHud />
-        <SmoothScroll>{children}</SmoothScroll>
+        {children}
       </body>
     </html>
   );

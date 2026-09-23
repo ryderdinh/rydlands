@@ -45,6 +45,16 @@
 /* Lenis (SmoothScroll.tsx) owns smooth scrolling, including anchor jumps;
    native scroll-behavior:smooth here would double up and fight it. */
 
+/* The page is a full-screen scene, not a document to scroll through: hide the
+   browser's own scrollbar (scrolling itself still works). */
+html {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -276,7 +286,16 @@ main,
 .hero-pin {
   position: relative;
   overflow: hidden;
-  border-bottom: 1px solid var(--line);
+}
+
+/* The poster's backdrop, on its own layer (not on .hero-pin) so it can
+   contract with the frame on scroll (see HeroPinned.tsx) while the rest of
+   the screen stays the plain page background. First in the DOM and with no
+   z-index, so everything else in the hero paints over it. */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background:
     radial-gradient(1100px circle at 66% 32%, rgba(79, 209, 197, 0.1), transparent 62%),
     linear-gradient(180deg, var(--bg-inset), var(--bg) 340px),
@@ -806,16 +825,10 @@ main,
   min-height: 100svh;
 }
 
-/* Full-bleed poster: the sticky nav ahead of the hero in flow (60px, invisible
-   until the first scroll) used to push the hero's top edge below the real top
-   of the viewport and its bottom past the fold, leaving a dead band above the
-   frame. Pull the hero up under the nav so the frame IS the screen, and the
-   bottom devices sit the same 20px from the edge as the top corners do. */
+/* Full-bleed poster: with no nav ahead of it in flow the hero is exactly the
+   viewport, so the frame IS the screen and the bottom devices sit the same
+   distance from the edge as the top corners do. */
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .hero-pin {
-    margin-top: -60px;
-  }
-
   /* Scoped under .hero-pin for specificity: both base rules are declared
      further down the file and would otherwise win the tie. */
   .hero-pin .hero-streaks,
@@ -952,20 +965,29 @@ main,
   pointer-events: none;
 }
 
-.hero-vignette {
+/* -------- Scene two: the metal card (see CardScene.tsx) --------
+   Fills the right half the frame vacates. Hidden until HeroPinned's timeline
+   brings it in; the canvas inside is sized by CardScene's ResizeObserver. */
+.card-scene {
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
-  height: 100vh;
-  /* Highest in the hero stack on purpose: the scene's final cut to black
-     has to cover the character and every frame device, not just the
-     ghost-wall backdrop. */
-  z-index: 4;
-  background: var(--bg);
+  width: 50%;
+  height: 100%;
+  z-index: 3;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+}
+
+.card-scene canvas {
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .card-scene {
+    display: none;
+  }
 }
 
 /* -------- Hero scroll cue -------- */
