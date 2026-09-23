@@ -27,10 +27,34 @@ const isAngle = (key: Key) => key === 'tilt' || key === 'yaw' || key === 'roll'
 // when done.
 export default function RingTuner() {
 	const [, force] = useState(0)
+	const [hidden, setHidden] = useState(false)
 	if (process.env.NODE_ENV !== 'development') return null
 
 	const read = (key: Key) =>
 		isAngle(key) ? ringTuning[key] / RAD : ringTuning[key]
+
+	if (hidden) {
+		return (
+			<button
+				type='button'
+				onClick={() => setHidden(false)}
+				style={{
+					position: 'fixed',
+					left: 16,
+					bottom: 16,
+					zIndex: 10000,
+					padding: '6px 10px',
+					background: 'rgba(11,12,14,0.92)',
+					border: '1px solid #3d4147',
+					font: '11px var(--font-mono), monospace',
+					color: '#4fd1c5',
+					cursor: 'pointer'
+				}}
+			>
+				show ring tuner
+			</button>
+		)
+	}
 
 	return (
 		<div
@@ -47,7 +71,31 @@ export default function RingTuner() {
 				color: '#ecece7'
 			}}
 		>
-			<div style={{ marginBottom: 8, color: '#4fd1c5' }}>ring tuner (dev only)</div>
+			<div
+				style={{
+					display: 'flex',
+					justifyContent: 'space-between',
+					alignItems: 'center',
+					marginBottom: 8,
+					color: '#4fd1c5'
+				}}
+			>
+				<span>ring tuner (dev only)</span>
+				<button
+					type='button'
+					onClick={() => setHidden(true)}
+					style={{
+						padding: '2px 6px',
+						background: 'transparent',
+						border: '1px solid #3d4147',
+						font: 'inherit',
+						color: '#ecece7',
+						cursor: 'pointer'
+					}}
+				>
+					hide
+				</button>
+			</div>
 			{controls.map(c => (
 				<label key={c.key} style={{ display: 'block', marginBottom: 8 }}>
 					<div style={{ display: 'flex', justifyContent: 'space-between' }}>

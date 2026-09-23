@@ -879,8 +879,10 @@ main,
 
 /* One-directional light-trail particles (see HeroSmoke.tsx) — a Pixi.js
    sprite system, not Three.js: a 2D sprite/particle renderer, no 3D scene
-   graph needed. Same z-index tier and bottom offset as .hero-streaks (its
-   always-on fallback, still visible around/under it). The particles sweep
+   graph needed. Same z-index tier as .hero-streaks (its always-on
+   fallback, still visible around/under it), but flush to the bottom edge
+   (bottom: 0): the smoke is a triangular plume that has to reach the very
+   bottom of the hero, not stop 70px short of it. The particles sweep
    low across the frame left-to-right (confirmed against the actual
    Chamber reference image — it's a bottom-hugging band, not a comet
    shooting diagonally up from a corner, which an earlier pass got wrong),
@@ -895,13 +897,12 @@ main,
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 70px;
+  bottom: 0;
   height: 82%;
   width: 100%;
   z-index: 2;
   display: block;
   pointer-events: none;
-  mix-blend-mode: screen;
 }
 
 /* This class now names the wrapper div (see HeroSmoke.tsx), not the canvas

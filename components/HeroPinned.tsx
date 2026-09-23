@@ -12,6 +12,9 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+// Temporarily off while the smoke is being redesigned; flip to bring it back.
+const SHOW_SMOKE = false;
+
 // Pins the hero for an extra scroll span: copy fades/lifts out first, then a
 // vignette wipes to black to resolve into the next section — a cut, not a
 // normal scroll-off. Desktop-only (see .hero-pin CSS): on touch/reduced-
@@ -82,7 +85,7 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
         <span className="hero-streak hero-streak-a" />
         <span className="hero-streak hero-streak-b" />
       </div>
-      <HeroSmoke />
+      {SHOW_SMOKE && <HeroSmoke />}
       <div className="hero-edge-lockup hero-edge-lockup--left" aria-hidden="true">
         <span className="hero-edge-tag">Game developer</span>
         <span className="hero-edge-word">Ryder</span>

@@ -81,7 +81,7 @@ export default function SiteNav() {
   return (
     <nav className="nav" ref={navRef}>
       <div className="container nav-inner">
-        <a href="#top" className="logo">
+        <a className="logo">
           <span className="logo-dot" />
           RYDER
         </a>
@@ -89,7 +89,6 @@ export default function SiteNav() {
           {LINKS.map((l) => (
             <li key={l.id} className="nav-link-item">
               <a
-                href={`#${l.id}`}
                 ref={(el) => {
                   linkRefs.current[l.id] = el;
                 }}
