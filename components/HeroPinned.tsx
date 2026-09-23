@@ -40,12 +40,18 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
     const frameEl = frameRef.current;
     if (!wrap || !bgEl || !frameEl) return;
     if (prefersReducedMotion()) return;
-    if (window.matchMedia("(pointer: coarse), (hover: none)").matches) return;
 
-    // Only lock the page once we know we'll drive it ourselves.
+    // Only lock the page once we know we'll drive it ourselves (see
+    // `.scene-locked` in globals.css: no native scroll, no rubber-band, on
+    // desktop and on iOS alike).
     const html = document.documentElement;
-    const prevOverflow = html.style.overflow;
-    html.style.overflow = "hidden";
+    html.classList.add("scene-locked");
+
+    // On a narrow (phone) screen the frame contracts to the top half instead
+    // of the left half. Read once at setup; a rotation/resize across the
+    // breakpoint needs a reload.
+    const narrow = window.matchMedia("(max-width: 900px)").matches;
+    const edge = narrow ? "bottom" : "right";
 
     let current = 0;
     let locked = false;
@@ -69,7 +75,7 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
       // mostly cleared: the right edge travels from the screen's edge to the
       // vertical midline. Explicit percent endpoints so GSAP never has to
       // convert from computed pixels.
-      tl.fromTo([bgEl, frameEl], { right: "0%" }, { right: "50%", ease: "power3.inOut", duration: 0.9 }, 0.55);
+      tl.fromTo([bgEl, frameEl], { [edge]: "0%" }, { [edge]: "50%", ease: "power3.inOut", duration: 0.9 }, 0.55);
       // Scene two's card rises into the contracted frame as it settles.
       tl.to(".card-scene", { autoAlpha: 1, ease: "none", duration: 0.4 }, 1.05);
       // Linear on purpose: CardScene runs its own damped springs after this target.
@@ -130,7 +136,7 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
 
     return () => {
       ctx.revert();
-      html.style.overflow = prevOverflow;
+      html.classList.remove("scene-locked");
     };
   }, []);
 

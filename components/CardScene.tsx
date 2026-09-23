@@ -146,7 +146,6 @@ export default function CardScene({ front = "main" }: { front?: string }) {
     const wrap = wrapRef.current;
     if (!wrap) return;
     if (prefersReducedMotion()) return;
-    if (window.matchMedia("(pointer: coarse), (hover: none)").matches) return;
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));

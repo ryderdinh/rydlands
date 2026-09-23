@@ -95,6 +95,31 @@ main,
   pointer-events: none;
 }
 
+/* The page is a set of full-screen scenes driven by swipe / wheel / keys
+   (HeroPinned), never native scrolling. While that is running: the document is
+   exactly one screen, and it must not follow a finger. `overflow: hidden`
+   alone doesn't stop iOS Safari's rubber-band, so the body is also pinned
+   (position: fixed) and touch panning is off; HeroPinned's Observer also
+   cancels touchmove. */
+html.scene-locked,
+html.scene-locked body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+html.scene-locked body {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+}
+
+html.scene-locked .hero-pin {
+  height: 100svh;
+  min-height: 0;
+  overflow: hidden;
+}
+
 /* -------- Preloader (full-screen cover; a circular hole opens at the center) --------
    z-index sits above the nav/hero/grain (<= 200) and below the cursor reticle
    (9999) so the custom cursor stays visible while loading. --r is the hole
@@ -987,9 +1012,12 @@ main,
   display: block;
 }
 
+/* Phones: the frame contracts to the top half (see HeroPinned), so the card
+   takes that half instead. */
 @media (max-width: 900px) {
   .card-scene {
-    display: none;
+    width: 100%;
+    height: 50%;
   }
 }
 
