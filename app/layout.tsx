@@ -27,6 +27,7 @@ import "@fontsource/jetbrains-mono/700.css";
 import "@fontsource/jetbrains-mono/800.css";
 import CustomCursor from "@/components/CustomCursor";
 import GrainOverlay from "@/components/GrainOverlay";
+import Preloader from "@/components/Preloader";
 import SmoothScroll from "@/components/SmoothScroll";
 import ScrollHud from "@/components/ScrollHud";
 import "./globals.css";
@@ -55,6 +56,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <Preloader />
         <GrainOverlay />
         <CustomCursor />
         <ScrollHud />

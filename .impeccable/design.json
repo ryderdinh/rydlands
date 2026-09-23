@@ -1,57 +1,271 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-22T00:00:00Z",
-  "title": "Design System: Ryder — Render Bench",
+  "generatedAt": "2026-09-23T15:30:15Z",
+  "title": "Design System: Ryder — Agent Reveal",
   "extensions": {
     "colorMeta": {
       "teal": {
         "role": "primary",
         "displayName": "Render Teal",
         "canonical": "#4fd1c5",
-        "tonalRamp": ["#0e2624", "#153f3b", "#1f5852", "#2c7a71", "#3aa198", "#4fd1c5", "#8fe4dc", "#c7f2ec"]
+        "tonalRamp": [
+          "#0e2624",
+          "#153f3b",
+          "#1f5852",
+          "#2c7a71",
+          "#3aa198",
+          "#4fd1c5",
+          "#8fe4dc",
+          "#c7f2ec"
+        ]
       },
       "gold": {
         "role": "secondary",
         "displayName": "Signal Gold",
         "canonical": "#ffd166",
-        "tonalRamp": ["#332405", "#59400a", "#805c0e", "#a67912", "#cc9a2b", "#ffd166", "#ffe0a0", "#fff0cf"]
+        "tonalRamp": [
+          "#332405",
+          "#59400a",
+          "#805c0e",
+          "#a67912",
+          "#cc9a2b",
+          "#ffd166",
+          "#ffe0a0",
+          "#fff0cf"
+        ]
       },
       "coral": {
         "role": "tertiary",
         "displayName": "Alert Coral",
         "canonical": "#ff6b6b",
-        "tonalRamp": ["#330d0d", "#591515", "#801e1e", "#a62727", "#cc3939", "#ff6b6b", "#ff9e9e", "#ffcfcf"]
+        "tonalRamp": [
+          "#330d0d",
+          "#591515",
+          "#801e1e",
+          "#a62727",
+          "#cc3939",
+          "#ff6b6b",
+          "#ff9e9e",
+          "#ffcfcf"
+        ]
       },
-      "bg": { "role": "neutral", "displayName": "Viewport Black", "canonical": "#101214", "tonalRamp": ["#000000", "#0b0c0e", "#101214", "#17191c", "#2a2d31", "#3d4147", "#5b5f64", "#90959b"] },
-      "bg-inset": { "role": "neutral", "displayName": "Inset Black", "canonical": "#0b0c0e", "tonalRamp": ["#000000", "#050506", "#0b0c0e", "#101214", "#17191c", "#2a2d31", "#3d4147", "#5b5f64"] },
-      "bg-raised": { "role": "neutral", "displayName": "Raised Panel", "canonical": "#17191c", "tonalRamp": ["#0b0c0e", "#101214", "#17191c", "#202327", "#2a2d31", "#3d4147", "#5b5f64", "#90959b"] },
-      "line": { "role": "neutral", "displayName": "Hairline", "canonical": "#2a2d31", "tonalRamp": ["#101214", "#17191c", "#202327", "#2a2d31", "#3d4147", "#5b5f64", "#90959b", "#ecece7"] },
-      "line-strong": { "role": "neutral", "displayName": "Hairline Strong", "canonical": "#3d4147", "tonalRamp": ["#101214", "#17191c", "#2a2d31", "#3d4147", "#525761", "#6f757e", "#90959b", "#ecece7"] },
-      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#ecece7", "tonalRamp": ["#101214", "#3d4147", "#5b5f64", "#90959b", "#b8bcc1", "#d4d7d3", "#ecece7", "#ffffff"] },
-      "ink-dim": { "role": "neutral", "displayName": "Ink Dim", "canonical": "#90959b", "tonalRamp": ["#101214", "#2a2d31", "#3d4147", "#5b5f64", "#767b82", "#90959b", "#b8bcc1", "#ecece7"] },
-      "ink-faint": { "role": "neutral", "displayName": "Ink Faint", "canonical": "#5b5f64", "tonalRamp": ["#101214", "#17191c", "#2a2d31", "#3d4147", "#5b5f64", "#767b82", "#90959b", "#b8bcc1"] }
+      "bg": {
+        "role": "neutral",
+        "displayName": "Viewport Black",
+        "canonical": "#101214",
+        "tonalRamp": [
+          "#000000",
+          "#0b0c0e",
+          "#101214",
+          "#17191c",
+          "#2a2d31",
+          "#3d4147",
+          "#5b5f64",
+          "#90959b"
+        ]
+      },
+      "bg-inset": {
+        "role": "neutral",
+        "displayName": "Inset Black",
+        "canonical": "#0b0c0e",
+        "tonalRamp": [
+          "#000000",
+          "#050506",
+          "#0b0c0e",
+          "#101214",
+          "#17191c",
+          "#2a2d31",
+          "#3d4147",
+          "#5b5f64"
+        ]
+      },
+      "bg-raised": {
+        "role": "neutral",
+        "displayName": "Raised Panel",
+        "canonical": "#17191c",
+        "tonalRamp": [
+          "#0b0c0e",
+          "#101214",
+          "#17191c",
+          "#202327",
+          "#2a2d31",
+          "#3d4147",
+          "#5b5f64",
+          "#90959b"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#2a2d31",
+        "tonalRamp": [
+          "#101214",
+          "#17191c",
+          "#202327",
+          "#2a2d31",
+          "#3d4147",
+          "#5b5f64",
+          "#90959b",
+          "#ecece7"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Hairline Strong",
+        "canonical": "#3d4147",
+        "tonalRamp": [
+          "#101214",
+          "#17191c",
+          "#2a2d31",
+          "#3d4147",
+          "#525761",
+          "#6f757e",
+          "#90959b",
+          "#ecece7"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#ecece7",
+        "tonalRamp": [
+          "#101214",
+          "#3d4147",
+          "#5b5f64",
+          "#90959b",
+          "#b8bcc1",
+          "#d4d7d3",
+          "#ecece7",
+          "#ffffff"
+        ]
+      },
+      "ink-dim": {
+        "role": "neutral",
+        "displayName": "Ink Dim",
+        "canonical": "#90959b",
+        "tonalRamp": [
+          "#101214",
+          "#2a2d31",
+          "#3d4147",
+          "#5b5f64",
+          "#767b82",
+          "#90959b",
+          "#b8bcc1",
+          "#ecece7"
+        ]
+      },
+      "ink-faint": {
+        "role": "neutral",
+        "displayName": "Ink Faint",
+        "canonical": "#5b5f64",
+        "tonalRamp": [
+          "#101214",
+          "#17191c",
+          "#2a2d31",
+          "#3d4147",
+          "#5b5f64",
+          "#767b82",
+          "#90959b",
+          "#b8bcc1"
+        ]
+      }
     },
     "typographyMeta": {
-      "wordmark": { "displayName": "Hero Wordmark (Oswald)", "purpose": "The single giant decorative 'RYDER' lockup in the hero, aria-hidden. Never reused elsewhere." },
-      "display": { "displayName": "Display (Unbounded)", "purpose": "Every section heading (h2) and the contact/about pull statements." },
-      "hero-h1": { "displayName": "Hero Headline (Unbounded)", "purpose": "The hero's real h1 positioning sentence." },
-      "body": { "displayName": "Body (IBM Plex Sans)", "purpose": "Paragraph copy across hero, about, contact." },
-      "label": { "displayName": "Label / Mono (JetBrains Mono)", "purpose": "Nav links, HUD readouts, tags, chips, marquee items, footer credit." }
+      "display": {
+        "displayName": "Display (Unbounded)",
+        "purpose": "Every section heading (h2) and the contact/about pull statements."
+      },
+      "hero-edge-word": {
+        "displayName": "Hero Edge Word (Oswald)",
+        "purpose": "The vertical, mirrored 'RYDER' on both hero edges, solid gold — the hero's dominant type and the only readable instance of the name. Never reused elsewhere."
+      },
+      "hero-edge-tag": {
+        "displayName": "Hero Edge Tag (IBM Plex Sans Bold)",
+        "purpose": "'Game developer', set beside each hero name on its midline; hidden at 640px and below."
+      },
+      "ring-glyph": {
+        "displayName": "Ring Glyph (JetBrains Mono ExtraBold)",
+        "purpose": "Each letter of the 3D skills ring; size and weight come from FONT_SIZE / FONT_WEIGHT in SkillsRing.tsx."
+      },
+      "hero-ghost-wall": {
+        "displayName": "Hero Ghost Wall (Oswald)",
+        "purpose": "Outline-only repeated 'RYDER' rows behind the character; texture, not text."
+      },
+      "body": {
+        "displayName": "Body (IBM Plex Sans)",
+        "purpose": "Paragraph copy across about and contact."
+      },
+      "label": {
+        "displayName": "Label / Mono (JetBrains Mono)",
+        "purpose": "Nav links, HUD readouts, tags, chips, footer credit."
+      }
     },
     "shadows": [
-      { "name": "telemetry-lift", "value": "0 16px 34px -14px rgba(0,0,0,0.6)", "purpose": "The one floating panel on the page (hero telemetry chip); not reused on ordinary cards." },
-      { "name": "status-dot-glow", "value": "0 0 0 3px rgba(79,209,197,0.18)", "purpose": "Soft ring around the live telemetry status dot, paired with a pulse animation." }
+      {
+        "name": "character-lift",
+        "value": "drop-shadow(0 30px 54px rgba(0,0,0,0.55))",
+        "purpose": "The one floating element on the page: soft ambient shadow grounding the hero portrait. Not reused on cards."
+      },
+      {
+        "name": "hero-name-lift",
+        "value": "0 8px 28px rgba(0,0,0,0.55)",
+        "purpose": "Text shadow under the solid-gold vertical name so it separates from the ghost wall."
+      },
+      {
+        "name": "ring-glyph-halo",
+        "value": "0 2px 12px rgba(0,0,0,0.8)",
+        "purpose": "Dark halo behind each skills-ring letter so it reads over both the bright jacket and the dark backdrop."
+      }
     ],
     "motion": [
-      { "name": "scroll-pin-scrub", "value": "GSAP ScrollTrigger, scrub: 1, pin: true", "purpose": "Hero and project-filmstrip pinning/choreography; desktop fine-pointer only." },
-      { "name": "magnetic-pull", "value": "gsap.to(el, { x, y, duration: 0.4, ease: 'power3' })", "purpose": "MagneticButton cursor-follow on primary/ghost buttons." },
-      { "name": "nav-pill-spring", "value": "Motion layoutId, type: spring, stiffness: 420, damping: 38, mass: 0.6", "purpose": "The sliding nav active-link pill; the site's one Motion-owned interaction." },
-      { "name": "skills-stagger", "value": "anime.js animate(), stagger, outQuad / outElastic(1, 0.6)", "purpose": "Skills-grid card and tag entrance; the site's one anime.js-owned interaction." }
+      {
+        "name": "scroll-pin-scrub",
+        "value": "GSAP ScrollTrigger, scrub: 1, pin: true",
+        "purpose": "Hero and project-filmstrip pinning/choreography; desktop fine-pointer only."
+      },
+      {
+        "name": "magnetic-pull",
+        "value": "gsap.to(el, { x, y, duration: 0.4, ease: 'power3' })",
+        "purpose": "MagneticButton cursor-follow on primary/ghost buttons."
+      },
+      {
+        "name": "nav-pill-spring",
+        "value": "Motion layoutId, type: spring, stiffness: 420, damping: 38, mass: 0.6",
+        "purpose": "The sliding nav active-link pill; the site's one Motion-owned interaction."
+      },
+      {
+        "name": "skills-stagger",
+        "value": "anime.js animate(), stagger, outQuad / outElastic(1, 0.6)",
+        "purpose": "Skills-grid card and tag entrance; the site's one anime.js-owned interaction."
+      },
+      {
+        "name": "ring-spin",
+        "value": "Three.js CSS3DRenderer, rotation += dt × 0.22 rad/s about the ring's own axis; tilt 27°, roll −24°",
+        "purpose": "The skills ring's continuous orbit around the hero character (desktop / fine pointer only)."
+      },
+      {
+        "name": "hero-light-trail",
+        "value": "Pixi.js sprite particle system, screen-blended, plus CSS streaks",
+        "purpose": "The low band of teal/gold light that sweeps across the hero's bottom edge, over the frame."
+      }
     ],
     "breakpoints": [
-      { "name": "mobile-nav-collapse", "value": "640px" },
-      { "name": "about-grid-collapse", "value": "760px" },
-      { "name": "hero-projects-desktop-pin", "value": "900px (also gated on hover:hover, pointer:fine, prefers-reduced-motion:no-preference)" }
+      {
+        "name": "mobile-nav-collapse",
+        "value": "640px (also hides the hero edge tags)"
+      },
+      {
+        "name": "about-grid-collapse",
+        "value": "760px"
+      },
+      {
+        "name": "hero-poster-narrow",
+        "value": "900px (skills ring hidden; character 74svh; name inset clamp(20px, 5vw, 88px) up to 900px, 104px from 901px)"
+      },
+      {
+        "name": "hero-pin-desktop",
+        "value": "hover:hover, pointer:fine, prefers-reduced-motion:no-preference (hero pinned at 100vh, pulled up under the nav)"
+      }
     ]
   },
   "components": [
@@ -96,42 +310,81 @@
       "css": ".ds-tag { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; padding: 5px 9px; border-radius: 3px; background: #17191c; border: 1px solid #2a2d31; color: #90959b; }"
     },
     {
-      "name": "Telemetry Chip",
+      "name": "Hero Edge Name",
       "kind": "custom",
-      "refersTo": "signature-render-stage",
-      "description": "Floating live-status readout over the hero's WebGL scene; the system's one shadow-bearing, blurred-background panel.",
-      "html": "<div class=\"ds-telemetry\" role=\"status\"><span class=\"ds-telemetry-dot\"></span><div class=\"ds-telemetry-copy\"><span class=\"ds-telemetry-label\">LIVE RENDER</span><span class=\"ds-telemetry-value\">60 fps · T+00:12.4</span></div></div>",
-      "css": ".ds-telemetry { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: rgba(11,12,14,0.74); border: 1px solid #3d4147; border-radius: 6px; box-shadow: 0 16px 34px -14px rgba(0,0,0,0.6); backdrop-filter: blur(10px); } .ds-telemetry-dot { width: 8px; height: 8px; border-radius: 50%; background: #4fd1c5; box-shadow: 0 0 0 3px rgba(79,209,197,0.18); animation: ds-pulse 1.8s ease-in-out infinite; } @keyframes ds-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } } .ds-telemetry-copy { display: flex; flex-direction: column; gap: 2px; font-family: 'JetBrains Mono', monospace; } .ds-telemetry-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #5b5f64; } .ds-telemetry-value { font-size: 12.5px; color: #ecece7; }"
+      "refersTo": "hero-edge-word",
+      "description": "The vertical name and its tag, as set on the hero's right edge (the left is the same rotated 180°). Solid gold Oswald with the tag beside it on the midline.",
+      "html": "<div class=\"ds-edge\"><span class=\"ds-edge-word\">Ryder</span><span class=\"ds-edge-tag\">Game developer</span></div>",
+      "css": ".ds-edge { display: flex; flex-direction: column; align-items: center; gap: 18px; writing-mode: vertical-lr; } .ds-edge-word { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 96px; line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; color: #ffd166; text-shadow: 0 8px 28px rgba(0,0,0,0.55); } .ds-edge-tag { font-family: 'IBM Plex Sans', system-ui, sans-serif; font-weight: 700; font-size: 16px; letter-spacing: 0.42em; text-transform: uppercase; white-space: nowrap; color: #ecece7; }"
+    },
+    {
+      "name": "Hero Frame",
+      "kind": "custom",
+      "refersTo": "hero-frame",
+      "description": "The poster's gold frame, drawn as one piece: a single top-lit gradient with the border band and the four corner plates cut out of it by one clip-path — no separate plate fills, so no seams.",
+      "html": "<div class=\"ds-frame\"></div>",
+      "css": ".ds-frame { width: 260px; height: 150px; background: linear-gradient(180deg, #f6d888 0%, #ffd166 30%, #e6b34f 62%, #c28d2f 100%); clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, 44px 12px, calc(100% - 44px) 12px, calc(100% - 44px) 44px, calc(100% - 12px) 44px, calc(100% - 12px) calc(100% - 44px), calc(100% - 44px) calc(100% - 44px), calc(100% - 44px) calc(100% - 12px), 44px calc(100% - 12px), 44px calc(100% - 44px), 12px calc(100% - 44px), 12px 44px, 44px 44px, 44px 12px); }"
+    },
+    {
+      "name": "Skills Ring Text",
+      "kind": "custom",
+      "refersTo": "ring-glyph",
+      "description": "A stretch of the skills ring: heavy uppercase mono letters, words joined only by a black diamond with a gold outline.",
+      "html": "<div class=\"ds-ring\">UNITY <span class=\"ds-ring-sep\">◆</span> SHADER <span class=\"ds-ring-sep\">◆</span> ANIMATION</div>",
+      "css": ".ds-ring { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 25px; text-transform: uppercase; white-space: pre; color: #ecece7; text-shadow: 0 2px 12px rgba(0,0,0,0.8); background: #101214; padding: 14px 18px; } .ds-ring-sep { font-size: 11.5px; color: #0b0c0e; -webkit-text-stroke: 3px #ffd166; paint-order: stroke fill; }"
     }
   ],
   "narrative": {
-    "northStar": "The Render Bench",
-    "overview": "The site is not a page that describes a shader developer — it is presented as the live engine viewport itself, refusing the category-default 'hero photo + text card' portfolio shell. A near-black ground reads as a scene backdrop, not a page background; a single live procedural Three.js material (the 'blob') is the recurring visual motif rather than a decorative hero graphic; and UI chrome throughout reads as an inspector panel — hairline rules, monospace micro-labels, tick marks, corner brackets — never as glass or gradient decoration for its own sake. The build carries two deliberate, non-negotiable typography and motion facts forward as system invariants, not open questions: Unbounded is the one display face for all regular headings, while Oswald ('--font-wordmark') is reserved for exactly one element — the giant hero 'RYDER' wordmark — because Unbounded alone read geometric/normal-width where the wordmark needed a condensed, poster-scale character. And the four motion libraries in the stack are lane-disciplined, not overlapping: GSAP + ScrollTrigger + Lenis own all scroll choreography and pinning; Three.js owns only the hero's live procedural shader material; Motion owns exactly one shared-layout micro-interaction (the sliding nav active-link pill); anime.js owns exactly one section's entrance (the skills-grid card/tag stagger). Color is applied as instrumentation, not paint: the near-black/off-white ground is the resting state, and the three accents (teal, gold, coral) appear as small, purposeful signals — a status dot, a tick mark, a tag border — almost never as large fills. The two backdrop-filter blur uses in the build (sticky nav background, the hero telemetry chip) are narrow legibility scrims over moving content, not a glassmorphism system.",
+    "northStar": "Agent Reveal",
+    "overview": "The hero is staged like a game's character-reveal card, not a category-default \"hero photo + text card\" portfolio shell: the poster fills the whole screen, an illustrated bust portrait stands dead center, the name \"RYDER\" runs vertically down both edges, mirrored and solid gold, and a gold metal frame lit from above closes the whole thing in — with a ghosted repeat of the wordmark tiled across the backdrop. There is no copy column: the pitch (headline, paragraph, CTA) was pulled from the hero for now, and only a visually hidden `<h1>` remains so the page keeps its heading. This replaced an earlier direction built around a live procedural Three.js shader material (the \"Render Bench\") — the user pointed at a Valorant agent-reveal poster and asked for that instead, character portrait in hand. Three.js was removed from the stack entirely at that point, not just unused — no live render, no shader telemetry, nothing to fabricate a \"live\" claim for — and later reintroduced for one specific, user-directed effect (`SkillsRing`'s 3D orbiting skills ring, see below); it isn't the Render Bench coming back, just the one dependency being confined to a single, narrow, explicitly-requested lane rather than owning the hero's identity the way it used to. Everywhere outside the hero, the site keeps its inspector-panel chrome — hairline rules, monospace micro-labels, tick marks, corner brackets — never glass or gradient decoration for its own sake; that language wasn't tied to the shader and survives the pivot intact.\n\nThe build carries two deliberate, non-negotiable typography and motion facts forward as system invariants, not open questions: Unbounded is the one display face for all regular headings, while Oswald (\"--font-wordmark\") is reserved for the hero — the vertical \"RYDER\" name on each edge and the ghosted background wall, never a second unrelated heading — because Unbounded alone read geometric/normal-width where the wordmark needed a condensed, poster-scale character. And the motion libraries in the stack are lane-disciplined, not overlapping: GSAP + ScrollTrigger + Lenis own all scroll choreography and pinning; Motion (`motion/react`, `layoutId`) owns exactly one shared-layout micro-interaction (the sliding nav active-link pill); anime.js owns exactly one section's entrance (the skills-grid card/tag stagger). A future edit should not blur these back together or add a redundant library for a job one of the three already owns.\n\nColor is applied as instrumentation, not paint: the near-black/off-white ground is the resting state, and the three accents (teal, gold, coral) appear as small, purposeful signals — a status dot, a tick mark, a tag border — almost never as large fills. The hero's diagonal light streaks are the one deliberate, capped exception (see Colors — Named Rules). The one `backdrop-filter: blur()` left in the build (sticky nav background) is a narrow legibility scrim over moving content, not a glassmorphism system; it should not be read as license for decorative glass panels elsewhere.",
     "keyCharacteristics": [
-      "Near-black engine-viewport ground with three signal accents (teal, gold, coral) used sparingly and functionally.",
-      "One live WebGL shader material as the page's signature visual, not a static hero image.",
-      "Inspector-panel chrome: hairlines, monospace micro-labels, corner-bracket details — flat by default, shadow reserved for exactly one floating element.",
-      "Two-face type system: Unbounded for every heading, Oswald confined to the single hero wordmark.",
-      "Four animation libraries, four disjoint jobs — no overlap, no redundancy."
+      "Near-black instrumentation ground with three signal accents (teal, gold, coral) used sparingly and functionally, everywhere except the hero.",
+      "The hero is a full-screen character-reveal poster: centered portrait, mirrored solid-gold vertical name, one lit gold metal frame — the page's one deliberately louder moment, not the norm to extend elsewhere.",
+      "Inspector-panel chrome: hairlines, monospace micro-labels, corner-bracket details — flat by default, no shadow except the hero character's own drop-shadow.",
+      "Two-face type system: Unbounded for every heading, Oswald confined to the hero's vertical name and its ghosted wall.",
+      "Three animation libraries, three disjoint jobs — no overlap, no redundancy. `HeroSmoke` owns a fourth, narrower lane: Pixi.js, a 2D sprite/particle renderer, for the hero's light-trail particle system — not a competitor to GSAP/Motion/anime.js's animation-timeline jobs, and not a 3D scene graph. `SkillsRing` owns a fifth: Three.js, reintroduced at explicit user direction specifically for one genuinely 3D effect (skills items orbiting the character in real perspective) after having been removed entirely earlier in the build — see Skills Ring below for what it's confined to and why CSS 3D transforms were the (declined) alternative."
     ],
     "rules": [
-      { "name": "The Instrumentation-Only Rule", "body": "Accent color (teal/gold/coral) is applied to small, functional marks — dots, ticks, borders, single HUD labels — never as a large background fill or a decorative gradient wash. The only large-surface color exception is the live shader material itself.", "section": "colors" },
-      { "name": "The Legibility-Scrim, Not Glass, Rule", "body": "backdrop-filter: blur() appears in exactly two places (sticky nav background, hero telemetry chip) to keep text readable over moving content underneath. It is not a general glassmorphism device; new panels default to a flat, opaque --bg-inset surface with a hairline border instead.", "section": "colors" },
-      { "name": "The One Wordmark Rule", "body": "Oswald renders exactly one element on the whole site (the hero 'RYDER' lockup). Every other heading, including section titles at similar visual weight, stays in Unbounded. Do not introduce a second Oswald instance to 'match' the hero elsewhere.", "section": "typography" },
-      { "name": "The Flat-Surface Rule", "body": "Cards, panels, chips, and nav are flat at rest — hairline border, no shadow. Shadow is reserved for the single floating telemetry chip; introducing shadows on ordinary cards breaks the inspector-panel flatness the rest of the system depends on.", "section": "elevation" }
+      {
+        "name": "The Instrumentation-Only Rule",
+        "body": "Accent color (teal/gold/coral) is applied to small, functional marks — dots, ticks, borders, single HUD labels — never as a large background fill or a decorative gradient wash, everywhere except the hero. The hero's bottom band is the one large-surface exception, and it's exactly one band, built in two layers: the always-on CSS light streaks (`.hero-streaks`) and, where WebGL/motion/a fine pointer allow it, an animated noise-flow shader on top (`HeroSmoke`) — both a user-directed \"agent reveal\" escalation, both confined to the same low-opacity, screen-blended region at the very bottom of the hero. See Hero Character & Frame. Coral is excluded from both; it stays confined to its diagnostic/alert uses. Do not add a second large-surface exception outside this one band.",
+        "section": "colors"
+      },
+      {
+        "name": "The Legibility-Scrim, Not Glass, Rule",
+        "body": "`backdrop-filter: blur()` appears in exactly one place (sticky nav background) to keep text readable over moving content underneath. It is not a general glassmorphism device; new panels default to a flat, opaque `--bg-inset` surface with a hairline border instead.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Wordmark Rule",
+        "body": "Oswald renders the hero's name and nothing else on the whole site: the vertical \"RYDER\" pair on the hero's edges (`.hero-edge-word`) and the outline-only ghost wall behind the character. No other h1/h2-weight text, including section titles at similar visual size, is ever set in Oswald. The name appears exactly as the mirrored pair — do not add a third readable instance (a horizontal lockup, a section title) to \"match\" the hero elsewhere.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-Surface Rule",
+        "body": "Cards, panels, chips, and nav are flat at rest — hairline border, no shadow. Shadow is reserved for the hero's character portrait; introducing shadows on ordinary cards breaks the inspector-panel flatness the rest of the system depends on.",
+        "section": "elevation"
+      },
+      {
+        "name": "The One Flight Grammar Rule",
+        "body": "Every pinned scene boundary — hero exit, filmstrip entrance, and all three `PinnedScene` sections — uses the same arrive/dwell/depart perspective transform (`rotateX` + `translateZ` + scale + blur), not a mix of fades, wipes, and zooms. A new pinned moment should extend this grammar, not invent a second one.",
+        "section": "components"
+      }
     ],
     "dos": [
-      "Do keep accent color (teal/gold/coral) to small functional marks — dots, ticks, chip borders, single HUD labels — per the Instrumentation-Only Rule.",
-      "Do set every heading in Unbounded; reserve Oswald for the one hero wordmark only.",
-      "Do keep cards and panels flat (hairline border, no shadow) at rest; the telemetry chip's shadow stays the one exception.",
-      "Do route scroll choreography and pinning through GSAP + ScrollTrigger + Lenis, the hero's live material through Three.js, the nav pill through Motion's layoutId, and the skills-grid entrance through anime.js — one library per job, per the Library Lane Rule.",
-      "Do provide a non-pinned, scroll-linked (not static) fallback for any pinned/3D moment on touch and prefers-reduced-motion, matching the pattern already in HeroPinned, HeroScope, and ProjectGallery."
+      "**Do** keep accent color (teal/gold/coral) to small functional marks — dots, ticks, chip borders, single HUD labels — per the Instrumentation-Only Rule.",
+      "**Do** set every heading in Unbounded; reserve Oswald for the hero's vertical name and ghost wall only.",
+      "**Do** keep cards and panels flat (hairline border, no shadow) at rest; the hero character's drop-shadow stays the one exception.",
+      "**Do** route scroll choreography and pinning through GSAP + ScrollTrigger + Lenis, the nav pill through Motion's `layoutId`, and the skills-grid entrance through anime.js — one library per job, per the Library Lane Rule. Pixi.js owns exactly one lane (`HeroSmoke`'s particle system) and Three.js owns exactly one other (`SkillsRing`'s 3D orbit, via `CSS3DRenderer`, at explicit user direction). Don't reach for either outside its one lane, and don't introduce a further rendering/3D library without discussing it first.",
+      "**Do** provide a non-pinned, scroll-linked (not static) fallback for any pinned moment on touch and `prefers-reduced-motion`, matching the pattern already in `HeroPinned` and `ProjectGallery`."
     ],
     "donts": [
-      "Don't add decorative backdrop-filter glass panels beyond the two functional legibility scrims (nav, telemetry chip) — the brief explicitly rejects glass/gradient decoration as chrome.",
-      "Don't apply the corner-bracket ('viewfinder') device to arbitrary new cards; it's confined to the about-card and cursor reticle, not a general corner ornament.",
-      "Don't give ordinary content cards a rounded radius — square corners are the panel convention; small radius (3px/6px) is reserved for buttons, tags, and chips.",
-      "Don't introduce a second animation library for a job one of the four (GSAP/Three.js/Motion/anime.js) already owns."
+      "**Don't** add decorative `backdrop-filter` glass panels beyond the nav's one functional legibility scrim — the brief explicitly rejects glass/gradient decoration as chrome.",
+      "**Don't** apply the corner-bracket (\"viewfinder\") device to arbitrary new cards; it's confined to the about-card, cursor reticle, and hero frame, not a general corner ornament.",
+      "**Don't** build the hero frame from separately filled parts: the border and its corner plates are one clipped gradient field so the metal reads as a single piece.",
+      "**Don't** re-add a horizontal \"RYDER\" wordmark or a left-column pitch to the hero without deciding it deliberately — the poster's name is the mirrored vertical pair.",
+      "**Don't** give ordinary content cards a rounded radius — square corners are the panel convention; small radius (3px/6px) is reserved for buttons, tags, and chips.",
+      "**Don't** introduce a second animation library for a job one of the three (GSAP/Motion/anime.js) already owns."
     ]
   }
 }

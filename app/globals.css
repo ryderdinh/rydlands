@@ -85,6 +85,69 @@ main,
   pointer-events: none;
 }
 
+/* -------- Preloader (full-screen cover; a circular hole opens at the center) --------
+   z-index sits above the nav/hero/grain (<= 200) and below the cursor reticle
+   (9999) so the custom cursor stays visible while loading. --r is the hole
+   radius in px, driven by Preloader.tsx; -2 keeps the cover fully closed. */
+.preloader {
+  /* --hole-r: radius of the transparent hole (-2 = closed). --ring-r: radius of
+     the glowing gold rim, a full circle from the first frame (JS sizes it to
+     fit the viewport). Both unitless px, driven by Preloader.tsx. Everything is two gradient layers on this one
+     element — the rim + glow on top, the opaque cover (with its hole) below —
+     which repaints far cheaper per frame than a mask plus a huge blurred
+     box-shadow on a resizing element. */
+  --hole-r: -2;
+  --ring-r: 150;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      transparent calc(var(--ring-r) * 1px - 70px),
+      rgba(var(--gold-rgb), 0.16) calc(var(--ring-r) * 1px - 22px),
+      rgba(var(--gold-rgb), 0.55) calc(var(--ring-r) * 1px - 5px),
+      var(--gold) calc(var(--ring-r) * 1px - 1px),
+      var(--gold) calc(var(--ring-r) * 1px + 1px),
+      rgba(var(--gold-rgb), 0.6) calc(var(--ring-r) * 1px + 5px),
+      rgba(var(--gold-rgb), 0.28) calc(var(--ring-r) * 1px + 24px),
+      rgba(var(--gold-rgb), 0.1) calc(var(--ring-r) * 1px + 50px),
+      transparent calc(var(--ring-r) * 1px + 90px)
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      transparent calc(var(--hole-r) * 1px),
+      var(--bg-inset) calc(var(--hole-r) * 1px + 1.5px)
+    );
+}
+
+.preloader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-mono), monospace;
+  color: var(--ink);
+}
+
+.preloader-percent {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: clamp(56px, 9vw, 104px);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.preloader-percent-unit {
+  font-size: 0.32em;
+  font-weight: 500;
+  color: var(--gold);
+}
+
 /* -------- Cursor reticle (viewfinder brackets, not a glow blob) -------- */
 .cursor-reticle {
   position: fixed;
