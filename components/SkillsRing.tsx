@@ -37,7 +37,7 @@ const ROTATION_SPEED = 0.22; // rad/s — a slow, readable drift, not a spin
 // side down, like a Saturn ring or a tilted coin) — this is the ring's
 // "angle" to change: increase for a more dramatic incline, decrease toward
 // 0 to flatten it back out.
-const TILT_ANGLE = THREE.MathUtils.degToRad(14);
+const TILT_ANGLE = THREE.MathUtils.degToRad(34);
 
 // Angular gap between adjacent glyphs, tuned against RADIUS the same way the
 // item spacing was (see the file-level comment on the spacing fix): arc
