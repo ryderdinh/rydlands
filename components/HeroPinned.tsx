@@ -69,12 +69,6 @@ export default function HeroPinned({ copy }: { copy: ReactNode }) {
         ))}
       </div>
       <div className="hero-scrim" aria-hidden="true" />
-      <div className="hero-character" aria-hidden="true">
-        <picture>
-          <source srcSet="/ryder-portrait.webp" type="image/webp" />
-          <img src="/ryder-portrait.png" alt="" />
-        </picture>
-      </div>
       <div className="hero-vignette" ref={vignetteRef} aria-hidden="true" />
       <div className="hero-streaks" aria-hidden="true">
         <span className="hero-streak hero-streak-a" />
@@ -99,6 +93,17 @@ export default function HeroPinned({ copy }: { copy: ReactNode }) {
         <div className="hero-copy-wrap" ref={copyRef}>
           {copy}
         </div>
+      </div>
+      {/* Desktop: absolutely positioned centerpiece, sized off .hero-pin's
+          100vh box (see .hero-character). Mobile: that box doesn't exist, so
+          this same element switches to normal document flow after the copy
+          instead — DOM position here only matters for mobile's stacked
+          layout, since desktop's absolute positioning is order-independent. */}
+      <div className="hero-character" aria-hidden="true">
+        <picture>
+          <source srcSet="/ryder-portrait.webp" type="image/webp" />
+          <img src="/ryder-portrait.png" alt="" />
+        </picture>
       </div>
       <div className="scroll-cue" ref={cueRef}>
         scroll to explore
