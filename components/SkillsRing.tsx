@@ -92,6 +92,12 @@ const FONT_SIZE = 25
 // Glyph weight, 100–800 (applied as --ring-font-weight; JetBrains Mono ships
 // every hundred, see app/layout.tsx).
 const FONT_WEIGHT = 800
+// Glyph colour (applied as --ring-color).
+const FONT_COLOR = '#ffffff'
+// Glow around the glyphs, 0 (none) to 1.4 (applied as --ring-glow).
+const GLOW = 1
+// Glow colour (applied as --ring-glow-color), independent of the glyph colour.
+const GLOW_COLOR = '#ffc342'
 // Shifts the whole ring in scene units (+X right, +Y up); the ring stays
 // centered on its container otherwise.
 const MOVE_X = -22
@@ -109,6 +115,9 @@ export const ringTuning = {
 	size: RING_SCALE,
 	fontSize: FONT_SIZE,
 	fontWeight: FONT_WEIGHT,
+	color: FONT_COLOR,
+	glow: GLOW,
+	glowColor: GLOW_COLOR,
 	moveX: MOVE_X,
 	moveY: MOVE_Y
 }
@@ -234,6 +243,9 @@ export default function SkillsRing({ items }: { items: string[] }) {
 		let fitScale = 1
 		let appliedFontSize = -1
 		let appliedFontWeight = -1
+		let appliedColor = ''
+		let appliedGlow = -1
+		let appliedGlowColor = ''
 
 		function resize() {
 			const w = backContainer!.clientWidth
@@ -329,6 +341,27 @@ export default function SkillsRing({ items }: { items: string[] }) {
 				appliedFontWeight = ringTuning.fontWeight
 				for (const c of [backContainer, frontContainer]) {
 					c.style.setProperty('--ring-font-weight', `${appliedFontWeight}`)
+				}
+			}
+
+			if (ringTuning.color !== appliedColor) {
+				appliedColor = ringTuning.color
+				for (const c of [backContainer, frontContainer]) {
+					c.style.setProperty('--ring-color', appliedColor)
+				}
+			}
+
+			if (ringTuning.glow !== appliedGlow) {
+				appliedGlow = ringTuning.glow
+				for (const c of [backContainer, frontContainer]) {
+					c.style.setProperty('--ring-glow', `${appliedGlow}`)
+				}
+			}
+
+			if (ringTuning.glowColor !== appliedGlowColor) {
+				appliedGlowColor = ringTuning.glowColor
+				for (const c of [backContainer, frontContainer]) {
+					c.style.setProperty('--ring-glow-color', appliedGlowColor)
 				}
 			}
 

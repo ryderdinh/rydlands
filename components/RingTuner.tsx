@@ -13,8 +13,14 @@ const controls = [
 	{ key: 'size', label: 'size (scale)', min: 0.4, max: 2, step: 0.05, unit: '×' },
 	{ key: 'fontSize', label: 'font size', min: 8, max: 32, step: 0.5, unit: 'px' },
 	{ key: 'fontWeight', label: 'font weight', min: 100, max: 800, step: 100, unit: '' },
+	{ key: 'glow', label: 'glow', min: 0, max: 1.4, step: 0.05, unit: '' },
 	{ key: 'moveX', label: 'move X (→)', min: -400, max: 400, step: 1, unit: '' },
 	{ key: 'moveY', label: 'move Y (↑)', min: -400, max: 400, step: 1, unit: '' }
+] as const
+
+const colorControls = [
+	{ key: 'color', label: 'font color' },
+	{ key: 'glowColor', label: 'glow color' }
 ] as const
 
 type Key = (typeof controls)[number]['key']
@@ -118,6 +124,31 @@ export default function RingTuner() {
 							force(n => n + 1)
 						}}
 					/>
+				</label>
+			))}
+			{colorControls.map(c => (
+				<label
+					key={c.key}
+					style={{
+						display: 'flex',
+						justifyContent: 'space-between',
+						alignItems: 'center',
+						marginBottom: 8
+					}}
+				>
+					<span>{c.label}</span>
+					<span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+						<span>{ringTuning[c.key]}</span>
+						<input
+							type='color'
+							value={ringTuning[c.key]}
+							style={{ width: 32, height: 20, padding: 0, border: 0, background: 'none' }}
+							onChange={e => {
+								ringTuning[c.key] = e.target.value
+								force(n => n + 1)
+							}}
+						/>
+					</span>
 				</label>
 			))}
 		</div>

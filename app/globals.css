@@ -581,9 +581,18 @@ main,
   font-size: var(--ring-font-size, 13px);
   font-weight: var(--ring-font-weight, 400);
   text-transform: uppercase;
-  color: var(--ink);
+  /* Set from SkillsRing.tsx's FONT_COLOR (and live by the dev tuner). */
+  color: var(--ring-color, #fff);
   white-space: pre;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+  /* Two-layer glow in its own colour (--ring-glow-color; tight core + wide halo), scaled by
+     --ring-glow, over the dark drop shadow that keeps it legible on the
+     character. Depth dimming (opacity, set per glyph in SkillsRing.tsx)
+     dims the glow with the glyph, so the front of the ring blazes and the
+     far side sinks back. */
+  text-shadow:
+    0 0 calc(6px * var(--ring-glow, 1)) color-mix(in srgb, var(--ring-glow-color, #fff) calc(80% * var(--ring-glow, 1)), transparent),
+    0 0 calc(18px * var(--ring-glow, 1)) color-mix(in srgb, var(--ring-glow-color, #fff) calc(45% * var(--ring-glow, 1)), transparent),
+    0 2px 12px rgba(0, 0, 0, 0.8);
   /* Deliberately no backface-visibility: hidden — a glyph rotated past
      90° from the camera keeps rendering from behind (reading mirrored)
      instead of vanishing. That reads as part of one continuous ring
@@ -599,6 +608,7 @@ main,
   color: var(--bg-inset);
   -webkit-text-stroke: 3px var(--gold);
   paint-order: stroke fill;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
   font-size: calc(var(--ring-font-size, 13px) * 0.46);
 }
 
