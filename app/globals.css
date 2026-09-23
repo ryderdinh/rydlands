@@ -684,13 +684,18 @@ main,
   }
 }
 
-/* One-directional light ribbons (see HeroSmoke.tsx) — a plain WebGL
-   fragment shader, not Three.js: this is one fullscreen triangle, no scene
+/* One-directional light-trail particles (see HeroSmoke.tsx) — a Pixi.js
+   sprite system, not Three.js: a 2D sprite/particle renderer, no 3D scene
    graph needed. Same z-index tier and bottom offset as .hero-streaks (its
    always-on fallback, still visible around/under it), just taller: the
-   shader sweeps its ribbons diagonally up from the bottom-right rather than
-   sitting in a shallow horizontal band, so it needs more vertical room to
-   read. The shader's own region falloff does the fading within that box. */
+   particles sweep diagonally up from the bottom-right rather than sitting
+   in a shallow horizontal band, so it needs more vertical room to read.
+   The component's own alpha falloffs do the fading within that box, and
+   they're computed against the canvas's own rendered dimensions, so they
+   hold up at any height this resolves to — including the shorter mobile
+   one below. Shown on mobile too (unlike the shader version this
+   replaced): a ~90-sprite pool is cheap enough to run there, see
+   HeroSmoke.tsx. */
 .hero-smoke-canvas {
   position: absolute;
   left: 0;
@@ -702,12 +707,6 @@ main,
   display: block;
   pointer-events: none;
   mix-blend-mode: screen;
-}
-
-@media (max-width: 900px) {
-  .hero-smoke-canvas {
-    display: none;
-  }
 }
 
 /* Guarantees copy legibility regardless of what's behind it — a fixed dark
