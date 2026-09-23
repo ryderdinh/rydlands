@@ -3,16 +3,16 @@
 import { useEffect, useRef } from "react";
 import { prefersReducedMotion } from "@/lib/motion";
 
-// Thick, one-directional light ribbons sweeping the hero's lower-right,
-// echoing the reference's trails. Explicit gaussian-band ribbons (5, each
-// with its own bent centerline and color mix) in a rotated "flow" frame —
-// not an emergent noise pattern, which kept reading as thin sparse lines no
-// matter how it was tuned. Plain WebGL (no Three.js): this is one
-// fullscreen-triangle fragment shader, not a scene — the scene-graph/camera
-// machinery Three.js exists for would be dead weight for a single flat
-// pass. Desktop/fine-pointer/no-reduced-motion only, layered above the
-// always-on CSS `.hero-streaks` band, which stays the fallback everywhere
-// this can't run.
+// Comet-tail light ribbons flaring from a source point low in the hero's
+// right side, thick and saturated near it, thinning and paling as they
+// trail up-left — not parallel bands of constant width. That's what the
+// reference actually does: a dense, colorful mass low-right with pale
+// wisps extending away from it, not a uniform repeating stripe pattern.
+// Plain WebGL (no Three.js): this is one fullscreen-triangle fragment
+// shader, not a scene — the scene-graph/camera machinery Three.js exists
+// for would be dead weight for a single flat pass. Desktop/fine-pointer/
+// no-reduced-motion only, layered above the always-on CSS `.hero-streaks`
+// band, which stays the fallback everywhere this can't run.
 const VERTEX_SRC = `
 attribute vec2 aPosition;
 varying vec2 vUv;
@@ -60,63 +60,86 @@ void main() {
   float aspect = uResolution.x / uResolution.y;
   vec2 centered = (vUv - 0.5) * vec2(aspect, 1.0);
 
-  // Rotate into a "flow" frame: fuv.x runs along the streak direction,
-  // fuv.y across it — the reference's trails sweep one consistent diagonal,
-  // not noise drifting isotropically.
-  float angle = radians(-16.0);
-  mat2 rot = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
-  vec2 fuv = rot * centered;
+  // Everything flares from one source point, low on the right — the
+  // reference's colorful mass sits there, with pale trails extending away
+  // from it, not a band of parallel stripes with no origin.
+  vec2 source = vec2(aspect * 0.3, -0.42);
 
-  float t = uTime * 0.09;
+  // Steep diagonal, up and to the left.
+  float flowAngle = radians(148.0);
+  vec2 flowDir = vec2(cos(flowAngle), sin(flowAngle));
+  vec2 acrossDir = vec2(-flowDir.y, flowDir.x);
 
-  // A handful of explicit thick ribbons rather than an emergent noise
-  // pattern — noise-derived bands kept reading as thin, sparse lines no
-  // matter how the thresholds were tuned. Each ribbon is a soft gaussian
-  // band around a centerline that bends slowly along its length (not a
-  // rigid straight diagonal) and drifts sideways over time.
-  vec3 accumColor = vec3(0.0);
-  float accumAlpha = 0.0;
+  vec2 toPixel = centered - source;
+  float along = dot(toPixel, flowDir);
+  float across = dot(toPixel, acrossDir);
 
-  for (int i = 0; i < 5; i++) {
+  float t = uTime * 0.12;
+
+  // Strands are combined with max(), not additive accumulation — additive
+  // gaussian bands stacked across several overlapping strands washed out
+  // into one soft indistinct glow with no readable line structure, which
+  // is exactly why the flow direction was unreadable. max() keeps each
+  // strand visually distinct wherever they cross.
+  vec3 maxColor = vec3(0.0);
+  float maxAlpha = 0.0;
+
+  const int STRANDS = 6;
+  for (int i = 0; i < STRANDS; i++) {
     float fi = float(i);
-    // Spread across the frame's actual visible vertical range (roughly
-    // -0.5..0.5 in this rotated space) — the previous spacing put 2 of 5
-    // ribbons' centerlines entirely off-frame, which is why only one was
-    // ever visible regardless of width/color tuning. Biased low: the
-    // reference's trails sit low in the frame, not sweeping up across the
-    // character's chest — the canvas box itself was also shortened to
-    // match instead of relying on falloff alone to keep them down there.
-    float baseOffset = -0.7 + fi * 0.22;
-    float driftSpeed = 0.35 + fi * 0.09;
-    float bend = fbm(vec2(fuv.x * 0.55 + fi * 11.0, t * driftSpeed)) - 0.5;
-    float centerline = baseOffset + bend * 0.55 + sin(fuv.x * 1.1 + fi * 2.3 + t * 1.1) * 0.1;
-    float dist = fuv.y - centerline;
+    float laneOffset = (fi - float(STRANDS - 1) * 0.5) * 0.13;
+    float speed = 0.5 + fi * 0.08;
+    float a = along - fi * 0.03;
 
-    // Narrow enough that neighboring ribbons stay visually distinct
-    // (dark shows between them) instead of merging into one wash.
-    float width = 0.075 + 0.02 * sin(fi * 3.1 + t * 0.4);
-    float band = exp(-(dist * dist) / (2.0 * width * width));
-    float core = exp(-(dist * dist) / (2.0 * (width * 0.22) * (width * 0.22)));
+    // The centerline bends gently along its length instead of running
+    // ruler-straight, and drifts slowly over time for a living, not
+    // static, flow. Bend amplitude grows with distance from the source so
+    // strands stay tight and legible near it and loosen as they trail off.
+    float bend = fbm(vec2(a * 1.6 + fi * 17.0, t * speed)) - 0.5;
+    float centerline = laneOffset + bend * (0.14 + a * 0.12);
+    float d = across - centerline;
 
-    vec3 ribbonTint = mix(uColorA, uColorB, fract(fi * 0.37 + 0.2));
-    // A thin hot highlight, not a wash toward white — the character's own
-    // jacket is already near-white, so a wide white core disappears into it.
-    vec3 ribbonColor = mix(ribbonTint, vec3(1.0), core * 0.45);
+    // The "comet tail" look: width and brightness both fall off with
+    // distance from the source, and nothing renders behind it (a < 0).
+    // A longer reach keeps the tail visible well across the frame so the
+    // direction of travel is unmistakable, not just legible near the source.
+    float reach = 1.35;
+    float taper = clamp(1.0 - a / reach, 0.0, 1.0);
+    taper = pow(taper, 0.5);
 
-    accumColor += ribbonColor * band;
-    accumAlpha = 1.0 - (1.0 - accumAlpha) * (1.0 - band);
+    // A steep power (>2) cross-section reads as a defined ribbon with a
+    // bright core and a soft skirt — a plain gaussian here always looked
+    // like a blurred smudge no matter how narrow it was made. Wider than
+    // the first pass: that pass was legible but too thin to read as smoke.
+    float width = mix(0.03, 0.085, taper);
+    float core = exp(-pow(abs(d) / width, 2.2));
+    float skirt = exp(-pow(abs(d) / (width * 2.8), 2.0)) * 0.45;
+    float shape = (core + skirt) * taper;
+    shape *= smoothstep(-0.04, 0.1, a);
+
+    // Fine turbulence breaks the strand into wisps along its length
+    // instead of a smooth solid tube.
+    float wisp = 0.6 + 0.4 * fbm(vec2(a * 6.0 - t * (speed + 0.4), fi * 5.0));
+    shape *= wisp;
+
+    vec3 tint = mix(uColorA, uColorB, fract(fi * 0.61 + 0.15));
+    vec3 strandColor = mix(tint, vec3(1.0), clamp(core * 0.5 + (1.0 - taper) * 0.15, 0.0, 0.6));
+
+    vec3 contribution = strandColor * shape;
+    if (shape > maxAlpha) {
+      maxColor = contribution;
+      maxAlpha = shape;
+    }
   }
 
-  // Region falloff: concentrated through the lower-right, fading out
-  // toward the top and left rather than filling the whole frame.
-  float regionFall = smoothstep(0.85, -0.55, fuv.y * 0.6 - fuv.x * 0.3);
-  // Pushed right of where the region falloff alone would put it — the
-  // hero's copy column lives in this frame's left third, so the ribbons
-  // clear it instead of washing out the pitch text.
-  float edgeFall = smoothstep(0.2, 0.5, vUv.x) * smoothstep(1.05, 0.75, vUv.x);
+  maxAlpha = min(maxAlpha, 0.92);
 
-  vec3 color = clamp(accumColor, 0.0, 1.6);
-  float alpha = accumAlpha * regionFall * edgeFall;
+  // Kept clear of the copy column in the left third so the tail doesn't
+  // wash out the pitch text.
+  float edgeFall = smoothstep(0.14, 0.42, vUv.x);
+
+  vec3 color = clamp(maxColor, 0.0, 1.4);
+  float alpha = maxAlpha * edgeFall;
 
   gl_FragColor = vec4(color, alpha);
 }
