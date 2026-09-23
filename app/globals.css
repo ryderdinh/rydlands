@@ -1041,7 +1041,15 @@ html.scene-locked .hero-pin {
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  /* A dark pill behind it: over the portrait's white jacket the bare faint text
+     was unreadable. */
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(16, 18, 20, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--ink-dim);
   pointer-events: none;
 }
 
