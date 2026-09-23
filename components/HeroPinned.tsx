@@ -77,12 +77,12 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
       </div>
       <HeroSmoke />
       <div className="hero-edge-lockup hero-edge-lockup--left" aria-hidden="true">
-        <span className="hero-edge-tag">Portfolio reveal</span>
+        <span className="hero-edge-tag">Game developer</span>
         <span className="hero-edge-word">Ryder</span>
       </div>
       <div className="hero-edge-lockup hero-edge-lockup--right" aria-hidden="true">
         <span className="hero-edge-word">Ryder</span>
-        <span className="hero-edge-tag">Unity developer</span>
+        <span className="hero-edge-tag">Game developer</span>
       </div>
       <div className="hero-frame" aria-hidden="true">
         <span className="hero-frame-corner tl" />

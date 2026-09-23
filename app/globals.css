@@ -1,3 +1,8 @@
+/* Tailwind without preflight: the hand-written styles below already own
+   the base/reset, so only theme tokens and utilities are pulled in. */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
 :root {
   --bg: #101214;
   --bg-raised: #17191c;
@@ -51,6 +56,21 @@ body {
 main,
 .footer {
   position: relative;
+}
+
+/* Standard visually-hidden-but-accessible pattern — content stays in the
+   accessibility tree and DOM flow (unlike display: none) without taking
+   up visual space. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -481,7 +501,8 @@ main,
    as redundant next to the ring. */
 .skills-ring {
   position: absolute;
-  right: 8%;
+  left: 50%;
+  transform: translateX(-50%);
   bottom: 0;
   height: 86%;
   width: 38%;
@@ -527,11 +548,18 @@ main,
 }
 
 /* -------- Hero character (the agent-reveal centerpiece) -------- */
+/* Centered at the bottom edge at every width — the hero is a single poster
+   frame (see .hero-pin's min-height), not a copy column with a portrait
+   under it. The <img> is sized off the viewport directly rather than as a
+   percentage of this flex wrapper: that percentage doesn't reliably
+   resolve against a flex item's own cross-size, and silently fell back to
+   the image's native ~920px height — fine on a tall window, but it cropped
+   his head off on a short, wide one. */
 .hero-character {
   position: absolute;
-  right: 2%;
+  left: 50%;
+  transform: translateX(-50%);
   bottom: 0;
-  height: 86%;
   z-index: 1;
   display: flex;
   align-items: flex-end;
@@ -540,133 +568,161 @@ main,
 
 .hero-character img {
   display: block;
-  height: 100%;
+  height: 96vh;
   width: auto;
+  max-width: none;
   filter: drop-shadow(0 30px 54px rgba(0, 0, 0, 0.55));
 }
 
 @media (max-width: 900px) {
-  /* The hero here is plain stacked document flow (no 100vh box to size a
-     percentage height against — that's what used to put the character's
-     native 920px-tall image over the entire screen, burying the copy).
-     Switching to position: relative (not static — keeps the z-index: 1
-     from the base rule, so it still paints above .hero-ghost-wall/.hero-
-     scrim) puts it back in flow instead, sized against the viewport
-     directly and placed after the copy in the DOM (see HeroPinned.tsx)
-     so it reads as a reveal underneath the pitch, not a competitor above
-     it. This is also what .hero-scrim's mobile gradient already fades to
-     transparent toward the bottom for — that gradient predates this and
-     was dead code without something here to show through it. */
-  .hero-character {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    height: auto;
-    width: 100%;
-    display: block;
-    text-align: center;
-    margin: 4px 0 0;
-  }
-
-  /* Sized directly rather than via the flex height: 100% the desktop rule
-     uses — that percentage doesn't reliably resolve against a flex item's
-     own definite cross-size across browsers, and silently falling back to
-     intrinsic aspect-ratio sizing off the full container width produced an
-     oversized image that overlapped the copy above it. */
   .hero-character img {
-    display: inline-block;
-    height: 46vh;
-    width: auto;
-    max-width: 90%;
+    height: 74svh;
   }
 }
 
-/* -------- Hero frame (agent-reveal style: gold corner brackets, a
-   vertical edge lockup, diagonal light streaks) -------- */
-.hero-frame-corner {
+/* -------- Hero frame (agent-reveal style): the reveal poster's gold border
+   running the full perimeter, with a square gold plate at each corner
+   carrying a small dark bracket mark. --frame is the border thickness; the
+   bottom devices (.hero-streaks, .scroll-cue) key off it so they sit just
+   inside the border. -------- */
+.hero-pin {
+  --frame: clamp(10px, 1.1vw, 18px);
+}
+
+.hero-frame {
   position: absolute;
-  width: 30px;
-  height: 30px;
-  border: 2px solid var(--gold);
+  inset: 0;
   z-index: 3;
+  border: var(--frame) solid var(--gold);
   pointer-events: none;
 }
 
-.hero-frame-corner.tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
-.hero-frame-corner.tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
-/* Same at-rest fold offset as .scroll-cue (see its note) — bottom corners
-   sit further in from the edge than the top pair so the frame still reads
-   intact before the hero is actually pinned. */
-.hero-frame-corner.bl { bottom: 70px; left: 20px; border-right: none; border-top: none; }
-.hero-frame-corner.br { bottom: 70px; right: 20px; border-left: none; border-top: none; }
+.hero-frame-corner {
+  position: absolute;
+  width: clamp(44px, 5.4vw, 96px);
+  aspect-ratio: 1;
+  background: var(--gold);
+}
+
+.hero-frame-corner::after {
+  content: "";
+  position: absolute;
+  inset: 30%;
+  border: 3px solid var(--bg-inset);
+}
+
+.hero-frame-corner.tl { top: calc(var(--frame) * -1); left: calc(var(--frame) * -1); }
+.hero-frame-corner.tr { top: calc(var(--frame) * -1); right: calc(var(--frame) * -1); }
+.hero-frame-corner.bl { bottom: calc(var(--frame) * -1); left: calc(var(--frame) * -1); }
+.hero-frame-corner.br { bottom: calc(var(--frame) * -1); right: calc(var(--frame) * -1); }
+
+.hero-frame-corner.tl::after { border-right: none; border-bottom: none; }
+.hero-frame-corner.tr::after { border-left: none; border-bottom: none; }
+.hero-frame-corner.bl::after { border-right: none; border-top: none; }
+.hero-frame-corner.br::after { border-left: none; border-top: none; }
+
+/* The name, as the reveal poster sets it: "RYDER" running vertically down
+   each edge, big and solid, mirrored (the left one reads bottom-to-top, the
+   right one top-to-bottom, like a reflection) with a small tracked tag on
+   the outer side of each. With the horizontal wordmark and the pitch column
+   gone from the hero, these two ARE the name — so they're the hero's
+   dominant type, not a ghosted watermark. Sits at z-index 1 (DOM-earlier
+   than .hero-character, same tier) so the character can overlap the name a
+   little instead of the name printing across him. Sized off the smaller of
+   vh/vw so the pair keeps clear of the centered character on shorter or
+   narrower windows, and shown at every width (there is no other name in the
+   hero) — the tags are the first thing dropped when space runs out. */
+.hero-edge-lockup {
+  display: flex;
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  /* In a vertical writing mode the flex axes swap: `column` is what puts the
+     tag beside the name (across the page) instead of stacked under it, and
+     `align-items` then runs along the text — center keeps the tag on the
+     same midline as the name. */
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  pointer-events: none;
+}
+
+.hero-edge-lockup--left {
+  left: clamp(20px, 5vw, 88px);
+  transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+}
+
+/* Inset past .scroll-hud (fixed, right 22px, ~46px wide, desktop only) so
+   the two lockups can share the same vertical center and stay mirrored. */
+.hero-edge-lockup--right {
+  right: clamp(20px, 5vw, 88px);
+  transform: translateY(-50%);
+  writing-mode: vertical-lr;
+}
+
+@media (min-width: 901px) {
+  .hero-edge-lockup--left {
+    left: 104px;
+  }
+
+  .hero-edge-lockup--right {
+    right: 104px;
+  }
+}
+
+.hero-edge-tag {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: clamp(15px, 2.9vh, 24px);
+  font-weight: 700;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink);
+}
 
 @media (max-width: 640px) {
-  .hero-frame-corner {
-    width: 20px;
-    height: 20px;
+  .hero-edge-tag {
+    display: none;
   }
-  .hero-frame-corner.tl, .hero-frame-corner.tr { top: 12px; }
-  .hero-frame-corner.bl, .hero-frame-corner.br { bottom: 12px; }
-  .hero-frame-corner.tl, .hero-frame-corner.bl { left: 12px; }
-  .hero-frame-corner.tr, .hero-frame-corner.br { right: 12px; }
 }
 
-/* A second, ghosted "RYDER" running vertically along each edge — the
-   reference's mirrored repeated-lockup framing device (left and right
-   read in opposite directions, like a reflection). Outline-only (no fill)
-   so it reads as a watermark, not a competitor to the real wordmark in the
-   copy column. Wide desktop only: at narrower widths .container's own
-   margin shrinks and the left one would collide with the masthead/pitch
-   text underneath. */
-.hero-edge-lockup {
-  display: none;
+.hero-edge-word {
+  font-family: var(--font-wordmark), sans-serif;
+  font-weight: 700;
+  font-size: clamp(56px, min(22vh, 12vw), 230px);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
 }
 
-@media (min-width: 1440px) {
-  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    .hero-edge-lockup {
-      display: flex;
-      position: absolute;
-      z-index: 2;
-      align-items: center;
-      gap: 16px;
-      pointer-events: none;
-    }
+/* The hero is one poster frame at every width: a full screen tall even in
+   the un-pinned (touch / reduced-motion) flow, where it used to be
+   auto-height and sized by its copy. */
+.hero-pin {
+  min-height: 100svh;
+}
 
-    .hero-edge-lockup--left {
-      top: 50%;
-      left: 30px;
-      transform: translateY(-50%);
-      writing-mode: vertical-rl;
-    }
+/* Full-bleed poster: the sticky nav ahead of the hero in flow (60px, invisible
+   until the first scroll) used to push the hero's top edge below the real top
+   of the viewport and its bottom past the fold, leaving a dead band above the
+   frame. Pull the hero up under the nav so the frame IS the screen, and the
+   bottom devices sit the same 20px from the edge as the top corners do. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .hero-pin {
+    margin-top: -60px;
+  }
 
-    /* Lower than center, not mirrored top-to-bottom at 50% — .scroll-hud
-       already owns the vertical-center of the right edge globally, so this
-       sits below it instead of fighting it for the same 130px track. */
-    .hero-edge-lockup--right {
-      top: 78%;
-      right: 30px;
-      transform: translateY(-50%);
-      writing-mode: vertical-lr;
-    }
+  /* Scoped under .hero-pin for specificity: both base rules are declared
+     further down the file and would otherwise win the tie. */
+  .hero-pin .hero-streaks {
+    bottom: var(--frame);
+  }
 
-    .hero-edge-tag {
-      font-family: var(--font-mono), monospace;
-      font-size: 10.5px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--ink-faint);
-    }
-
-    .hero-edge-word {
-      font-family: var(--font-wordmark), sans-serif;
-      font-weight: 700;
-      font-size: 48px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: transparent;
-      -webkit-text-stroke: 1.5px rgba(255, 209, 102, 0.4);
-    }
+  .hero-pin .scroll-cue {
+    bottom: calc(var(--frame) + 16px);
   }
 }
 
@@ -777,41 +833,20 @@ main,
   right: 0;
   height: 100vh;
   z-index: 1;
-  background: linear-gradient(90deg, var(--bg) 0%, var(--bg) 26%, rgba(16, 18, 20, 0.75) 42%, transparent 62%);
+  /* Symmetric edge falloff, not a one-sided fade: the character is centered
+     and the name lockups run both edges, so both edges get the same dark
+     shoulder (contrast for the vertical lockups) and the middle — where the
+     ghost wall reads behind him — stays clear. */
+  background: linear-gradient(
+    90deg,
+    var(--bg) 0%,
+    rgba(16, 18, 20, 0.6) 14%,
+    transparent 34%,
+    transparent 66%,
+    rgba(16, 18, 20, 0.6) 86%,
+    var(--bg) 100%
+  );
   pointer-events: none;
-}
-
-@media (max-width: 900px) {
-  .hero-scrim {
-    /* height: 100vh (the base rule) is shorter than .hero-pin's actual
-       content height now that the character renders in flow below the
-       copy (see .hero-character) — left as 100vh, the gradient's fade-to-
-       transparent stop landed partway down the character instead of at
-       the section's actual bottom, showing as a hard seam across the
-       jacket. Stretching to the positioned ancestor's real height via
-       top+bottom (not a percentage, which can't resolve against
-       .hero-pin's auto height) instead of a fixed viewport height fixes
-       that regardless of how tall the content ends up being. */
-    height: auto;
-    top: 0;
-    bottom: 0;
-    /* More stops than the fix above strictly needs: the original 2-taper
-       gradient had an abrupt slope change at its 55% stop (flat opaque,
-       then suddenly tapering) — a classic Mach-band artifact, and a very
-       visible one over the character's bright white jacket. Spreading the
-       falloff across several intermediate stops removes the kink instead
-       of just relocating it. */
-    background: linear-gradient(
-      180deg,
-      var(--bg) 0%,
-      var(--bg) 40%,
-      rgba(16, 18, 20, 0.82) 52%,
-      rgba(16, 18, 20, 0.55) 64%,
-      rgba(16, 18, 20, 0.28) 77%,
-      rgba(16, 18, 20, 0.08) 90%,
-      transparent 100%
-    );
-  }
 }
 
 .hero-vignette {

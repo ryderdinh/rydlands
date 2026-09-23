@@ -36,6 +36,7 @@ export default function TiltCard({
 
   return createElement(
     as,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- polymorphic `as` element props
     { ref, className: `tilt-card ${className ?? ""}`.trim(), ...rest } as any,
     <>
       {children}

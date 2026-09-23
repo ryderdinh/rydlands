@@ -60,24 +60,20 @@ export default function ProjectVessel({ type, layers, pulse, shimmer }: ProjectV
     );
   }
 
-  let bottom = 0;
+  const bottoms = layers.map((_, idx) => layers.slice(0, idx).reduce((sum, l) => sum + l.h, 0));
   return (
     <TiltCard as="div" className="bottle" maxTilt={12} glare innerRef={nodeRef} aria-hidden="true">
-      {layers.map((layer, idx) => {
-        const el = (
-          <div
-            key={idx}
-            className="layer"
-            style={{
-              height: `${layer.h}%`,
-              bottom: `${bottom}%`,
-              background: layer.c,
-            }}
-          />
-        );
-        bottom += layer.h;
-        return el;
-      })}
+      {layers.map((layer, idx) => (
+        <div
+          key={idx}
+          className="layer"
+          style={{
+            height: `${layer.h}%`,
+            bottom: `${bottoms[idx]}%`,
+            background: layer.c,
+          }}
+        />
+      ))}
     </TiltCard>
   );
 }

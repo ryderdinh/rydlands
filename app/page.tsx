@@ -1,8 +1,6 @@
-import HeroIntro from "@/components/HeroIntro";
 import HeroPinned from "@/components/HeroPinned";
 import PinnedScene from "@/components/PinnedScene";
 import ScrollReveal from "@/components/ScrollReveal";
-import SplitReveal from "@/components/SplitReveal";
 import MagneticButton from "@/components/MagneticButton";
 import SiteNav from "@/components/SiteNav";
 import SkillGrid from "@/components/SkillGrid";
@@ -69,7 +67,7 @@ const projects: Project[] = [
   {
     tag: "Performance · Diagnostics",
     title: "Android ANR Root-Cause",
-    desc: "Traced Google Play Console ANR logs back to a GPU fence stall caused by a WebView ad creative (Pangle/ByteDance) blocking Unity's RenderThread.",
+    desc: "Traced Google Play Console ANR logs back to a GPU fence stall caused by a WebView ad creative (Pangle/ByteDance) blocking Unity&apos;s RenderThread.",
     stack: ["Android", "Profiling", "AppLovin MAX"],
     vessel: {
       type: "orb",
@@ -98,31 +96,12 @@ export default function Home() {
         <HeroPinned
           skillsItems={skillsRingItems}
           copy={
-            <HeroIntro className="hero-copy-inner">
-              <div className="hero-masthead">
-                <span className="hero-eyebrow">Unity developer · gameplay, shaders, native performance</span>
-                <div className="hero-wordmark" aria-hidden="true">RYDER</div>
-              </div>
-              <div className="hero-copy">
-                <SplitReveal as="h1">
-                  Gameplay that ships. Shaders I write myself.
-                </SplitReveal>
-                <p>
-                  Unity developer for mobile games — hand-written URP/HLSL shaders,
-                  C# gameplay systems, and the native/performance work most
-                  portfolios skip.
-                </p>
-                <div className="cta-row">
-                  <MagneticButton href="#projects" className="btn btn-primary">
-                    View case studies
-                  </MagneticButton>
-                  <MagneticButton href="#contact" className="btn btn-link">
-                    Get in touch
-                    <span className="btn-link-arrow" aria-hidden="true">→</span>
-                  </MagneticButton>
-                </div>
-              </div>
-            </HeroIntro>
+            // Agent-reveal poster composition: character centered, name only as
+            // the vertical edge lockups (see HeroPinned.tsx). The pitch (headline
+            // + paragraph + CTA) that used to fill the left column is pulled for
+            // now rather than deleted — the page still needs exactly one <h1> for
+            // accessibility/SEO, so it stays in the DOM, visually hidden.
+            <h1 className="sr-only">Gameplay that ships. Shaders I write myself.</h1>
           }
         />
 
@@ -160,7 +139,7 @@ export default function Home() {
                 <p>
                   Beyond gameplay, I own <strong>native ad-mediation integration</strong>{" "}
                   (AppLovin MAX) on both Android and iOS, and once root-caused a hard
-                  ANR down to a WebView ad creative blocking Unity's RenderThread.
+                  ANR down to a WebView ad creative blocking Unity&apos;s RenderThread.
                 </p>
                 <p>
                   How I work: lean code, clear English comments, production-ready
