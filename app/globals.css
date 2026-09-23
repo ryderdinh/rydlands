@@ -501,13 +501,38 @@ main,
 }
 
 @media (max-width: 900px) {
-  /* Not shown on mobile: the hero here is plain stacked document flow (no
-     100vh box to size a percentage height against — that's what put the
-     character's native 920px-tall image over the entire screen, burying
-     the copy). A right-sized, non-overlapping mobile treatment is future
-     work; hiding it is the safe default over broken/illegible text. */
+  /* The hero here is plain stacked document flow (no 100vh box to size a
+     percentage height against — that's what used to put the character's
+     native 920px-tall image over the entire screen, burying the copy).
+     Switching to position: relative (not static — keeps the z-index: 1
+     from the base rule, so it still paints above .hero-ghost-wall/.hero-
+     scrim) puts it back in flow instead, sized against the viewport
+     directly and placed after the copy in the DOM (see HeroPinned.tsx)
+     so it reads as a reveal underneath the pitch, not a competitor above
+     it. This is also what .hero-scrim's mobile gradient already fades to
+     transparent toward the bottom for — that gradient predates this and
+     was dead code without something here to show through it. */
   .hero-character {
-    display: none;
+    position: relative;
+    right: auto;
+    bottom: auto;
+    height: auto;
+    width: 100%;
+    display: block;
+    text-align: center;
+    margin: 4px 0 0;
+  }
+
+  /* Sized directly rather than via the flex height: 100% the desktop rule
+     uses — that percentage doesn't reliably resolve against a flex item's
+     own definite cross-size across browsers, and silently falling back to
+     intrinsic aspect-ratio sizing off the full container width produced an
+     oversized image that overlapped the copy above it. */
+  .hero-character img {
+    display: inline-block;
+    height: 46vh;
+    width: auto;
+    max-width: 90%;
   }
 }
 
@@ -620,7 +645,13 @@ main,
      glows across the character's lower half like the reference's light
      trails crossing the agent, rather than stopping behind them. */
   z-index: 2;
-  overflow: hidden;
+  /* Not overflow: hidden — that clip, combined with mix-blend-mode: screen,
+     rendered as a visible horizontal seam right at the container's own top
+     edge wherever it crossed the character's jacket (a compositing
+     artifact at the clip boundary, not anything drawn there on purpose).
+     The two streak bars below are already bounded by their own left/width;
+     their blur softly bleeding past this box's edges is harmless, unlike
+     a hard clip line was. */
   pointer-events: none;
   opacity: 0.5;
   mix-blend-mode: screen;
@@ -665,7 +696,7 @@ main,
   left: 0;
   right: 0;
   bottom: 100px;
-  height: 42%;
+  height: 82%;
   width: 100%;
   z-index: 2;
   display: block;
@@ -694,7 +725,34 @@ main,
 
 @media (max-width: 900px) {
   .hero-scrim {
-    background: linear-gradient(180deg, var(--bg) 0%, var(--bg) 55%, rgba(16, 18, 20, 0.65) 70%, transparent 88%);
+    /* height: 100vh (the base rule) is shorter than .hero-pin's actual
+       content height now that the character renders in flow below the
+       copy (see .hero-character) — left as 100vh, the gradient's fade-to-
+       transparent stop landed partway down the character instead of at
+       the section's actual bottom, showing as a hard seam across the
+       jacket. Stretching to the positioned ancestor's real height via
+       top+bottom (not a percentage, which can't resolve against
+       .hero-pin's auto height) instead of a fixed viewport height fixes
+       that regardless of how tall the content ends up being. */
+    height: auto;
+    top: 0;
+    bottom: 0;
+    /* More stops than the fix above strictly needs: the original 2-taper
+       gradient had an abrupt slope change at its 55% stop (flat opaque,
+       then suddenly tapering) — a classic Mach-band artifact, and a very
+       visible one over the character's bright white jacket. Spreading the
+       falloff across several intermediate stops removes the kink instead
+       of just relocating it. */
+    background: linear-gradient(
+      180deg,
+      var(--bg) 0%,
+      var(--bg) 40%,
+      rgba(16, 18, 20, 0.82) 52%,
+      rgba(16, 18, 20, 0.55) 64%,
+      rgba(16, 18, 20, 0.28) 77%,
+      rgba(16, 18, 20, 0.08) 90%,
+      transparent 100%
+    );
   }
 }
 

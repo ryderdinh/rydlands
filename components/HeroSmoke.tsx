@@ -1,137 +1,82 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Application, Container, Sprite, Texture } from "pixi.js";
 import { prefersReducedMotion } from "@/lib/motion";
 
-// Thick, one-directional light ribbons sweeping the hero's lower-right,
-// echoing the reference's trails. Explicit gaussian-band ribbons (5, each
-// with its own bent centerline and color mix) in a rotated "flow" frame —
-// not an emergent noise pattern, which kept reading as thin sparse lines no
-// matter how it was tuned. Plain WebGL (no Three.js): this is one
-// fullscreen-triangle fragment shader, not a scene — the scene-graph/camera
-// machinery Three.js exists for would be dead weight for a single flat
-// pass. Desktop/fine-pointer/no-reduced-motion only, layered above the
+// A real sprite particle system, not an analytic shader shape — that's the
+// point of using Pixi here. Several rounds of raw-WebGL gaussian ribbons all
+// read as smooth vector shapes (clean, mathematically continuous edges), no
+// matter how their width/taper/noise was tuned, because a single continuous
+// analytic band just doesn't have the texture organic smoke/light trails
+// have. Real VFX tools (Unity's Shuriken, Unreal's Niagara — the reference's
+// own poster likely came from something in this family) build that texture
+// from many small soft sprites with randomized size/opacity/drift, not one
+// continuous shape. Pixi is a right-sized choice for that: a 2D sprite/
+// particle renderer with blend modes, not a 3D scene graph — the same
+// reasoning that kept the smoke's previous version on plain WebGL instead of
+// pulling in Three.js applies here too; this is a sprite compositor, not a
+// 3D engine. Desktop/fine-pointer/no-reduced-motion only, layered above the
 // always-on CSS `.hero-streaks` band, which stays the fallback everywhere
 // this can't run.
-const VERTEX_SRC = `
-attribute vec2 aPosition;
-varying vec2 vUv;
-void main() {
-  vUv = aPosition * 0.5 + 0.5;
-  gl_Position = vec4(aPosition, 0.0, 1.0);
-}
-`;
 
-const FRAGMENT_SRC = `
-precision highp float;
-varying vec2 vUv;
-uniform float uTime;
-uniform vec2 uResolution;
-uniform vec3 uColorA;
-uniform vec3 uColorB;
+const TEAL: [number, number, number] = [79, 209, 197];
+const GOLD: [number, number, number] = [255, 209, 102];
 
-float hash(vec2 p) {
-  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
 }
 
-float noise(vec2 p) {
-  vec2 i = floor(p);
-  vec2 f = fract(p);
-  float a = hash(i);
-  float b = hash(i + vec2(1.0, 0.0));
-  float c = hash(i + vec2(0.0, 1.0));
-  float d = hash(i + vec2(1.0, 1.0));
-  vec2 u = f * f * (3.0 - 2.0 * f);
-  return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+function mixColor(t: number): number {
+  const r = Math.round(lerp(TEAL[0], GOLD[0], t));
+  const g = Math.round(lerp(TEAL[1], GOLD[1], t));
+  const b = Math.round(lerp(TEAL[2], GOLD[2], t));
+  return (r << 16) | (g << 8) | b;
 }
 
-float fbm(vec2 p) {
-  float v = 0.0;
-  float amp = 0.5;
-  for (int i = 0; i < 5; i++) {
-    v += amp * noise(p);
-    p *= 2.02;
-    amp *= 0.5;
-  }
-  return v;
+// A soft radial-gradient "puff" brush, generated once and reused for every
+// particle (tinted/scaled per-instance) — the same technique a Shuriken/
+// Niagara smoke texture uses, not a fabricated image asset, just a plain
+// feathered dot drawn to an offscreen canvas.
+function createPuffTexture(): Texture {
+  const size = 128;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return Texture.EMPTY;
+  const r = size / 2;
+  const gradient = ctx.createRadialGradient(r, r, 0, r, r, r);
+  gradient.addColorStop(0, "rgba(255,255,255,0.9)");
+  gradient.addColorStop(0.35, "rgba(255,255,255,0.55)");
+  gradient.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  return Texture.from(canvas);
 }
 
-void main() {
-  float aspect = uResolution.x / uResolution.y;
-  vec2 centered = (vUv - 0.5) * vec2(aspect, 1.0);
-
-  // Rotate into a "flow" frame: fuv.x runs along the streak direction,
-  // fuv.y across it — the reference's trails sweep one consistent diagonal,
-  // not noise drifting isotropically.
-  float angle = radians(-16.0);
-  mat2 rot = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
-  vec2 fuv = rot * centered;
-
-  float t = uTime * 0.09;
-
-  // A handful of explicit thick ribbons rather than an emergent noise
-  // pattern — noise-derived bands kept reading as thin, sparse lines no
-  // matter how the thresholds were tuned. Each ribbon is a soft gaussian
-  // band around a centerline that bends slowly along its length (not a
-  // rigid straight diagonal) and drifts sideways over time.
-  vec3 accumColor = vec3(0.0);
-  float accumAlpha = 0.0;
-
-  for (int i = 0; i < 5; i++) {
-    float fi = float(i);
-    // Spread across the frame's actual visible vertical range (roughly
-    // -0.5..0.5 in this rotated space) — the previous spacing put 2 of 5
-    // ribbons' centerlines entirely off-frame, which is why only one was
-    // ever visible regardless of width/color tuning. Biased low: the
-    // reference's trails sit low in the frame, not sweeping up across the
-    // character's chest — the canvas box itself was also shortened to
-    // match instead of relying on falloff alone to keep them down there.
-    float baseOffset = -0.7 + fi * 0.22;
-    float driftSpeed = 0.35 + fi * 0.09;
-    float bend = fbm(vec2(fuv.x * 0.55 + fi * 11.0, t * driftSpeed)) - 0.5;
-    float centerline = baseOffset + bend * 0.55 + sin(fuv.x * 1.1 + fi * 2.3 + t * 1.1) * 0.1;
-    float dist = fuv.y - centerline;
-
-    // Narrow enough that neighboring ribbons stay visually distinct
-    // (dark shows between them) instead of merging into one wash.
-    float width = 0.075 + 0.02 * sin(fi * 3.1 + t * 0.4);
-    float band = exp(-(dist * dist) / (2.0 * width * width));
-    float core = exp(-(dist * dist) / (2.0 * (width * 0.22) * (width * 0.22)));
-
-    vec3 ribbonTint = mix(uColorA, uColorB, fract(fi * 0.37 + 0.2));
-    // A thin hot highlight, not a wash toward white — the character's own
-    // jacket is already near-white, so a wide white core disappears into it.
-    vec3 ribbonColor = mix(ribbonTint, vec3(1.0), core * 0.45);
-
-    accumColor += ribbonColor * band;
-    accumAlpha = 1.0 - (1.0 - accumAlpha) * (1.0 - band);
-  }
-
-  // Region falloff: concentrated through the lower-right, fading out
-  // toward the top and left rather than filling the whole frame.
-  float regionFall = smoothstep(0.85, -0.55, fuv.y * 0.6 - fuv.x * 0.3);
-  // Pushed right of where the region falloff alone would put it — the
-  // hero's copy column lives in this frame's left third, so the ribbons
-  // clear it instead of washing out the pitch text.
-  float edgeFall = smoothstep(0.2, 0.5, vUv.x) * smoothstep(1.05, 0.75, vUv.x);
-
-  vec3 color = clamp(accumColor, 0.0, 1.6);
-  float alpha = accumAlpha * regionFall * edgeFall;
-
-  gl_FragColor = vec4(color, alpha);
+interface Particle {
+  sprite: Sprite;
+  vx: number;
+  vy: number;
+  age: number;
+  life: number;
+  wobblePhase: number;
+  wobbleSpeed: number;
+  wobbleAmp: number;
+  baseScale: number;
+  hue: number;
 }
-`;
 
-function compileShader(gl: WebGLRenderingContext, type: number, source: string) {
-  const shader = gl.createShader(type);
-  if (!shader) return null;
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    gl.deleteShader(shader);
-    return null;
-  }
-  return shader;
+// Up and to the left, steep — same flow direction the previous shader
+// tuned against user feedback, kept here since that direction itself was
+// validated; screen-space y-down, so "up" is negative y.
+const FLOW = normalize(-0.848, -0.53);
+const ACROSS = normalize(-FLOW[1], FLOW[0]);
+
+function normalize(x: number, y: number): [number, number] {
+  const len = Math.hypot(x, y) || 1;
+  return [x / len, y / len];
 }
 
 export default function HeroSmoke() {
@@ -143,93 +88,180 @@ export default function HeroSmoke() {
     if (prefersReducedMotion()) return;
     if (window.matchMedia("(pointer: coarse), (hover: none)").matches) return;
 
-    const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false });
-    if (!gl) return;
+    let destroyed = false;
+    let app: Application | null = null;
+    let ro: ResizeObserver | null = null;
+    let onVisibility: (() => void) | null = null;
 
-    const vertexShader = compileShader(gl, gl.VERTEX_SHADER, VERTEX_SRC);
-    const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SRC);
-    if (!vertexShader || !fragmentShader) return;
-
-    const program = gl.createProgram();
-    if (!program) return;
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
-
-    gl.useProgram(program);
-
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    // One triangle big enough to cover the whole clip space — cheaper than
-    // a quad (2 triangles) and the overhang is clipped for free.
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 3, -1, -1, 3]),
-      gl.STATIC_DRAW
-    );
-    const aPosition = gl.getAttribLocation(program, "aPosition");
-    gl.enableVertexAttribArray(aPosition);
-    gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
-
-    const uTime = gl.getUniformLocation(program, "uTime");
-    const uResolution = gl.getUniformLocation(program, "uResolution");
-    const uColorA = gl.getUniformLocation(program, "uColorA");
-    const uColorB = gl.getUniformLocation(program, "uColorB");
-
-    gl.uniform3f(uColorA, 79 / 255, 209 / 255, 197 / 255); // teal
-    gl.uniform3f(uColorB, 255 / 255, 209 / 255, 102 / 255); // gold
-
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-    function resize() {
-      if (!canvas || !gl) return;
-      const dpr = Math.min(window.devicePixelRatio, 1.5);
-      const w = Math.round(canvas.clientWidth * dpr);
-      const h = Math.round(canvas.clientHeight * dpr);
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-        gl.viewport(0, 0, w, h);
+    (async () => {
+      const application = new Application();
+      try {
+        await application.init({
+          canvas,
+          resizeTo: canvas,
+          backgroundAlpha: 0,
+          antialias: true,
+          resolution: Math.min(window.devicePixelRatio, 1.5),
+          autoDensity: true,
+          powerPreference: "low-power",
+        });
+      } catch {
+        // WebGL unavailable or context creation failed — leave the always-
+        // on CSS .hero-streaks fallback as the only effect, same as the
+        // pointer/reduced-motion gates above.
+        return;
       }
-      gl.uniform2f(uResolution, w, h);
-    }
-    resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(canvas);
-
-    let raf = 0;
-    const start = performance.now();
-
-    const render = () => {
-      const t = (performance.now() - start) / 1000;
-      gl.uniform1f(uTime, t);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-      raf = requestAnimationFrame(render);
-    };
-
-    function onVisibility() {
-      if (document.hidden) {
-        if (raf) cancelAnimationFrame(raf);
-        raf = 0;
-      } else if (!raf) {
-        render();
+      if (destroyed) {
+        application.destroy(true, { children: true, texture: true });
+        return;
       }
-    }
-    document.addEventListener("visibilitychange", onVisibility);
+      app = application;
 
-    render();
+      const puffTexture = createPuffTexture();
+      const container = new Container();
+      app.stage.addChild(container);
+
+      // Modest pool, small sprites, low per-particle alpha: the first pass
+      // used 140 large (up to 280px) sprites at 0.32 alpha on "add" —
+      // enough overlap near the source to saturate straight to a blown-out
+      // white disc before any individual-puff texture could read. Fewer,
+      // smaller, dimmer sprites leave the overlaps additive blending is
+      // good at (bright where several genuinely coincide) without every
+      // near-source frame clipping to white.
+      const POOL_SIZE = 90;
+      const particles: Particle[] = [];
+
+      function resetParticle(p: Particle, fresh: boolean) {
+        const w = app!.renderer.width / app!.renderer.resolution;
+        const h = app!.renderer.height / app!.renderer.resolution;
+        // Source sits low and to the right — a fixed origin point the
+        // whole tail flares from, matching the reference's colorful mass
+        // low in the frame with pale wisps extending away from it. Each
+        // particle also gets its own perpendicular offset at spawn (not
+        // just a velocity-angle spread), so the tail has width from the
+        // start instead of every particle emitting from one exact point.
+        const perpOffset = (Math.random() - 0.5) * h * 0.1;
+        const sx = w * 0.8 + (Math.random() - 0.5) * w * 0.04 + ACROSS[0] * perpOffset;
+        const sy = h * 0.92 + (Math.random() - 0.5) * h * 0.03 + ACROSS[1] * perpOffset;
+        const speed = h * (0.22 + Math.random() * 0.22); // px/sec, scales with canvas
+        const spread = (Math.random() - 0.5) * 0.6;
+        p.vx = (FLOW[0] + ACROSS[0] * spread) * speed;
+        p.vy = (FLOW[1] + ACROSS[1] * spread) * speed;
+        p.life = 1.1 + Math.random() * 1.3;
+        // Only the initial pool fill needs an in-flight head start — a
+        // reset mid-animation should always restart clean at the source.
+        // Without this, every pool particle spawns with position pinned
+        // to the source regardless of its assigned age, so the whole pool
+        // sits stacked on top of each other for the first ~1.5s of real
+        // time (however "old" their age field claims to be) instead of
+        // already being spread out along the trail — additive blending
+        // 140 overlapping sprites at one point reads as a single blown-out
+        // disc, not a tail.
+        p.age = fresh ? Math.random() * p.life : 0;
+        p.sprite.x = sx + p.vx * p.age;
+        p.sprite.y = sy + p.vy * p.age;
+        p.wobblePhase = Math.random() * Math.PI * 2;
+        p.wobbleSpeed = 0.6 + Math.random() * 0.8;
+        p.wobbleAmp = h * (0.01 + Math.random() * 0.02);
+        p.baseScale = (0.05 + Math.random() * 0.09) * (h / 128);
+        p.hue = Math.random();
+        p.sprite.tint = mixColor(p.hue);
+      }
+
+      for (let i = 0; i < POOL_SIZE; i++) {
+        const sprite = new Sprite(puffTexture);
+        sprite.anchor.set(0.5);
+        // "screen" over "add": screen's 1-(1-a)(1-b) accumulation
+        // approaches white asymptotically as sprites overlap, rather than
+        // "add"'s straight sum, which clips to solid white the moment
+        // enough sprites coincide — exactly what produced the single
+        // blown-out disc in the first pass.
+        sprite.blendMode = "screen";
+        const p: Particle = {
+          sprite,
+          vx: 0,
+          vy: 0,
+          age: 0,
+          life: 1,
+          wobblePhase: 0,
+          wobbleSpeed: 1,
+          wobbleAmp: 0,
+          baseScale: 1,
+          hue: 0,
+        };
+        resetParticle(p, true);
+        container.addChild(sprite);
+        particles.push(p);
+      }
+
+      const tick = (ticker: { deltaMS: number }) => {
+        const dt = Math.min(ticker.deltaMS / 1000, 1 / 30);
+        const w = app!.renderer.width / app!.renderer.resolution;
+        const h = app!.renderer.height / app!.renderer.resolution;
+        for (const p of particles) {
+          p.age += dt;
+          if (p.age >= p.life) {
+            resetParticle(p, false);
+            continue;
+          }
+          const tNorm = p.age / p.life;
+          p.wobblePhase += dt * p.wobbleSpeed;
+          const wobble = Math.sin(p.wobblePhase) * p.wobbleAmp * tNorm;
+          p.sprite.x += p.vx * dt + ACROSS[0] * wobble * dt * 4;
+          p.sprite.y += p.vy * dt + ACROSS[1] * wobble * dt * 4;
+
+          // Grows slightly then thins toward the end of life — a puff
+          // expanding and dissipating, not a fixed-size dot fading out.
+          const growth = Math.sin(tNorm * Math.PI) * 0.4 + 0.8;
+          // Stretched and oriented along its own velocity — a round dot
+          // reads as a static cluster near the source no matter how many
+          // of them there are; elongating each one into a small streak
+          // pointed the way it's actually moving is what makes the flow
+          // direction and the "flying" motion read at a glance, the same
+          // way a motion-streak/comet sprite works in a real particle
+          // system rather than a puff of smoke.
+          p.sprite.rotation = Math.atan2(p.vy, p.vx);
+          p.sprite.scale.set(p.baseScale * growth * 2.6, p.baseScale * growth * 0.6);
+
+          // Fade in fast, hold, fade out — and fade extra hard once a
+          // particle drifts left past the copy column so the tail never
+          // washes out the pitch text there.
+          const fadeIn = Math.min(tNorm / 0.12, 1);
+          const fadeOut = Math.min((1 - tNorm) / 0.35, 1);
+          const edgeFall = Math.min(Math.max((p.sprite.x / w - 0.14) / 0.28, 0), 1);
+          // Fades out again once a particle has traveled far enough up
+          // the frame to reach the headline's row — without this the trail
+          // (which easily outlives the ~1-2s it takes to get there)
+          // regularly crossed "Gameplay that ships. / Shaders I write
+          // myself." in testing. Keeps the effect reading as "low in the
+          // frame" the way the reference does, rather than letting reach
+          // alone push it into the copy above.
+          const topFall = Math.min(Math.max((p.sprite.y / h - 0.65) / 0.23, 0), 1);
+          p.sprite.alpha = 0.22 * fadeIn * fadeOut * edgeFall * topFall;
+        }
+      };
+
+      app.ticker.add(tick);
+
+      onVisibility = () => {
+        if (!app) return;
+        if (document.hidden) app.ticker.stop();
+        else app.ticker.start();
+      };
+      document.addEventListener("visibilitychange", onVisibility);
+
+      ro = new ResizeObserver(() => {
+        // resizeTo handles the renderer/canvas size itself; particles just
+        // keep animating in the new dimensions on their next reset.
+      });
+      ro.observe(canvas);
+    })();
 
     return () => {
-      if (raf) cancelAnimationFrame(raf);
-      ro.disconnect();
-      document.removeEventListener("visibilitychange", onVisibility);
-      gl.deleteProgram(program);
-      gl.deleteShader(vertexShader);
-      gl.deleteShader(fragmentShader);
-      gl.deleteBuffer(positionBuffer);
+      destroyed = true;
+      if (onVisibility) document.removeEventListener("visibilitychange", onVisibility);
+      if (ro) ro.disconnect();
+      if (app) app.destroy(true, { children: true, texture: true });
     };
   }, []);
 
