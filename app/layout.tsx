@@ -1,36 +1,28 @@
 import type { Metadata } from "next";
-import { Unbounded, IBM_Plex_Sans, JetBrains_Mono, Oswald } from "next/font/google";
+// Self-hosted via @fontsource, not next/font/google — see the comment on
+// the --font-* variables in globals.css for why (Turbopack's next/font/
+// google needs a Vercel-only internal package that isn't available
+// building on Cloudflare Pages). Each import below is the combined CSS
+// for one weight, covering all of that weight's subsets (including
+// vietnamese for Unbounded) in one file — no separate subset import
+// needed. Genuinely condensed grotesk (Oswald) for the one giant hero
+// wordmark — Unbounded (the regular display face) reads geometric/
+// normal-width, not condensed.
+import "@fontsource/unbounded/600.css";
+import "@fontsource/unbounded/700.css";
+import "@fontsource/unbounded/800.css";
+import "@fontsource/oswald/600.css";
+import "@fontsource/oswald/700.css";
+import "@fontsource/ibm-plex-sans/400.css";
+import "@fontsource/ibm-plex-sans/500.css";
+import "@fontsource/ibm-plex-sans/600.css";
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/500.css";
 import CustomCursor from "@/components/CustomCursor";
 import GrainOverlay from "@/components/GrainOverlay";
 import SmoothScroll from "@/components/SmoothScroll";
 import ScrollHud from "@/components/ScrollHud";
 import "./globals.css";
-
-const display = Unbounded({
-  subsets: ["latin", "vietnamese"],
-  weight: ["600", "700", "800"],
-  variable: "--font-display",
-});
-
-// Genuinely condensed grotesk for the one giant hero wordmark — Unbounded
-// (the regular display face) reads geometric/normal-width, not condensed.
-const wordmark = Oswald({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-wordmark",
-});
-
-const body = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-body",
-});
-
-const mono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-mono",
-});
 
 export const metadata: Metadata = {
   title: "Ryder — Unity Mobile Game Developer",
@@ -54,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable} ${wordmark.variable}`}>
+    <html lang="en">
       <body>
         <GrainOverlay />
         <CustomCursor />
