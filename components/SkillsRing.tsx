@@ -30,7 +30,7 @@ import { prefersReducedMotion } from "@/lib/motion";
 // part of its scene at all. Two DOM layers at different z-index is the
 // only way to actually occlude against something outside the scene.
 
-const RADIUS = 380;
+const RADIUS = 300;
 const ROTATION_SPEED = 0.22; // rad/s — a slow, readable drift, not a spin
 // Tilts the ring's plane about the X axis (0 = flat horizontal circle, text
 // only ever slides sideways; positive tilts the far side up and the near
@@ -43,7 +43,7 @@ const TILT_ANGLE = THREE.MathUtils.degToRad(14);
 // item spacing was (see the file-level comment on the spacing fix): arc
 // length = angle × RADIUS, so this is roughly "one monospace character's
 // width" worth of arc at this radius, not an arbitrary constant.
-const CHAR_ANGLE_STEP = 0.026;
+const CHAR_ANGLE_STEP = 0.033;
 
 function createScene(container: HTMLDivElement) {
   const scene = new THREE.Scene();
