@@ -1,19 +1,12 @@
 import HeroPinned from "@/components/HeroPinned";
-import PinnedScene from "@/components/PinnedScene";
-import ScrollReveal from "@/components/ScrollReveal";
 import MagneticButton from "@/components/MagneticButton";
+import PinnedScene from "@/components/PinnedScene";
+import ProjectGallery, { type Project } from "@/components/ProjectGallery";
+import ScrollReveal from "@/components/ScrollReveal";
 import SiteNav from "@/components/SiteNav";
 import SkillGrid from "@/components/SkillGrid";
-import ProjectGallery, { type Project } from "@/components/ProjectGallery";
 
-const skillsRingItems = [
-  "Unity Engine",
-  "URP Shaders",
-  "Gameplay Systems",
-  "Mobile Games",
-  "HLSL / ShaderLab",
-  "AppLovin MAX",
-];
+const skillsRingItems = ["Unity", "Shader", "Animation", "Game Architecture"];
 
 const skillGroups = [
   {
@@ -33,7 +26,12 @@ const skillGroups = [
   },
   {
     title: "Native & Monetization",
-    tags: ["AppLovin MAX", "Android / iOS Native Bridge", "ANR & Performance Profiling", "Objective-C"],
+    tags: [
+      "AppLovin MAX",
+      "Android / iOS Native Bridge",
+      "ANR & Performance Profiling",
+      "Objective-C",
+    ],
     tick: "var(--teal)",
   },
 ];
@@ -60,7 +58,10 @@ const projects: Project[] = [
     stack: ["UniTask", "URP Shader", "AudioController"],
     vessel: {
       type: "orb",
-      layers: [{ h: 50, c: "#ffd166" }, { h: 50, c: "#4fd1c5" }],
+      layers: [
+        { h: 50, c: "#ffd166" },
+        { h: 50, c: "#4fd1c5" },
+      ],
       shimmer: true,
     },
   },
@@ -82,7 +83,10 @@ const projects: Project[] = [
     stack: ["Objective-C", "AppLovin MAX", "iOS"],
     vessel: {
       type: "bottle",
-      layers: [{ h: 50, c: "#ffd166" }, { h: 50, c: "#ff6b6b" }],
+      layers: [
+        { h: 50, c: "#ffd166" },
+        { h: 50, c: "#ff6b6b" },
+      ],
     },
   },
 ];
@@ -111,8 +115,8 @@ export default function Home() {
           <ScrollReveal className="section-head" pinOwned>
             <h2>Tools I reach for daily</h2>
             <p className="section-sub">
-              The stack behind the case studies above — gameplay, rendering, tooling,
-              and the native/monetization layer.
+              The stack behind the case studies above — gameplay, rendering, tooling, and the
+              native/monetization layer.
             </p>
           </ScrollReveal>
           <SkillGrid groups={skillGroups} pinOwned />
@@ -125,25 +129,36 @@ export default function Home() {
             </div>
             <div className="about">
               <div className="about-card">
-                <div><span>Role</span><span>Unity Developer</span></div>
-                <div><span>Focus</span><span>Mobile games</span></div>
-                <div><span>Core strength</span><span>Gameplay + shaders</span></div>
-                <div><span>Domain</span><span>rydlands.com</span></div>
+                <div>
+                  <span>Role</span>
+                  <span>Unity Developer</span>
+                </div>
+                <div>
+                  <span>Focus</span>
+                  <span>Mobile games</span>
+                </div>
+                <div>
+                  <span>Core strength</span>
+                  <span>Gameplay + shaders</span>
+                </div>
+                <div>
+                  <span>Domain</span>
+                  <span>rydlands.com</span>
+                </div>
               </div>
               <div>
                 <p className="pull">
-                  In Unity URP, I go from gameplay logic in C# to hand-written
-                  ShaderLab/HLSL for effects nobody else on the team can build —
-                  multi-layer liquids, event shimmer.
+                  In Unity URP, I go from gameplay logic in C# to hand-written ShaderLab/HLSL for
+                  effects nobody else on the team can build — multi-layer liquids, event shimmer.
                 </p>
                 <p>
-                  Beyond gameplay, I own <strong>native ad-mediation integration</strong>{" "}
-                  (AppLovin MAX) on both Android and iOS, and once root-caused a hard
-                  ANR down to a WebView ad creative blocking Unity&apos;s RenderThread.
+                  Beyond gameplay, I own <strong>native ad-mediation integration</strong> (AppLovin
+                  MAX) on both Android and iOS, and once root-caused a hard ANR down to a WebView ad
+                  creative blocking Unity&apos;s RenderThread.
                 </p>
                 <p>
-                  How I work: lean code, clear English comments, production-ready
-                  solutions over long illustrative demos.
+                  How I work: lean code, clear English comments, production-ready solutions over
+                  long illustrative demos.
                 </p>
               </div>
             </div>
@@ -154,13 +169,20 @@ export default function Home() {
           <ScrollReveal focusPull pinOwned>
             <div className="contact-panel">
               <h2>Got a project that needs a careful Unity dev?</h2>
-              <p>I reply within 24 hours. Open to short-term freelance work and longer full-time roles.</p>
+              <p>
+                I reply within 24 hours. Open to short-term freelance work and longer full-time
+                roles.
+              </p>
               <div className="contact-links">
                 <MagneticButton href="mailto:hello@rydlands.com" className="btn btn-primary">
                   hello@rydlands.com
                 </MagneticButton>
-                <MagneticButton href="#" className="btn btn-ghost">GitHub</MagneticButton>
-                <MagneticButton href="#" className="btn btn-ghost">LinkedIn</MagneticButton>
+                <MagneticButton href="#" className="btn btn-ghost">
+                  GitHub
+                </MagneticButton>
+                <MagneticButton href="#" className="btn btn-ghost">
+                  LinkedIn
+                </MagneticButton>
               </div>
             </div>
           </ScrollReveal>

@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { prefersReducedMotion } from "@/lib/motion";
 import HeroSmoke from "@/components/HeroSmoke";
 import SkillsRing from "@/components/SkillsRing";
+import RingTuner from "@/components/RingTuner";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -102,6 +103,7 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
           side show over him — rather than just steering clear of his
           silhouette. Desktop only (see .skills-ring CSS). */}
       <SkillsRing items={skillsItems} />
+      <RingTuner />
       {/* Desktop: absolutely positioned centerpiece, sized off .hero-pin's
           100vh box (see .hero-character). Mobile: that box doesn't exist, so
           this same element switches to normal document flow after the copy

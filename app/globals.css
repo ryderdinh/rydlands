@@ -514,7 +514,9 @@ main,
    as a flat card that merely orbits. */
 .skills-ring-char {
   font-family: var(--font-mono), monospace;
-  font-size: 13px;
+  /* Set from SkillsRing.tsx's FONT_SIZE (and live by the dev tuner). */
+  font-size: var(--ring-font-size, 13px);
+  font-weight: var(--ring-font-weight, 400);
   text-transform: uppercase;
   color: var(--ink);
   white-space: pre;
@@ -528,8 +530,13 @@ main,
 }
 
 .skills-ring-dot {
-  color: var(--teal);
-  font-size: 6px;
+  /* Black diamond with a gold outline: the stroke is painted first and the
+     fill over it, so only the stroke's outer half shows and the outline
+     doesn't eat into the fill. */
+  color: var(--bg-inset);
+  -webkit-text-stroke: 3px var(--gold);
+  paint-order: stroke fill;
+  font-size: calc(var(--ring-font-size, 13px) * 0.46);
 }
 
 /* -------- Hero character (the agent-reveal centerpiece) -------- */

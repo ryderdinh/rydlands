@@ -17,7 +17,7 @@ import {
 // rather than baking text into a canvas texture. One CSS3DObject per glyph,
 // not per word — each letter has its own position around the circle, which
 // is what makes a word curve along the ring's path instead of reading as a
-// flat card that merely orbits (see CHAR_ANGLE_STEP below).
+// flat card that merely orbits (see computeLayout below).
 // Desktop only, no-reduced-motion only, and entirely decorative — the same
 // items are listed again, plainly, in the Skills Grid section further down
 // the page; this is a hero flourish layered on top, not the accessible
@@ -53,7 +53,14 @@ const ROTATION_SPEED = 0.22 // rad/s — a slow, readable drift, not a spin
 // side down, like a Saturn ring or a tilted coin) — this is the ring's
 // "angle" to change: increase for a more dramatic incline, decrease toward
 // 0 to flatten it back out.
-const TILT_ANGLE = THREE.MathUtils.degToRad(34)
+const TILT_ANGLE = THREE.MathUtils.degToRad(27)
+// Tips the whole ring sideways about the Z axis, after its own spin — the ring
+// keeps spinning about its own (now tilted) axis. Negative leans it the other
+// way.
+const ROLL_ANGLE = THREE.MathUtils.degToRad(-24)
+// Uniform scale on the whole ring (glyphs included), on top of resize()'s
+// shrink-to-fit factor. Unlike RADIUS this doesn't change glyph spacing.
+const RING_SCALE = 0.8
 
 // How close the ring's shrunk-to-fit horizontal reach (see resize()'s
 // scale calculation) is allowed to come to the viewport edge before
@@ -73,11 +80,38 @@ const MIN_RING_SCALE = 0.5
 // than letters popping in and out of existence at a hard edge.
 const MIN_OPACITY = 0.35
 
-// Angular gap between adjacent glyphs, tuned against RADIUS the same way the
-// item spacing was (see the file-level comment on the spacing fix): arc
-// length = angle × RADIUS, so this is roughly "one monospace character's
-// width" worth of arc at this radius, not an arbitrary constant.
-const CHAR_ANGLE_STEP = 0.033
+// The angle between glyphs is not a constant: the words are one continuous
+// run of text — "UNITY ◆ SHADER ◆ …" — separated only by the ◆ (a blank slot
+// either side of it), and every glyph slot in that run is the same size, the
+// whole set divided evenly around the circle. Letter spacing therefore works
+// itself out from the words: more or longer words means tighter letters.
+// Glyph size in CSS px (applied as --ring-font-size on the ring containers;
+// the dot is sized off it in CSS). Bigger text on a
+// full ring runs the letters together — use fewer or shorter words.
+const FONT_SIZE = 25
+// Glyph weight, 100–800 (applied as --ring-font-weight; JetBrains Mono ships
+// every hundred, see app/layout.tsx).
+const FONT_WEIGHT = 800
+// Shifts the whole ring in scene units (+X right, +Y up); the ring stays
+// centered on its container otherwise.
+const MOVE_X = -22
+const MOVE_Y = 42
+
+// Live values the render loop reads every frame, seeded from the constants
+// above. The constants stay the source of truth for production; RingTuner
+// (the dev-only sliders) writes here so values can be found by eye and copied
+// back into the constants.
+export const ringTuning = {
+	tilt: TILT_ANGLE,
+	yaw: 0,
+	roll: ROLL_ANGLE,
+	speed: ROTATION_SPEED,
+	size: RING_SCALE,
+	fontSize: FONT_SIZE,
+	fontWeight: FONT_WEIGHT,
+	moveX: MOVE_X,
+	moveY: MOVE_Y
+}
 
 function createScene(container: HTMLDivElement) {
 	const scene = new THREE.Scene()
@@ -90,6 +124,12 @@ function createScene(container: HTMLDivElement) {
 	container.appendChild(renderer.domElement)
 
 	const group = new THREE.Group()
+	// Euler order matters here: 'ZXY' composes as Rz · Rx · Ry, so the spin
+	// (rotation.y) is applied first, about the ring's own axis, and the X tilt
+	// and Z roll are applied after it, to the ring as a whole. With the default
+	// 'XYZ' the roll would land inside the spin and wobble the ring instead of
+	// tipping it.
+	group.rotation.order = 'ZXY'
 	scene.add(group)
 
 	return { scene, camera, renderer, group }
@@ -97,7 +137,10 @@ function createScene(container: HTMLDivElement) {
 
 interface RingItem {
 	object: CSS3DObject
-	angle: number
+	// Where the glyph sits around the ring is recomputed every frame from
+	// these two (see the render loop).
+	wordIndex: number
+	offsetIndex: number
 	inFront: boolean
 }
 
@@ -128,8 +171,25 @@ export default function SkillsRing({ items }: { items: string[] }) {
 		const count = repeated.length
 		const ringItems: RingItem[] = []
 
+		// One continuous run: each word is its letters, a blank, the ◆, a blank —
+		// nothing else between words. Every one of those slots is the same size,
+		// step = 2π / (total slots), so letter spacing and the gaps around each ◆
+		// are all the same distance apart. The first word is kept centered on
+		// angle 0.
+		const wordSlots = repeated.map(text => [...text].length + 3)
+		const totalSlots = wordSlots.reduce((sum, n) => sum + n, 0)
+		const step = (Math.PI * 2) / totalSlots
+		const wordCenters: number[] = []
+		let cursor = 0
+		wordSlots.forEach(n => {
+			wordCenters.push((cursor + n / 2) * step)
+			cursor += n
+		})
+		const firstCenter = wordCenters[0]
+		wordCenters.forEach((c, k) => (wordCenters[k] = c - firstCenter))
+
 		repeated.forEach((text, i) => {
-			const slotAngle = (i / count) * Math.PI * 2
+			const slotAngle = wordCenters[i]
 			// Each word is its own run of glyphs (plus a trailing gap and dot),
 			// one CSS3DObject per glyph rather than one per word — a `null`
 			// entry consumes an angle step without rendering anything, which is
@@ -137,8 +197,7 @@ export default function SkillsRing({ items }: { items: string[] }) {
 			// glyph gets its own position/rotation around the circle, centered
 			// on the word's slot, so the word itself curves along the ring
 			// instead of reading as one flat card that happens to orbit.
-			const glyphs: (string | null)[] = [...text, null, '◆']
-			const startOffset = -((glyphs.length - 1) / 2) * CHAR_ANGLE_STEP
+			const glyphs: (string | null)[] = [...text, null, '◆', null]
 
 			glyphs.forEach((glyph, gi) => {
 				if (glyph === null) return
@@ -150,7 +209,8 @@ export default function SkillsRing({ items }: { items: string[] }) {
 				el.textContent = glyph
 
 				const object = new CSS3DObject(el)
-				const angle = slotAngle + startOffset + gi * CHAR_ANGLE_STEP
+				const offsetIndex = gi - (glyphs.length - 1) / 2
+				const angle = slotAngle + offsetIndex * step
 				object.position.set(
 					RADIUS * Math.sin(angle),
 					0,
@@ -167,9 +227,13 @@ export default function SkillsRing({ items }: { items: string[] }) {
 				// Starts in the back scene; the render loop's very first pass
 				// immediately reassigns it if that's not actually correct yet.
 				back.group.add(object)
-				ringItems.push({ object, angle, inFront: false })
+				ringItems.push({ object, wordIndex: i, offsetIndex, inFront: false })
 			})
 		})
+
+		let fitScale = 1
+		let appliedFontSize = -1
+		let appliedFontWeight = -1
 
 		function resize() {
 			const w = backContainer!.clientWidth
@@ -203,19 +267,12 @@ export default function SkillsRing({ items }: { items: string[] }) {
 				1
 			)
 
-			for (const { camera, renderer, group } of [back, front]) {
+			for (const { camera, renderer } of [back, front]) {
 				camera.aspect = w / h
 				camera.updateProjectionMatrix()
 				renderer.setSize(w, h)
-				group.scale.setScalar(scale)
-				// Tilting rotates the whole group about its local origin, which
-				// drags the near (front, most visually prominent) side down by
-				// RADIUS × sin(TILT_ANGLE) — nudge the group back up by that same
-				// (scaled) amount so the front of the ring settles at roughly the
-				// same height it sat at untilted, rather than drooping toward the
-				// character's waist.
-				group.position.y = RADIUS * Math.sin(TILT_ANGLE) * scale
 			}
+			fitScale = scale
 		}
 		resize()
 		const ro = new ResizeObserver(resize)
@@ -224,12 +281,14 @@ export default function SkillsRing({ items }: { items: string[] }) {
 		let raf = 0
 		let rotation = 0
 		let lastT = performance.now()
+		const rotationMatrix = new THREE.Matrix4()
+		const worldPosition = new THREE.Vector3()
 
 		const render = () => {
 			const now = performance.now()
 			const dt = Math.min((now - lastT) / 1000, 1 / 30)
 			lastT = now
-			rotation += dt * ROTATION_SPEED
+			rotation += dt * ringTuning.speed
 			// Both groups share one rotation value, kept in sync by hand every
 			// frame (not a shared Three.js parent) — that's what lets an item
 			// move from one scene's group to the other's mid-rotation without
@@ -237,17 +296,62 @@ export default function SkillsRing({ items }: { items: string[] }) {
 			// transform at the moment of the handoff. The X tilt is constant,
 			// but set here too rather than once outside the loop, so it stays
 			// trivially in sync with rotation.y the same way.
-			back.group.rotation.set(TILT_ANGLE, rotation, 0)
-			front.group.rotation.set(TILT_ANGLE, rotation, 0)
+			back.group.rotation.set(
+				ringTuning.tilt,
+				rotation + ringTuning.yaw,
+				ringTuning.roll
+			)
+			front.group.rotation.copy(back.group.rotation)
+			rotationMatrix.makeRotationFromEuler(back.group.rotation)
+			// fitScale is resize()'s shrink-to-fit factor; size is the tuner's
+			// manual multiplier on top of it.
+			back.group.scale.setScalar(fitScale * ringTuning.size)
+			front.group.scale.setScalar(fitScale * ringTuning.size)
+			// Tilting rotates the whole group about its local origin, which
+			// drags the near (front, most visually prominent) side down by
+			// RADIUS × sin(tilt) — nudge the group back up by that same
+			// (scaled) amount so the front of the ring settles at roughly the
+			// same height it sat at untilted, rather than drooping toward the
+			// character's waist. Per frame (not in resize) so it follows the
+			// tilt while it's being tuned.
+			const lift = RADIUS * Math.sin(ringTuning.tilt) * back.group.scale.x
+			back.group.position.set(ringTuning.moveX, lift + ringTuning.moveY, 0)
+			front.group.position.copy(back.group.position)
+
+			if (ringTuning.fontSize !== appliedFontSize) {
+				appliedFontSize = ringTuning.fontSize
+				for (const c of [backContainer, frontContainer]) {
+					c.style.setProperty('--ring-font-size', `${appliedFontSize}px`)
+				}
+			}
+
+			if (ringTuning.fontWeight !== appliedFontWeight) {
+				appliedFontWeight = ringTuning.fontWeight
+				for (const c of [backContainer, frontContainer]) {
+					c.style.setProperty('--ring-font-weight', `${appliedFontWeight}`)
+				}
+			}
 
 			for (const item of ringItems) {
-				const worldAngle = item.angle + rotation
+				const angle =
+					wordCenters[item.wordIndex] + item.offsetIndex * step
+				item.object.position.set(
+					RADIUS * Math.sin(angle),
+					0,
+					RADIUS * Math.cos(angle)
+				)
+				item.object.rotation.y = angle
 				// 1 = nearest the camera (in front of the character), -1 =
 				// farthest (behind him) — dims the far side as a depth cue
 				// (see MIN_OPACITY) and decides which of the two scenes
 				// currently owns this item (so it paints behind vs. in front
-				// of the character).
-				const depth = Math.cos(worldAngle)
+				// of the character). Read off the item's actual rotated
+				// position rather than cos(spin angle): that shortcut is only
+				// right for a pure X-tilt + Y-spin, and put glyphs in the wrong
+				// scene as soon as the ring is rolled about Z.
+				const depth =
+					worldPosition.copy(item.object.position).applyMatrix4(rotationMatrix)
+						.z / RADIUS
 				item.object.element.style.opacity = String(
 					MIN_OPACITY + (1 - MIN_OPACITY) * ((depth + 1) / 2)
 				)
