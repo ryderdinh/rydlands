@@ -71,6 +71,12 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
       </div>
       <div className="hero-scrim" aria-hidden="true" />
       <div className="hero-vignette" ref={vignetteRef} aria-hidden="true" />
+      <div className="hero-frame" aria-hidden="true">
+        <span className="hero-frame-corner tl" />
+        <span className="hero-frame-corner tr" />
+        <span className="hero-frame-corner bl" />
+        <span className="hero-frame-corner br" />
+      </div>
       <div className="hero-streaks" aria-hidden="true">
         <span className="hero-streak hero-streak-a" />
         <span className="hero-streak hero-streak-b" />
@@ -83,12 +89,6 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
       <div className="hero-edge-lockup hero-edge-lockup--right" aria-hidden="true">
         <span className="hero-edge-word">Ryder</span>
         <span className="hero-edge-tag">Game developer</span>
-      </div>
-      <div className="hero-frame" aria-hidden="true">
-        <span className="hero-frame-corner tl" />
-        <span className="hero-frame-corner tr" />
-        <span className="hero-frame-corner bl" />
-        <span className="hero-frame-corner br" />
       </div>
       <div className="container hero">
         <div className="hero-copy-wrap" ref={copyRef}>
