@@ -60,7 +60,7 @@ export const cardTuning = {
   size: 0.76,
   stiffness: 40, // spring pulling the entrance toward its target (higher = snappier)
   damping: 0.6, // damping ratio: 1 = no overshoot, lower = bouncier settle
-  turns: 2, // full turns about its vertical axis on the way up; it lands face-on
+  turns: 1, // full turns about its vertical axis on the way up; it lands face-on
   tint: "#ffffff", // multiplies the color map
   lightColor: "#fff4e0",
 };
