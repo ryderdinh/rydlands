@@ -513,11 +513,12 @@ main,
   color: var(--ink);
   white-space: pre;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
-  /* Without this, a glyph rotated past 90° from the camera (the far side
-     of the ring) doesn't disappear the way a WebGL backface would — the
-     browser keeps rendering the same flat element from behind, which
-     reads as mirrored left-right. */
-  backface-visibility: hidden;
+  /* Deliberately no backface-visibility: hidden — a glyph rotated past
+     90° from the camera keeps rendering from behind (reading mirrored)
+     instead of vanishing. That reads as part of one continuous ring
+     rather than letters popping in and out of existence at a hard edge;
+     SkillsRing.tsx dims it toward the far side (MIN_OPACITY) rather than
+     fading it to nothing. */
 }
 
 .skills-ring-dot {
