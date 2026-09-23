@@ -502,21 +502,21 @@ main,
   }
 }
 
-.skills-ring-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* One glyph per CSS3DObject, not one per whole word — each letter gets its
+   own position/rotation around the ring (see SkillsRing.tsx's per-character
+   layout), so a word actually curves along the cylinder instead of reading
+   as a flat card that merely orbits. */
+.skills-ring-char {
   font-family: var(--font-mono), monospace;
   font-size: 13px;
-  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink);
-  white-space: nowrap;
+  white-space: pre;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
-  /* Without this, an item rotated past 90° from the camera (the far side
+  /* Without this, a glyph rotated past 90° from the camera (the far side
      of the ring) doesn't disappear the way a WebGL backface would — the
      browser keeps rendering the same flat element from behind, which
-     reads as its text mirrored left-right. */
+     reads as mirrored left-right. */
   backface-visibility: hidden;
 }
 

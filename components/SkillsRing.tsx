@@ -10,13 +10,15 @@ import { prefersReducedMotion } from "@/lib/motion";
 // CSS3DRenderer, not the WebGL renderer: it drives the same Three.js scene/
 // camera math, but the "pixels" it outputs are real DOM text nodes
 // positioned via CSS matrix3d transforms, not a rasterized canvas — so the
-// ring uses the site's actual font/color/letter-spacing at full crispness
-// at any size, the same way the flat marquee ticker (which this reuses the
-// same items and visual language from) already does, rather than baking
-// text into a canvas texture. Desktop only, no-reduced-motion only, and
-// entirely decorative — the flat marquee ticker up top remains the
-// always-visible, accessible list of the same items; this is a hero
-// flourish layered on top of it, not a replacement for it.
+// ring uses the site's actual font/color at full crispness at any size,
+// rather than baking text into a canvas texture. One CSS3DObject per glyph,
+// not per word — each letter has its own position/rotation around the
+// circle, which is what makes a word curve along the ring instead of
+// reading as a flat card that merely orbits (see CHAR_ANGLE_STEP below).
+// Desktop only, no-reduced-motion only, and entirely decorative — the same
+// items are listed again, plainly, in the Skills Grid section further down
+// the page; this is a hero flourish layered on top, not the accessible
+// listing itself.
 //
 // Actually loops AROUND the character, not just beside him: two
 // synchronized scenes/renderers, one painted behind .hero-character and
@@ -30,6 +32,12 @@ import { prefersReducedMotion } from "@/lib/motion";
 
 const RADIUS = 380;
 const ROTATION_SPEED = 0.22; // rad/s — a slow, readable drift, not a spin
+
+// Angular gap between adjacent glyphs, tuned against RADIUS the same way the
+// item spacing was (see the file-level comment on the spacing fix): arc
+// length = angle × RADIUS, so this is roughly "one monospace character's
+// width" worth of arc at this radius, not an arbitrary constant.
+const CHAR_ANGLE_STEP = 0.026;
 
 function createScene(container: HTMLDivElement) {
   const scene = new THREE.Scene();
@@ -78,25 +86,42 @@ export default function SkillsRing({ items }: { items: string[] }) {
     // usually in view without the text colliding.
     const repeated = [...items, ...items];
     const count = repeated.length;
-    const ringItems: RingItem[] = repeated.map((text, i) => {
-      const el = document.createElement("div");
-      el.className = "skills-ring-item";
-      el.innerHTML = `${text}<span class="skills-ring-dot">◆</span>`;
+    const ringItems: RingItem[] = [];
 
-      const object = new CSS3DObject(el);
-      const angle = (i / count) * Math.PI * 2;
-      object.position.set(RADIUS * Math.sin(angle), 0, RADIUS * Math.cos(angle));
-      // Faces outward from the ring's center, tangent to the circle —
-      // reads normally at the front, foreshortens toward edge-on as it
-      // swings round to the side, which is what actually sells the
-      // "wrapping around a 3D cylinder" illusion rather than a flat
-      // carousel of billboards that always face the camera.
-      object.rotation.y = angle;
+    repeated.forEach((text, i) => {
+      const slotAngle = (i / count) * Math.PI * 2;
+      // Each word is its own run of glyphs (plus a trailing gap and dot),
+      // one CSS3DObject per glyph rather than one per word — a `null`
+      // entry consumes an angle step without rendering anything, which is
+      // what puts a small gap between the last letter and the dot. Every
+      // glyph gets its own position/rotation around the circle, centered
+      // on the word's slot, so the word itself curves along the ring
+      // instead of reading as one flat card that happens to orbit.
+      const glyphs: (string | null)[] = [...text, null, "◆"];
+      const startOffset = -((glyphs.length - 1) / 2) * CHAR_ANGLE_STEP;
 
-      // Starts in the back scene; the render loop's very first pass
-      // immediately reassigns it if that's not actually correct yet.
-      back.group.add(object);
-      return { object, angle, inFront: false };
+      glyphs.forEach((glyph, gi) => {
+        if (glyph === null) return;
+        const el = document.createElement("div");
+        el.className = glyph === "◆" ? "skills-ring-char skills-ring-dot" : "skills-ring-char";
+        el.textContent = glyph;
+
+        const object = new CSS3DObject(el);
+        const angle = slotAngle + startOffset + gi * CHAR_ANGLE_STEP;
+        object.position.set(RADIUS * Math.sin(angle), 0, RADIUS * Math.cos(angle));
+        // Faces outward from the ring's center, tangent to the circle at
+        // this glyph's own point — reads normally at the front,
+        // foreshortens toward edge-on as it swings round to the side,
+        // which is what actually sells the "wrapping around a 3D
+        // cylinder" illusion rather than a flat billboard that always
+        // faces the camera.
+        object.rotation.y = angle;
+
+        // Starts in the back scene; the render loop's very first pass
+        // immediately reassigns it if that's not actually correct yet.
+        back.group.add(object);
+        ringItems.push({ object, angle, inFront: false });
+      });
     });
 
     function resize() {
