@@ -60,6 +60,7 @@ export const cardTuning = {
   size: 0.76,
   stiffness: 40, // spring pulling the entrance toward its target (higher = snappier)
   damping: 0.6, // damping ratio: 1 = no overshoot, lower = bouncier settle
+  turns: 2, // full turns about its vertical axis on the way up; it lands face-on
   tint: "#ffffff", // multiplies the color map
   lightColor: "#fff4e0",
 };
@@ -78,9 +79,6 @@ const CORNER_RADIUS = 0.02;
 const FILL_W = 0.74;
 const FILL_H = 0.72;
 const FOV = 30;
-// Turns about its vertical axis on the way up (1 = one full turn), so the back
-// swings into view mid-flight and it lands face-on.
-const ENTRY_TURNS = 0.5;
 // Idle sway (radians / world units at idle = 1): a slow yaw and pitch that let
 // the light travel across the relief, a hint of roll, and a gentle float.
 const IDLE_YAW = 0.2;
@@ -118,11 +116,19 @@ function createCardGeometry() {
   for (let i = 0; i < pos.count; i++) {
     uv.setXY(i, pos.getX(i) / CARD_W + 0.5, pos.getY(i) / CARD_H + 0.5);
   }
+  // The back cap shows its own art (public/card/back/). Seen from behind, after the
+  // card has turned about its vertical axis, the same UVs would read mirrored
+  // along the art's vertical, so flip v there to make the back read correctly.
+  const lids = geometry.groups[0];
+  const backStart = lids.start;
+  const backEnd = lids.start + lids.count / 2;
+  for (let i = backStart; i < backEnd; i++) {
+    uv.setY(i, 1 - uv.getY(i));
+  }
   uv.needsUpdate = true;
 
   // Extrude emits the lids (back cap first, then front cap) as group 0 and the
   // rim as group 1; split them so front, back and rim can each have a material.
-  const lids = geometry.groups[0];
   const rim = geometry.groups[1];
   geometry.clearGroups();
   geometry.addGroup(rim.start, rim.count, 0);
@@ -131,7 +137,9 @@ function createCardGeometry() {
   return geometry;
 }
 
-export default function CardScene() {
+// `front` picks which front design to show: the folder public/card/front/<front>/.
+// The back is always public/card/back/, one design for every front.
+export default function CardScene({ front = "main" }: { front?: string }) {
   const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -165,30 +173,38 @@ export default function CardScene() {
 
     const loader = new THREE.TextureLoader();
     const maxAniso = renderer.capabilities.getMaxAnisotropy();
-    const load = (name: string, srgb: boolean) => {
-      const t = loader.load(`/card/${name}.png`);
+    const load = (path: string, srgb: boolean) => {
+      const t = loader.load(`/card/${path}.png`);
       t.anisotropy = maxAniso;
       if (srgb) t.colorSpace = THREE.SRGBColorSpace;
       return t;
     };
-    const color = load("card-color", true);
-    const rough = load("card-rough", false);
-    const normal = load("card-normal", false);
-
-    const face = new THREE.MeshPhysicalMaterial({
-      map: color,
-      metalness: 1,
-      roughness: 1,
-      roughnessMap: rough,
-      normalMap: normal,
-      normalScale: new THREE.Vector2(cardTuning.normal, cardTuning.normal),
-      clearcoat: cardTuning.clearcoat,
-      clearcoatRoughness: 0.25,
-    });
+    // Front and back are separate sets of the same three maps: <dir>/color, /rough,
+    // /normal (see docs/card-assets.md).
+    const textures: THREE.Texture[] = [];
+    const makeFace = (dir: string) => {
+      const map = load(`${dir}/color`, true);
+      const roughnessMap = load(`${dir}/rough`, false);
+      const normalMap = load(`${dir}/normal`, false);
+      textures.push(map, roughnessMap, normalMap);
+      return new THREE.MeshPhysicalMaterial({
+        map,
+        metalness: 1,
+        roughness: 1,
+        roughnessMap,
+        normalMap,
+        normalScale: new THREE.Vector2(cardTuning.normal, cardTuning.normal),
+        clearcoat: cardTuning.clearcoat,
+        clearcoatRoughness: 0.25,
+      });
+    };
+    const face = makeFace(`front/${front}`);
+    const backFace = makeFace("back");
+    const faces = [face, backFace];
     const plain = new THREE.MeshStandardMaterial({ color: 0x1e1e21, metalness: 1, roughness: 0.4 });
     const geometry = createCardGeometry();
-    // Groups (see createCardGeometry): 0 = the rim, 1 = front face, 2 = back.
-    const card = new THREE.Mesh(geometry, [plain, face, plain]);
+    // Groups (see createCardGeometry): 0 = the rim, 1 = front face, 2 = back face.
+    const card = new THREE.Mesh(geometry, [plain, face, backFace]);
     card.rotation.z = CARD_ROLL;
     const pivot = new THREE.Group();
     pivot.add(card);
@@ -249,10 +265,12 @@ export default function CardScene() {
       scene.environmentIntensity = cardTuning.envIntensity;
       light.intensity = cardTuning.light;
       light.color.set(cardTuning.lightColor);
-      face.normalScale.setScalar(cardTuning.normal);
-      face.roughness = cardTuning.roughness;
-      face.clearcoat = cardTuning.clearcoat;
-      face.color.set(cardTuning.tint);
+      for (const f of faces) {
+        f.normalScale.setScalar(cardTuning.normal);
+        f.roughness = cardTuning.roughness;
+        f.clearcoat = cardTuning.clearcoat;
+        f.color.set(cardTuning.tint);
+      }
 
       // The idle sway starts when the entrance target is reached, and is simply
       // added on top of the entrance springs: it is not gated on those springs
@@ -269,7 +287,7 @@ export default function CardScene() {
       // Entrance: rises from below the frame while spinning about its vertical
       // axis, leaning back a little; all of it goes to nothing as the springs
       // settle. Idle: the slow sway on top.
-      pivot.rotation.y = enterSpin * ENTRY_TURNS * Math.PI * 2 + sway * IDLE_YAW * Math.sin(t * 0.5);
+      pivot.rotation.y = enterSpin * cardTuning.turns * Math.PI * 2 + sway * IDLE_YAW * Math.sin(t * 0.5);
       pivot.rotation.x = -enterRise * 0.35 + sway * IDLE_PITCH * Math.sin(t * 0.37);
       pivot.rotation.z = sway * IDLE_ROLL * Math.sin(t * 0.29);
       pivot.position.set(0, -enterRise * travel + sway * IDLE_FLOAT * Math.sin(t * 0.7), 0);
@@ -283,17 +301,15 @@ export default function CardScene() {
       cancelAnimationFrame(raf);
       ro.disconnect();
       geometry.dispose();
-      face.dispose();
+      faces.forEach((f) => f.dispose());
       plain.dispose();
-      color.dispose();
-      rough.dispose();
-      normal.dispose();
+      textures.forEach((t) => t.dispose());
       envMap.dispose();
       pmrem.dispose();
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, []);
+  }, [front]);
 
   return <div className="card-scene" ref={wrapRef} aria-hidden="true" />;
 }

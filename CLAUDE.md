@@ -55,10 +55,14 @@ Panels must keep the `data-dev-tuner` attribute (see above).
 
 ## Metal card assets
 
-`public/card/`: `card-color.png` is the hand-edited source; `card-rough.png`, `card-normal.png`
-and `card-mask.png` are generated from it by `python3 scripts/gen-card-maps.py` (needs Pillow).
-All four share one size, and `CARD_W` in `CardScene.tsx` must match the art's aspect ratio.
-Details: `docs/card-assets.md`.
+The card has two faces: many possible **fronts** (one per scene) and one shared **back**,
+each a folder of images under `public/card/`: `front/<variant>/` (today `front/main/`) and
+`back/` (currently a copy of the front). In each folder `color.png` is the hand-edited
+source; `rough.png`, `normal.png` and `mask.png` are generated from it by
+`python3 scripts/gen-card-maps.py [front/<variant>|back|--all]` (needs Pillow; run it yourself
+when a `color.png` changes, but note it overwrites hand-painted maps). `<CardScene front="main" />`
+picks the front. All faces share one size, and `CARD_W` in `CardScene.tsx` must match the art's
+aspect ratio. Details: `docs/card-assets.md`.
 
 ## Parked / unused
 

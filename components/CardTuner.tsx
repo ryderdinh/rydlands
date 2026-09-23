@@ -17,7 +17,8 @@ const controls: readonly TunerControl[] = [
 	{ key: 'idle', label: 'idle sway', min: 0, max: 3, step: 0.05, unit: '×' },
 	{ key: 'size', label: 'size (scale)', min: 0.5, max: 1.5, step: 0.02, unit: '×' },
 	{ key: 'stiffness', label: 'entrance stiffness', min: 10, max: 120, step: 1 },
-	{ key: 'damping', label: 'entrance damping', min: 0.2, max: 1.5, step: 0.02 }
+	{ key: 'damping', label: 'entrance damping', min: 0.2, max: 1.5, step: 0.02 },
+	{ key: 'turns', label: 'entrance turns', min: 0, max: 4, step: 0.25 }
 ]
 
 const colors: readonly TunerColor[] = [

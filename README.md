@@ -28,10 +28,13 @@ xong thì chép số vào hằng trong `SkillsRing.tsx` / `CardScene.tsx`.
 
 ## Ảnh thẻ kim loại
 
-`public/card/` — sửa tay `card-color.png`, rồi tạo lại các ảnh còn lại:
+`public/card/` có mặt trước (`front/<biến thể>/`, hiện là `front/main/`, có thể thêm nhiều
+loại) và mặt sau (`back/`, chỉ một). Sửa tay `color.png` trong thư mục, rồi tạo lại các ảnh còn lại:
 
 ```bash
-python3 scripts/gen-card-maps.py
+python3 scripts/gen-card-maps.py            # front/main
+python3 scripts/gen-card-maps.py back       # mặt sau
+python3 scripts/gen-card-maps.py --all      # tất cả
 ```
 
 Chi tiết trong [docs/card-assets.md](docs/card-assets.md). Hướng dẫn cho agent: [CLAUDE.md](CLAUDE.md).
