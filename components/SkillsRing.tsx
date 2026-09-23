@@ -28,7 +28,7 @@ import { prefersReducedMotion } from "@/lib/motion";
 // part of its scene at all. Two DOM layers at different z-index is the
 // only way to actually occlude against something outside the scene.
 
-const RADIUS = 220;
+const RADIUS = 380;
 const ROTATION_SPEED = 0.22; // rad/s — a slow, readable drift, not a spin
 
 function createScene(container: HTMLDivElement) {
@@ -67,8 +67,18 @@ export default function SkillsRing({ items }: { items: string[] }) {
     const back = createScene(backContainer);
     const front = createScene(frontContainer);
 
-    const count = items.length;
-    const ringItems: RingItem[] = items.map((text, i) => {
+    // Repeated, like the flat marquee's own content duplication — six
+    // items spread once around the full circle left wide, empty gaps
+    // between them (usually only one label visible at a time). Doubling
+    // the list packs a label every ~30° instead of every ~60° (paired
+    // with the larger RADIUS above — packing tighter without it just
+    // made adjacent items overlap and run together illegibly, since an
+    // item near the front of the ring is magnified by the perspective,
+    // not rendered at a flat 1:1 CSS-pixel size), so more than one is
+    // usually in view without the text colliding.
+    const repeated = [...items, ...items];
+    const count = repeated.length;
+    const ringItems: RingItem[] = repeated.map((text, i) => {
       const el = document.createElement("div");
       el.className = "skills-ring-item";
       el.innerHTML = `${text}<span class="skills-ring-dot">◆</span>`;
