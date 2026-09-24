@@ -9,6 +9,7 @@ import HeroPortrait from "@/components/HeroPortrait";
 import HeroSmoke from "@/components/HeroSmoke";
 import SkillsRing from "@/components/SkillsRing";
 import CardTuner from "@/components/CardTuner";
+import CardPlateEditor from "@/components/CardPlateEditor";
 import GlitchTuner from "@/components/GlitchTuner";
 import RingTuner from "@/components/RingTuner";
 
@@ -190,6 +191,7 @@ export default function HeroPinned({ copy, skillsItems }: { copy: ReactNode; ski
       <RingTuner visible={scene === 0} />
       <GlitchTuner visible={scene === 0} />
       <CardTuner visible={scene === 1} />
+      <CardPlateEditor visible={scene === 1} />
       {/* Desktop: absolutely positioned centerpiece, sized off .hero-pin's
           100vh box (see .hero-character). Mobile: that box doesn't exist, so
           this same element switches to normal document flow after the copy

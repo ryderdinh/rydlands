@@ -1084,6 +1084,33 @@ html.scene-locked .hero-pin {
   }
 }
 
+/* -------- Dev-only card plate editor (app/dev/card-plate, dev builds only) --------
+   Hosts CardScene outside HeroPinned's scene machinery, so .card-scene's
+   hidden-by-default, half-width layout (above) needs overriding to fill this page
+   instead of waiting on a scene transition it'll never get. */
+.card-editor-page {
+  position: relative;
+  min-height: 100vh;
+  background: #0b0c0e;
+}
+.card-editor-page .card-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: none;
+}
+.card-editor-page-note {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 10002;
+  color: #6b7076;
+  font: 11px var(--font-mono), monospace;
+}
+
 /* -------- Hero scroll cue -------- */
 .scroll-cue {
   position: absolute;
